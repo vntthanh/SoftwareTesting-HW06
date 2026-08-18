@@ -80,3 +80,34 @@ FUNCTION generate_api_tests(
 
     RETURN candidate_tests
 ```
+
+## 5. Diagram
+
+```mermaid
+flowchart TD
+    A[API Specification + Selected Endpoint] --> B[Extract API Contract]
+    
+    B --> C[Build Test Model]
+
+    C --> D1[Domain Test Generator]
+    C --> D2[State Transition Generator]
+    C --> D3[Security Test Generator]
+    C --> D4[Contract Test Generator]
+    
+    D1 --> E[Combine Candidate Tests]
+    D2 --> E
+    D3 --> E
+    D4 --> E
+    
+    E --> F[Remove Duplicates]
+    
+    F --> G[Attach Specification Basis]
+    
+    G --> H[Flag Assumptions]
+    
+    H --> I[Coverage Check]
+    
+    I --> J[Assign Test IDs]
+    
+    J --> K[Candidate API Test Cases]
+```
