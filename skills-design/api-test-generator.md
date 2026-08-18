@@ -30,3 +30,53 @@ A structured set of candidate test cases.
 - Expected Result
 - Specification Basis
 - Assumptions / Notes
+
+## 4. Pseudocode
+
+```text
+FUNCTION generate_api_tests(
+    api_specification,
+    selected_endpoint,
+    target_count = 35
+):
+
+    api_contract = extract_api_contract(
+        api_specification,
+        selected_endpoint
+    )
+
+    IF api_contract is NOT FOUND:
+        RETURN error
+
+    test_model = analyze_api_contract(api_contract)
+
+    domain_tests = generate_domain_tests(test_model)
+    state_tests = generate_state_tests(test_model)
+    security_tests = generate_security_tests(test_model)
+    contract_tests = generate_contract_tests(test_model)
+
+    candidate_tests = combine(
+        domain_tests,
+        state_tests,
+        security_tests,
+        contract_tests
+    )
+
+    candidate_tests = remove_duplicates(candidate_tests)
+
+    FOR EACH test IN candidate_tests:
+        attach_specification_basis(test, api_contract)
+        
+        IF test depends on behavior NOT defined by the specification:
+            mark_assumption(test)
+
+    candidate_tests = ensure_required_coverage(
+        candidate_tests,
+        test_model,
+        target_count
+    )
+
+    assign_test_ids(candidate_tests)
+
+    RETURN candidate_tests
+```
