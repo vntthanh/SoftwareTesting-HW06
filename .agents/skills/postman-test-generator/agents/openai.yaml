@@ -1,4 +1,4 @@
 interface:
   display_name: "Postman Test Generator"
-  short_description: "Convert reviewed API test cases to Postman"
-  default_prompt: "Use $postman-test-generator to convert the reviewed API test-case CSV into a Newman-compatible Postman collection."
+  short_description: "Convert reviewed API tests to Postman"
+  default_prompt: "Use $postman-test-generator to convert the reviewed API test-case CSV into a Newman-compatible Postman Collection v2.1."
