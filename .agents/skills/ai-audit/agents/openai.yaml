@@ -1,0 +1,4 @@
+interface:
+  display_name: "AI Audit"
+  short_description: "Export conversations to AI audit documents"
+  default_prompt: "Use $ai-audit to export the available conversation to the provided AI_Audit.md or the default audit document."
