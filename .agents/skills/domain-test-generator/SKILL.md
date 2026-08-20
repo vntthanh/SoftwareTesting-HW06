@@ -9,9 +9,9 @@ Focus only on Domain Testing for every input of one selected endpoint. Keep anal
 
 ## Inputs and ownership
 
-Require `api_contract` and normalized `test_model`, inline or through a shared-context path, plus `domain_report_path`. In generation also accept `candidate_output_path`. If invoked independently with a specification and endpoint, extract the same contract and model once; stop if the endpoint is absent or ambiguous.
+Require `api_contract` and normalized `test_model`, inline or through a shared-context path, plus `domain_report_path`. The report path may be a standalone domain report or, during generation, a reviewed combined Phase-1 report; in the combined form read only the `DOMAIN` section. In generation also accept `candidate_output_path`. For supplemental generation, also accept existing domain candidates and a category-specific uncovered partition/boundary or additional-count request. If invoked independently with a specification and endpoint, extract the same contract and model once; stop if the endpoint is absent or ambiguous.
 
-In an orchestrated run, read but never edit shared context. Write only the domain report during analysis and the domain candidate fragment during generation. Never write the combined final suite.
+In an orchestrated run, read but never edit shared context. During Phase 1 write only the unique report path supplied by the parent, including when it is a temporary merge input. During generation, treat a combined reviewed report as read-only and write only the domain candidate fragment. Never write the combined report or final suite.
 
 ## Select one phase
 
@@ -32,12 +32,13 @@ Do not perform both phases in one invocation. The author cannot self-approve. If
 
 ## Phase 2 — generate from the reviewed model
 
-1. Read the contract and approved report.
+1. Read the contract and approved standalone report or approved `DOMAIN` section of a combined report.
 2. Generate cases covering every reviewed partition and boundary for every parameter. Prefer one-factor-at-a-time against the reviewed baseline; combine only for reviewed cross-parameter rules.
 3. Use provisional IDs such as `DOMAIN-P001`; an orchestrator may replace them.
 4. Cite reviewed partition/boundary IDs and exact specification bases. State assumptions for unspecified invalid responses.
-5. Verify parameter, partition, and boundary coverage; report unrepresentable reviewed items.
-6. Write a JSON array to `candidate_output_path` when supplied; otherwise return candidates directly.
+5. For a supplemental request, inspect the existing domain candidates and generate only supported, semantically distinct cases for the requested reviewed partitions, boundaries, or additional count. Do not reproduce existing candidates or go beyond the approved domain model.
+6. Verify parameter, partition, and boundary coverage; report unrepresentable reviewed items.
+7. Write a JSON array to `candidate_output_path` when supplied; otherwise return candidates directly.
 
 ## Candidate schema
 

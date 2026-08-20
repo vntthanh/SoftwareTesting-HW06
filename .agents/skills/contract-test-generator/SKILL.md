@@ -9,9 +9,9 @@ Focus only on contract tests for one selected endpoint. Support two separate inv
 
 ## Inputs and ownership
 
-Require `api_contract` and normalized `test_model`, inline or through a shared-context path, plus `contract_report_path`. In generation also accept `candidate_output_path`. If invoked independently with a specification and endpoint, extract the same contract and model once; stop if the endpoint is absent or ambiguous.
+Require `api_contract` and normalized `test_model`, inline or through a shared-context path, plus `contract_report_path`. The report path may be a standalone contract report or, during generation, a reviewed combined Phase-1 report; in the combined form read only the `CONTRACT` section. In generation also accept `candidate_output_path`. For supplemental generation, also accept existing contract candidates and a category-specific uncovered-rule or additional-count request. If invoked independently with a specification and endpoint, extract the same contract and model once; stop if the endpoint is absent or ambiguous.
 
-In an orchestrated run, read but never edit shared context. Write only the contract report during analysis and the contract candidate fragment during generation. Never write the combined final suite.
+In an orchestrated run, read but never edit shared context. During Phase 1 write only the unique report path supplied by the parent, including when it is a temporary merge input. During generation, treat a combined reviewed report as read-only and write only the contract candidate fragment. Never write the combined report or final suite.
 
 ## Select one phase
 
@@ -30,12 +30,13 @@ Do not perform both phases in one invocation. The author cannot self-approve. If
 
 ## Phase 2 — generate from the reviewed model
 
-1. Read the contract and approved report. Treat reviewed model changes as test-design authority while the specification remains authority for API behavior.
+1. Read the contract and approved standalone report or approved `CONTRACT` section of a combined report. Treat reviewed model changes as test-design authority while the specification remains authority for API behavior.
 2. Generate distinct positive and negative cases covering every approved rule and relevant request/response contract.
 3. Use provisional IDs such as `CONTRACT-P001`; an orchestrator may replace them.
 4. Map every case to approved rule IDs and exact specification bases. Put unspecified behavior in `Assumptions / Notes`.
-5. Verify every approved rule is covered or explicitly reported unresolved.
-6. Write a JSON array to `candidate_output_path` when supplied; otherwise return candidates directly.
+5. For a supplemental request, inspect the existing contract candidates and generate only supported, semantically distinct cases for the requested reviewed rules or additional count. Do not reproduce existing candidates or go beyond the approved contract model.
+6. Verify every approved rule is covered or explicitly reported unresolved.
+7. Write a JSON array to `candidate_output_path` when supplied; otherwise return candidates directly.
 
 ## Candidate schema
 

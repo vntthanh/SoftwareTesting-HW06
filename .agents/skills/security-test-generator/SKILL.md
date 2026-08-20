@@ -9,9 +9,9 @@ Focus only on security tests supported by requirements applicable to one selecte
 
 ## Inputs and ownership
 
-Require `api_contract`, normalized `test_model`, and extracted `security_requirements` (`SEC-01` through `SEC-07`), inline or through a shared-context path, plus `security_report_path`. In generation also accept `candidate_output_path`. If invoked independently with a specification and endpoint, extract them once. Record missing SEC IDs as absent; never substitute a generic checklist.
+Require `api_contract`, normalized `test_model`, and extracted `security_requirements` (`SEC-01` through `SEC-07`), inline or through a shared-context path, plus `security_report_path`. The report path may be a standalone security report or, during generation, a reviewed combined Phase-1 report; in the combined form read only the `SECURITY` section. In generation also accept `candidate_output_path`. For supplemental generation, also accept existing security candidates and a category-specific uncovered scenario/requirement or additional-count request. If invoked independently with a specification and endpoint, extract them once. Record missing SEC IDs as absent; never substitute a generic checklist.
 
-In an orchestrated run, read but never edit shared context. Write only the security report during analysis and the security candidate fragment during generation. Never write the combined final suite.
+In an orchestrated run, read but never edit shared context. During Phase 1 write only the unique report path supplied by the parent, including when it is a temporary merge input. During generation, treat a combined reviewed report as read-only and write only the security candidate fragment. Never write the combined report or final suite.
 
 ## Select one phase
 
@@ -31,12 +31,13 @@ Do not perform both phases in one invocation. The author cannot self-approve. If
 
 ## Phase 2 — generate from the reviewed model
 
-1. Read the contract and approved report.
+1. Read the contract and approved standalone report or approved `SECURITY` section of a combined report.
 2. Generate distinct cases covering every reviewed applicable SEC requirement and scenario, including valid-control cases when reviewed.
 3. Use provisional IDs such as `SECURITY-P001`; an orchestrator may replace them.
 4. Cite scenario IDs, SEC IDs, and exact bases. Record assumptions for unspecified status, message, redaction, timing, or side effects.
-5. Verify requirement/scenario coverage and report uncovered applicable items.
-6. Write a JSON array to `candidate_output_path` when supplied; otherwise return candidates directly.
+5. For a supplemental request, inspect the existing security candidates and generate only supported, semantically distinct cases for the requested reviewed scenarios, requirements, or additional count. Do not reproduce existing candidates or go beyond the approved security model.
+6. Verify requirement/scenario coverage and report uncovered applicable items.
+7. Write a JSON array to `candidate_output_path` when supplied; otherwise return candidates directly.
 
 ## Candidate schema
 
