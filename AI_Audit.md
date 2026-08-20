@@ -406,3 +406,112 @@ Validation passed:
     - For one combined report, copy each existing category section into its own temporary file before spawning workers.
     - Merge the temporary reports back into the combined report after Phase 1.
     - Replace “exactly four agents” with one primary agent per testing dimension. Allow extra helper, retry, or supplemental agents when needed.
+
+### Artifact 5
+
+- **User:** Vương Ngũ Tín Thành
+- **Date and Time:** 2026-08-20 12:40:11 GMT+7
+- **Model Used:** GPT-5.6 Sol (parent and inherited specialist agents)
+- **Skill Used:**
+  - `api-test-generator`
+  - `contract-test-generator`
+  - `domain-test-generator`
+  - `state-transition-test-generator`
+  - `security-test-generator`
+- **Prompt:**
+
+````markdown
+Use [$api-test-generator](D:\GitHub\SoftwareTesting-HW06\\.agents\skills\api-test-generator\SKILL.md) for **Pool A — Forgot Password / Reset Password**.
+
+
+
+Inputs:
+
+- API specification: [api_specification.md](reference/api_specification.md)
+- System requirements: [system_requirements.md](reference/system_requirements.md)
+- Selected API: `POST /api/reset-password`
+
+Write the Phase 1 analysis to: `review/pool-a/` (create files).
+
+After Phase 1, stop for my review before generating test cases.
+
+Treat the provided specification and system requirements as authoritative. Do not invent missing API behavior.
+````
+
+- **AI Output:**
+
+````markdown
+I’m using the `api-test-generator` skill because this request calls for its coordinated Phase 1 analysis and explicit human-review checkpoint. I’ll read its instructions and the relevant endpoint requirements first, then create only the review artifacts under `review/pool-a/`.
+
+The skill requires four parallel specialist agents and a hard review gate. I’m now reading each specialist’s exact Phase 1 contract and extracting a single shared endpoint context so all analyses use the same authoritative facts.
+
+The selected contract is sparse: it defines the JSON request example but no response contract or status codes. The requirements add password-strength, OTP binding, expiry, and one-time-use rules; I’ll preserve those as requirements while explicitly marking unmapped fields and unspecified API behavior as gaps.
+
+The shared context is complete. I’m starting the four mandated Phase 1 specialists concurrently; each owns only its category report, and none is allowed to generate test cases or modify the shared/status files.
+
+All four Phase 1 outputs are back; state analysis found the OTP lifecycle applicable. I’m validating each report for source identity, complete tables, pending review markers, unsupported claims, and confirming that no candidate test files were created.
+
+Phase 1 is complete and stopped at the human-review gate. No test cases were generated.
+
+Review artifacts:
+
+- [Contract analysis](D:/GitHub/SoftwareTesting-HW06/review/pool-a/reports/contract-report.md)
+- [Domain analysis](D:/GitHub/SoftwareTesting-HW06/review/pool-a/reports/domain-report.md)
+- [State-transition analysis](D:/GitHub/SoftwareTesting-HW06/review/pool-a/reports/state-report.md) — applicable
+- [Security analysis](D:/GitHub/SoftwareTesting-HW06/review/pool-a/reports/security-report.md)
+- [Shared API context](D:/GitHub/SoftwareTesting-HW06/review/pool-a/shared-api-context.md)
+- [Orchestration status and review focus](D:/GitHub/SoftwareTesting-HW06/review/pool-a/orchestration-status.md)
+
+All four reports are marked `PENDING`. The analysis explicitly preserves unspecified behavior, particularly the absent response contract, confirmation-password API mapping, JWT applicability, and OTP interpretation.
+````
+
+- **File Modifications:**
+  - `File:` `review/pool-a/shared-api-context.md`.
+    - `Action:` created.
+    - `Deleted:` None.
+    - `Replaced With:` None.
+    - `Appended:` Shared source identity and hashes; the normalized request, response, authentication, SEC-01–SEC-07, state, and test models for `POST /api/reset-password`; exact specification bases; and explicit gaps and assumptions.
+  - `File:` `review/pool-a/orchestration-status.md`.
+    - `Action:` created, then edited.
+    - `Deleted:` Initial `IN_PROGRESS` status and the four pending-specialist placeholders.
+    - `Replaced With:` `AWAITING_HUMAN_REVIEW` status, collected-report paths and hashes, state applicability, coordinator validation results, five human-review focus items, and a gate record confirming that no candidate tests or final suite exist.
+    - `Appended:` None.
+  - `File:` `review/pool-a/reports/contract-report.md`.
+    - `Action:` created.
+    - `Deleted:` None.
+    - `Replaced With:` None.
+    - `Appended:` Phase 1 CONTRACT analysis containing source identity, request and response inventories, `CR-001`–`CR-012`, gaps and ambiguities, and a `Review Status: PENDING` block.
+  - `File:` `review/pool-a/reports/domain-report.md`.
+    - `Action:` created.
+    - `Deleted:` None.
+    - `Replaced With:` None.
+    - `Appended:` Phase 1 DOMAIN analysis containing the valid baseline, parameter inventory, `DP-001`–`DP-026`, `DB-001`–`DB-006`, cross-parameter constraints, gaps and ambiguities, and a pending review block.
+  - `File:` `review/pool-a/reports/state-report.md`.
+    - `Action:` created.
+    - `Deleted:` None.
+    - `Replaced With:` None.
+    - `Appended:` Phase 1 STATE analysis marking applicability as `APPLICABLE`, defining `ST-01`–`ST-03`, guards `GD-01`–`GD-05`, transitions `TR-001`–`TR-005`, gaps and ambiguities, and a pending review block.
+  - `File:` `review/pool-a/reports/security-report.md`.
+    - `Action:` created.
+    - `Deleted:` None.
+    - `Replaced With:` None.
+    - `Appended:` Phase 1 SECURITY analysis containing endpoint characteristics, the SEC-01–SEC-07 applicability matrix, `SS-001`–`SS-007`, coverage decisions, gaps, requested human decisions, and a `Review Status: PENDING` block.
+- **Verdict:** INCOMPLETE
+- **Reasoning:**
+  - Required request fields were not clearly enforced.
+  - `null`, wrong-type, malformed, and malformed-email inputs were left unclear.
+  - JWT requirement for reset password was unresolved.
+  - SQL injection black-box checks were missing.
+  - OTP brute-force/rate-limit checks were missing.
+  - Account-enumeration checks were missing.
+- **Student Fixes:**
+  - Treated `email`, `resetToken`, and `newPassword` as required.
+  - Treated malformed, missing, `null`, and wrong-type inputs as invalid.
+  - Added `Content-Type: application/json`.
+  - Added reviewed HTTP expectations: `200`, `400`, `415`, and `429`.
+  - Marked JWT as not required for this recovery endpoint.
+  - Kept OTP usable after failed validation.
+  - Consume OTP only after a successful reset.
+  - Added SQL injection black-box testing.
+  - Added OTP brute-force/rate-limit testing.
+  - Added account-enumeration testing.
