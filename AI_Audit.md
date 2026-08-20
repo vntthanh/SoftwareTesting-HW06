@@ -308,8 +308,10 @@ Artifacts 3-3 successfully appended to `D:\GitHub\SoftwareTesting-HW06\AI_Audit.
 
 - **User:** Vương Ngũ Tín Thành
 - **Date and Time:** 2026-08-20 11:52:36 GMT+7
-- **Model Used:** GPT-5
-- **Skill Used:** `skill-creator`
+- **Model Used:** GPT-5.6 Sol
+- **Skill Used:**
+  - `skill-creator`
+  - `ai-audit`
 - **Prompt:**
 
 ````markdown
@@ -521,7 +523,7 @@ All four reports are marked `PENDING`. The analysis explicitly preserves unspeci
 
 - **User:** Vương Ngũ Tín Thành
 - **Date and Time:** 2026-08-20 17:27:46 GMT+7
-- **Model Used:** GPT-5 (Codex; parent and inherited specialist agents)
+- **Model Used:** GPT-5.6 Sol (parent and inherited specialist agents)
 - **Skill Used:**
   - `api-test-generator`
   - `contract-test-generator`
@@ -614,7 +616,7 @@ All reviewed coverage is represented except `CR-008`, because the confirmation-p
 
 - **User:** Vương Ngũ Tín Thành
 - **Date and Time:** 2026-08-20 20:24:33 GMT+7
-- **Model Used:** GPT-5 (Codex; parent and inherited specialist agents)
+- **Model Used:** GPT-5.6 Sol (parent and inherited specialist agents)
 - **Skill Used:**
   - `api-test-generator`
   - `contract-test-generator`
@@ -702,4 +704,44 @@ Validation passed: 76 cases, 76 unique sequential IDs, nine required fields per 
     - `Appended:` None.
 - **Verdict:** VALID
 - **Reasoning:** The agent correctly resolved found test defects.
+- **Student Fixes:** None
+
+### Artifact 8
+
+- **User:** Vương Ngũ Tín Thành
+- **Date and Time:** 2026-08-20 20:47:31 GMT+7
+- **Model Used:** GPT-5.6 Sol
+- **Skill Used:** `ai-audit`
+- **Prompt:**
+
+````markdown
+Base on [pool-a](review/pool-a/), fill in [Main_Report.md](Main_Report.md).
+````
+
+- **AI Output:**
+
+````markdown
+I’ll inspect the report template and the completed Pool A artifacts, then fill only the relevant sections with the reviewed analysis, final test-suite results, revisions, and validation evidence.
+
+The deliverable CSV already matches the final Pool A suite byte-for-byte (76 cases, same SHA-256), so the existing `test-cases/a-forgot-password.csv` link is correct. I’ll now populate Sections A.2–A.6 and update the report date, while leaving Pools B and C untouched.
+
+Filled the Pool A sections in [Main_Report.md](D:/GitHub/SoftwareTesting-HW06/Main_Report.md):
+
+- Contract, domain, state-transition, and security analyses
+- Reviewed assumptions and unresolved behavior
+- Final counts: 26 CONTRACT, 36 DOMAIN, 5 STATE, 9 SECURITY
+- Revision and validation summary for all 76 cases
+- Updated report date to 2026-08-20
+
+All report links, IDs, counts, and the final CSV checksum were verified. Pools B and C were unchanged.
+````
+
+- **File Modifications:**
+  - `File:` `Main_Report.md`.
+    - `Action:` edited.
+    - `Deleted:` Report and last-updated dates of `2026-08-18`; empty Pool A Sections A.2–A.5; and blank Contract, Domain, State Transition, Security, and Total counts in Section A.6.
+    - `Replaced With:` Report and last-updated dates of `2026-08-20`; Pool A contract analysis covering request fields, `CR-001`–`CR-012`, reviewed HTTP assumptions, and unresolved `CR-008`; domain analysis covering `DP-001`–`DP-026`, `DB-001`–`DB-006`, exploratory `API-030`, and valid `API-059`; state analysis covering `ST-01`–`ST-03`, `TR-001`–`TR-005`, and observable/configurable expiry gating; security applicability for `SEC-01`–`SEC-07` and scenarios `SS-001`–`SS-009`; test counts of 26 CONTRACT, 36 DOMAIN, 5 STATE, 9 SECURITY, and 76 total; plus stable IDs, eight revised cases, validation evidence, and final CSV SHA-256 `3C50ACA8A132222E82E6AFC0607B4C055F22069AEF9FB10429CF326CF6C24081`.
+    - `Appended:` None.
+- **Verdict:** VALID
+- **Reasoning:** The agent correctly summarized pool A process into main report.
 - **Student Fixes:** None

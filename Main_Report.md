@@ -12,7 +12,7 @@
 | SUT repository | <https://github.com/ttbhanh/eshop-sut> |
 | Submission repository | <https://github.com/vntthanh/SoftwareTesting-HW06> |
 | Report date | 2026-08-18 |
-| Last updated | 2026-08-18 |
+| Last updated | 2026-08-20 |
 
 ## 2. Selected APIs
 
@@ -53,11 +53,67 @@ Pool A covers **FR-03 – Forgot Password / Password Reset**. This report select
 
 ### A.2. Contractual Testing Analysis
 
+The selected endpoint is documented as `POST /api/reset-password` with a JSON body containing three top-level fields:
+
+| Field | Documented representation | Reviewed constraint |
+| --- | --- | --- |
+| `email` | JSON string | Required for account identification and OTP-to-email binding |
+| `resetToken` | JSON string | Required; represents the six-digit OTP generated during step 1 |
+| `newPassword` | JSON string | Required; must satisfy the FR-01 password-strength rules incorporated by FR-03 |
+
+The reviewed contract model contains rules `CR-001`–`CR-012`. It covers the method and path, JSON-object representation, documented member set, string representations, OTP/email binding, password strength, OTP expiry, one-time use, the combined valid request, and the absence of a documented response schema.
+
+The API specification does not define response statuses or bodies for this endpoint. The reviewed test model therefore labels `Content-Type: application/json`, `200 OK` for a normal successful reset, and `400 Bad Request` for invalid request data as external HTTP testing assumptions. It does not invent response messages, response fields, validation precedence, or parser behavior beyond the reviewed assumptions.
+
+FR-03 requires a confirmation-password value at workflow/UI level, but the endpoint body does not document such a field. Consequently, `CR-008` remains unresolved for direct API testing: no `confirmPassword`-style property was invented. The complete analysis is stored in [`review/pool-a/reports/contract-report.md`](review/pool-a/reports/contract-report.md).
+
 ### A.3. Domain Testing Analysis
+
+Domain analysis uses the documented example as a value baseline and adds the required workflow state: a registered email, a six-digit OTP issued for that same email, an unexpired and unused OTP, and a conforming new password. Tests vary one input factor at a time where possible.
+
+The reviewed model defines 26 equivalence partitions (`DP-001`–`DP-026`) across the JSON container and the three body fields. Important partitions include:
+
+- valid and malformed/non-object JSON containers;
+- missing, `null`, and wrong-type values for all three required fields;
+- registered, unregistered, malformed, empty, and OTP-mismatched email values;
+- OTP values below, at, and above six digits; non-decimal, wrong-type, omitted, and unissued values;
+- passwords that meet all rules or separately omit uppercase, lowercase, digit, allowed special character, or minimum length.
+
+Six boundary models (`DB-001`–`DB-006`) cover OTP length, password length, and the minimum counts of uppercase, lowercase, digit, and allowed-special characters. No unsupported maximum lengths, email boundaries, or concrete OTP lifetime were inferred.
+
+Additional JSON properties remain exploratory because the specification defines no accept/reject oracle (`API-030`). Conversely, `Aa1!bbbb#` is valid (`API-059`) because it satisfies every explicit password rule through `A`, lowercase letters, `1`, and the allowed `!`; no requirement prohibits the additional `#`. The complete analysis is stored in [`review/pool-a/reports/domain-report.md`](review/pool-a/reports/domain-report.md).
 
 ### A.4. State Transition Testing Analysis
 
+State-transition testing is applicable because FR-03 and SEC-07 define an OTP lifecycle. The reviewed model contains three normalized states:
+
+| State | Meaning |
+| --- | --- |
+| `ST-01` | OTP is usable, unexpired, unused, and bound to the requesting email |
+| `ST-02` | OTP has passed the real SUT expiry point and is no longer usable |
+| `ST-03` | OTP was used successfully and invalidated |
+
+Five transitions/guard failures (`TR-001`–`TR-005`) cover successful reset and OTP invalidation, cross-email OTP use, expired OTP use, replay after successful use, and weak-password rejection. The reviewed `TR-005` decision preserves the usable OTP and leaves the old password unchanged when password validation fails.
+
+Expiry tests do not assume a lifetime, clock, boundary, or grace period. They execute only when the real SUT expiry point can be configured or objectively observed; otherwise, the case is recorded as `BLOCKED / NOT EXECUTABLE`, not as a product failure. The complete analysis is stored in [`review/pool-a/reports/state-report.md`](review/pool-a/reports/state-report.md).
+
 ### A.5. Security Testing Analysis
+
+All supplied requirements `SEC-01`–`SEC-07` were evaluated for this endpoint:
+
+| Requirement | Applicability and treatment |
+| --- | --- |
+| `SEC-01` | Applicable: the reset password must not be stored in plaintext. Verification is explicitly white-box/storage-level because Postman alone cannot prove persistence behavior. |
+| `SEC-02` | Not applicable under the reviewed recovery model: the OTP is the recovery credential and no JWT is required for this unauthenticated endpoint. |
+| `SEC-03` | Not applicable: this is not an Admin API. |
+| `SEC-04` | No direct API scenario: the sources define no response-reflection or UI-rendering sink for the submitted values. |
+| `SEC-05` | Conditionally applicable: inert SQL/query metacharacters must not bypass reset controls, affect another account, reveal database information, or cause unexpected failure. Full parameterization proof may require implementation inspection. |
+| `SEC-06` | Not applicable: this is not a profile-update API and has no documented `role` input. |
+| `SEC-07` | Directly applicable: the OTP is six digits, email-bound, expiring, and invalidated after successful use. |
+
+The security model contains nine scenarios (`SS-001`–`SS-009`). In addition to SEC-01, SEC-05, and SEC-07 coverage, the reviewed model includes two external best-practice scenarios: automated-guessing resistance and account-enumeration resistance. The guessing test runs only when an authoritative configured abuse-control limit is known and never invents a threshold. The enumeration test compares the same `400` status, semantic JSON body (or exact non-JSON body), content type, redirect behavior, password/token/account-metadata side effects, and treats timing as informational unless an approved tolerance exists.
+
+The complete analysis is stored in [`review/pool-a/reports/security-report.md`](review/pool-a/reports/security-report.md).
 
 ### A.6. Test Cases
 
@@ -67,11 +123,15 @@ The test cases were derived from the reviewed analyses in Sections A.2–A.5.
 
 | Testing Type | Number of Test Cases |
 | --- | ---: |
-| Contractual Testing | |
-| Domain Testing | |
-| State Transition Testing | |
-| Security Testing | |
-| **Total** | |
+| Contractual Testing | 26 |
+| Domain Testing | 36 |
+| State Transition Testing | 5 |
+| Security Testing | 9 |
+| **Total** | **76** |
+
+The suite uses stable IDs `API-001`–`API-076` and exactly nine traceability fields per record. Every case targets `POST /api/reset-password` and retains its provisional specialist ID in `Assumptions / Notes`. Parent validation found no missing fields, duplicate IDs, endpoint/category mismatches, or true within-category request/oracle duplicates. Coverage includes `CR-001`–`CR-007`, `CR-009`–`CR-012`, `DP-001`–`DP-026`, `DB-001`–`DB-006`, `TR-001`–`TR-005`, and `SS-001`–`SS-009`; `CR-008` is explicitly unresolved because confirmation-password transport is not documented.
+
+Eight cases were revised after review: `API-025`, `API-030`, `API-059`, `API-065`, `API-068`, `API-072`, `API-075`, and `API-076`. These revisions clarified exploratory behavior, valid additional password characters, observable/configurable expiry preconditions, white-box storage verification, configured rate limits, and account-enumeration comparison rules. Revalidation preserved all 76 IDs and coverage. The final CSV has SHA-256 `3C50ACA8A132222E82E6AFC0607B4C055F22069AEF9FB10429CF326CF6C24081`. Test cases were designed and validated but were not executed as part of this generation phase.
 
 ## Pool B: Discount Coupons
 
