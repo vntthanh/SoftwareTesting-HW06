@@ -1,0 +1,4 @@
+interface:
+  display_name: "Domain Test Generator"
+  short_description: "Generate API partitions and boundary tests"
+  default_prompt: "Use $domain-test-generator to analyze input domains or generate reviewed domain tests for an API endpoint."

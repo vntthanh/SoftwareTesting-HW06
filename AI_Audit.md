@@ -143,3 +143,163 @@ I also tested the validator with both a passing collection and a deliberately sc
 - **Verdict:** VALID
 - **Reasoning:** The agent successfully fixed all defects.
 - **Student Fixes:** None
+
+### Artifact 3
+
+- **User:** Vương Ngũ Tín Thành
+- **Date and Time:** 2026-08-20 11:16:56 GMT+7
+- **Model Used:** GPT-5.6 Sol
+- **Skill Used:**
+  - `skill-creator`
+  - `ai-audit`
+- **Prompt:**
+
+````markdown
+Use [$skill-creator](C:\Users\xing0\\.codex\skills\\.system\skill-creator\SKILL.md) to implement the Agent Skills defined by [api-test-generator](skills-design/api-test-generator/)
+
+Treat the design as the source of truth.
+
+Create **5 composable skills**:
+
+- `api-test-generator` — orchestrator
+- `contract-test-generator`
+- `domain-test-generator`
+- `state-transition-test-generator`
+- `security-test-generator`
+
+The four specialized generators must be independent skills, not reference files.
+
+For `api-test-generator`, use Codex multi-agent orchestration to:
+
+1. Prepare the shared API/endpoint context once.
+2. Spawn **4 subagents concurrently**, one for each specialized skill.
+3. Wait for all four to finish.
+4. Aggregate and validate their results into the final output.
+
+Please note that for specialized generators currently are split into 2 phases, due to `HUMAN REVIEW` step.
+
+Specialized skills must also work independently. Use `references/` only for supporting material.
+
+Avoid concurrent writes to the final output; the orchestrator owns aggregation and final output.
+
+Do not build a custom multi-agent framework if Codex's native subagent orchestration is sufficient.
+
+Follow [$skill-creator](C:\Users\xing0\\.codex\skills\\.system\skill-creator\SKILL.md) conventions and validate all five skills after implementation.
+
+At the end, log this artifact using [$ai-audit](D:\GitHub\SoftwareTesting-HW06\\.agents\skills\ai-audit\SKILL.md) and report the created skill tree and validation results.
+````
+
+- **AI Output:**
+
+````markdown
+Implemented and validated all five skills, with Artifact 3 logged in [AI_Audit.md](D:/GitHub/SoftwareTesting-HW06/AI_Audit.md).
+
+Created skill tree:
+
+```text
+.agents/skills/
+├── api-test-generator/
+│   ├── SKILL.md
+│   └── agents/openai.yaml
+├── contract-test-generator/
+│   ├── SKILL.md
+│   └── agents/openai.yaml
+├── domain-test-generator/
+│   ├── SKILL.md
+│   └── agents/openai.yaml
+├── state-transition-test-generator/
+│   ├── SKILL.md
+│   └── agents/openai.yaml
+└── security-test-generator/
+    ├── SKILL.md
+    └── agents/openai.yaml
+```
+
+Validation results:
+
+- `quick_validate.py`: passed for all five skills with `Skill is valid!`.
+- Semantic checks passed for shared-context-once preparation, exactly four concurrent specialist agents, waiting for all four, parent-only aggregation/final writes, and two-phase human-review gates.
+- All five `agents/openai.yaml` files parse successfully.
+- Each specialist is independently invocable and owns only its report/candidate fragment.
+- No `references/` were created because no supporting material was needed.
+
+Artifacts 3-3 successfully appended to `D:\GitHub\SoftwareTesting-HW06\AI_Audit.md`.
+````
+
+- **File Modifications:**
+  - `File: .agents/skills/api-test-generator/SKILL.md`.
+    - `Action:` created, then replaced scaffold content.
+    - `Deleted:` Initial skill-creator TODO scaffold.
+    - `Replaced With:` Orchestrator instructions for one-time shared context preparation, concurrent native four-agent execution, two review-separated phases, parent-owned aggregation, de-duplication, traceability, coverage validation, target-count handling, and final output ownership.
+    - `Appended:` None.
+  - `File: .agents/skills/api-test-generator/agents/openai.yaml`.
+    - `Action:` created.
+    - `Deleted:` None.
+    - `Replaced With:` None.
+    - `Appended:` UI metadata and default invocation prompt for `api-test-generator`.
+  - `File: .agents/skills/contract-test-generator/SKILL.md`.
+    - `Action:` created, then replaced scaffold content.
+    - `Deleted:` Initial skill-creator TODO scaffold.
+    - `Replaced With:` Independent two-phase contract-analysis, human-review, candidate-generation, traceability, and file-ownership instructions.
+    - `Appended:` None.
+  - `File: .agents/skills/contract-test-generator/agents/openai.yaml`.
+    - `Action:` created.
+    - `Deleted:` None.
+    - `Replaced With:` None.
+    - `Appended:` UI metadata and default invocation prompt for `contract-test-generator`.
+  - `File: .agents/skills/domain-test-generator/SKILL.md`.
+    - `Action:` created, then replaced scaffold content.
+    - `Deleted:` Initial skill-creator TODO scaffold.
+    - `Replaced With:` Independent equivalence-partition and boundary-analysis workflow with human review, candidate generation, traceability, and file boundaries.
+    - `Appended:` None.
+  - `File: .agents/skills/domain-test-generator/agents/openai.yaml`.
+    - `Action:` created.
+    - `Deleted:` None.
+    - `Replaced With:` None.
+    - `Appended:` UI metadata and default invocation prompt for `domain-test-generator`.
+  - `File: .agents/skills/state-transition-test-generator/SKILL.md`.
+    - `Action:` created, then replaced scaffold content.
+    - `Deleted:` Initial skill-creator TODO scaffold.
+    - `Replaced With:` Independent applicability check, state/transition modeling, human review, candidate generation, justified empty result, traceability, and file boundaries.
+    - `Appended:` None.
+  - `File: .agents/skills/state-transition-test-generator/agents/openai.yaml`.
+    - `Action:` created.
+    - `Deleted:` None.
+    - `Replaced With:` None.
+    - `Appended:` UI metadata and default invocation prompt for `state-transition-test-generator`.
+  - `File: .agents/skills/security-test-generator/SKILL.md`.
+    - `Action:` created, then replaced scaffold content.
+    - `Deleted:` Initial skill-creator TODO scaffold.
+    - `Replaced With:` Independent SEC-01–SEC-07 applicability/scenario analysis, human review, candidate generation, safety, traceability, and file boundaries.
+    - `Appended:` None.
+  - `File: .agents/skills/security-test-generator/agents/openai.yaml`.
+    - `Action:` created.
+    - `Deleted:` None.
+    - `Replaced With:` None.
+    - `Appended:` UI metadata and default invocation prompt for `security-test-generator`.
+  - `File: AI_Audit.md`.
+    - `Action:` appended.
+    - `Deleted:` None.
+    - `Replaced With:` None.
+    - `Appended:` Artifact 3 containing the verbatim prompt, final AI output, file modifications, and review TODOs.
+  - `File: .skill-implementation.patch` and `.skill-stage/*/SKILL.md`.
+    - `Action:` temporary files created and deleted.
+    - `Deleted:` Staged patch and five staged skill files after protected-directory installation.
+    - `Replaced With:` None.
+    - `Appended:` None.
+  - `File: .validation-deps/**`.
+    - `Action:` temporary validator dependencies created and deleted.
+    - `Deleted:` Isolated PyYAML validation dependency directory after validation.
+    - `Replaced With:` None.
+    - `Appended:` None.
+- **Verdict:** INCOMPLETE
+- **Reasoning:**
+  - Cross-category deduplication may remove required test coverage.
+  - STATE: NOT_APPLICABLE is not passed correctly into Phase 2.
+  - Completed subagents are not explicitly closed.
+  - The parent skill may generate extra tests itself instead of delegating them.
+  - If the user provides one Phase-1 report file, parallel agents may write to the same file.
+    - For one report file, workers should write separate temporary reports first. The parent should merge temporary reports into the final Phase-1 report.
+    - Temporary files should be deleted only after the merged report is successfully validated.
+    - If merging fails, temporary files should be kept for recovery.
+- **Student Fixes:** Continue guide the agent to resolve defects.

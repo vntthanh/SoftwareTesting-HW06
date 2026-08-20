@@ -1,0 +1,4 @@
+interface:
+  display_name: "State Transition Test Generator"
+  short_description: "Generate stateful API transition tests"
+  default_prompt: "Use $state-transition-test-generator to analyze state behavior or generate reviewed transition tests for an API endpoint."

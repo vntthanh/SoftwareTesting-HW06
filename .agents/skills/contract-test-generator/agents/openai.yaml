@@ -1,0 +1,4 @@
+interface:
+  display_name: "Contract Test Generator"
+  short_description: "Generate contract-focused API tests"
+  default_prompt: "Use $contract-test-generator to analyze or generate contract tests for a selected API endpoint."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "API Test Generator"
+  short_description: "Orchestrate reviewed API test generation"
+  default_prompt: "Use $api-test-generator to generate reviewed, traceable API test cases for a selected endpoint."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Security Test Generator"
+  short_description: "Generate requirements-based API security tests"
+  default_prompt: "Use $security-test-generator to analyze security requirements or generate reviewed security tests for an API endpoint."
