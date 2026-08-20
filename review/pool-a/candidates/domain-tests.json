@@ -1,0 +1,716 @@
+[
+  {
+    "Test ID": "DOMAIN-P001",
+    "Endpoint": "POST /api/reset-password",
+    "Category": "DOMAIN",
+    "Test Objective": "Verify the documented JSON object shape with a registered email, its usable six-digit OTP, and a conforming password.",
+    "Preconditions": "The account test@domain.com is registered. OTP 123456 was issued for that email, is unexpired, and is unused. Any workflow-level confirmation equals NewPassword123!.",
+    "Request Input": {
+      "Headers": {
+        "Content-Type": "application/json"
+      },
+      "Body": {
+        "email": "test@domain.com",
+        "resetToken": "123456",
+        "newPassword": "NewPassword123!"
+      }
+    },
+    "Expected Result": "200 OK. No response body, message, header, or media-type assertion is made.",
+    "Specification Basis": "DP-001, DP-005, DP-011, DP-018, DB-001 (6-digit boundary), DC-001 through DC-006; API specification lines 44-52; FR-03 lines 50-60; FR-01 line 34; SEC-07 line 284. The 200 and application/json oracles are reviewed external Phase 2 assumptions.",
+    "Assumptions / Notes": "The test fixture controls OTP issuance so that 123456 is the actual usable OTP. Successful password replacement is the intended operation effect; exact persistence timing and response content are unspecified. No confirmation field is added."
+  },
+  {
+    "Test ID": "DOMAIN-P002",
+    "Endpoint": "POST /api/reset-password",
+    "Category": "DOMAIN",
+    "Test Objective": "Verify rejection of a well-formed JSON request whose top-level value is an array rather than an object.",
+    "Preconditions": "No account or OTP state is required because the top-level request representation is invalid under the reviewed validation assumption.",
+    "Request Input": {
+      "Headers": {
+        "Content-Type": "application/json"
+      },
+      "Body": [
+        "test@domain.com",
+        "123456",
+        "NewPassword123!"
+      ]
+    },
+    "Expected Result": "400 Bad Request. No response body or error-message assertion is made.",
+    "Specification Basis": "DP-002; API specification lines 46-52 show an object. Shared normalized model rule 8 is the reviewed external assumption that non-object JSON is invalid; the 400 and application/json oracles are reviewed external Phase 2 assumptions.",
+    "Assumptions / Notes": "The sources contain no formal schema. Rejection of non-object JSON is an explicitly reviewed external validation assumption, not a source-defined response fact."
+  },
+  {
+    "Test ID": "DOMAIN-P003",
+    "Endpoint": "POST /api/reset-password",
+    "Category": "DOMAIN",
+    "Test Objective": "Verify rejection of a malformed JSON request body.",
+    "Preconditions": "No account or OTP state is required because JSON parsing cannot produce the documented request object.",
+    "Request Input": {
+      "Headers": {
+        "Content-Type": "application/json"
+      },
+      "Raw Body": "{\"email\":\"test@domain.com\","
+    },
+    "Expected Result": "400 Bad Request. No response body or parser-message assertion is made.",
+    "Specification Basis": "DP-003; API specification lines 46-52 document a JSON object. Shared normalized model rule 8 is the reviewed external assumption that malformed JSON is invalid; the 400 and application/json oracles are reviewed external Phase 2 assumptions.",
+    "Assumptions / Notes": "The source does not define malformed-body handling or parser diagnostics."
+  },
+  {
+    "Test ID": "DOMAIN-P004",
+    "Endpoint": "POST /api/reset-password",
+    "Category": "DOMAIN",
+    "Test Objective": "Characterize handling of an additional JSON member while all documented members remain valid.",
+    "Preconditions": "The account test@domain.com is registered. OTP 123456 was issued for that email, is unexpired, and is unused.",
+    "Request Input": {
+      "Headers": {
+        "Content-Type": "application/json"
+      },
+      "Body": {
+        "email": "test@domain.com",
+        "resetToken": "123456",
+        "newPassword": "NewPassword123!",
+        "unexpected": "value"
+      }
+    },
+    "Expected Result": "No reviewed acceptance-or-rejection oracle exists for additional members. Record the actual status and side effects without treating acceptance or rejection as a conformance failure; do not assert a response body or message.",
+    "Specification Basis": "DP-004; API specification lines 46-52 list only the three documented members but define no additional-property behavior. The request application/json header is a reviewed external Phase 2 assumption.",
+    "Assumptions / Notes": "UNRESOLVED ORACLE: neither ignore nor reject behavior may be invented. This is a characterization candidate and must not be scored as a deterministic pass/fail case until the product owner defines extra-property behavior."
+  },
+  {
+    "Test ID": "DOMAIN-P005",
+    "Endpoint": "POST /api/reset-password",
+    "Category": "DOMAIN",
+    "Test Objective": "Verify that an OTP cannot be used with a different registered email.",
+    "Preconditions": "Both test@domain.com and other@domain.com are registered. OTP 123456 was issued only for test@domain.com, is unexpired, and is unused.",
+    "Request Input": {
+      "Headers": {
+        "Content-Type": "application/json"
+      },
+      "Body": {
+        "email": "other@domain.com",
+        "resetToken": "123456",
+        "newPassword": "NewPassword123!"
+      }
+    },
+    "Expected Result": "400 Bad Request. The OTP-to-email binding prevents a valid reset. No response body or message is asserted.",
+    "Specification Basis": "DP-006, DC-001; FR-03 line 60. The 400 and application/json oracles are reviewed external Phase 2 assumptions.",
+    "Assumptions / Notes": "This reviewed interaction necessarily varies the email-token association rather than a single scalar value. Email case-normalization behavior is outside scope."
+  },
+  {
+    "Test ID": "DOMAIN-P006",
+    "Endpoint": "POST /api/reset-password",
+    "Category": "DOMAIN",
+    "Test Objective": "Verify handling of a syntactically ordinary email address that is not registered.",
+    "Preconditions": "unknown@domain.com is not registered and has no issued OTP. OTP 123456 belongs to no request for that email.",
+    "Request Input": {
+      "Headers": {
+        "Content-Type": "application/json"
+      },
+      "Body": {
+        "email": "unknown@domain.com",
+        "resetToken": "123456",
+        "newPassword": "NewPassword123!"
+      }
+    },
+    "Expected Result": "400 Bad Request under the reviewed invalid-request HTTP oracle. No response body, message, or account-existence disclosure behavior is asserted.",
+    "Specification Basis": "DP-007; FR-03 line 50 requires a registered email for the workflow. The 400 and application/json oracles are reviewed external Phase 2 assumptions.",
+    "Assumptions / Notes": "A source-supported valid OTP setup cannot exist for this partition. The sources do not define enumeration resistance or the exact reset-endpoint response for an unregistered email."
+  },
+  {
+    "Test ID": "DOMAIN-P007",
+    "Endpoint": "POST /api/reset-password",
+    "Category": "DOMAIN",
+    "Test Objective": "Verify rejection of a clearly malformed email string without imposing a restrictive email regex.",
+    "Preconditions": "OTP 123456 is a controlled usable OTP for test@domain.com; all non-email request values are valid.",
+    "Request Input": {
+      "Headers": {
+        "Content-Type": "application/json"
+      },
+      "Body": {
+        "email": "not-an-email",
+        "resetToken": "123456",
+        "newPassword": "NewPassword123!"
+      }
+    },
+    "Expected Result": "400 Bad Request. No response body or email-validation message is asserted.",
+    "Specification Basis": "DP-008; FR-03 requires a registered email, and the reviewed structured DP-008 adds external input-validation practice for syntactically valid structured input. The 400 and application/json oracles are reviewed external Phase 2 assumptions.",
+    "Assumptions / Notes": "The malformed email cannot also preserve a valid OTP binding, so validation order and the reason selected by the implementation are not asserted."
+  },
+  {
+    "Test ID": "DOMAIN-P008",
+    "Endpoint": "POST /api/reset-password",
+    "Category": "DOMAIN",
+    "Test Objective": "Verify rejection of an empty email string.",
+    "Preconditions": "OTP 123456 is a controlled usable OTP for test@domain.com; all non-email request values are valid.",
+    "Request Input": {
+      "Headers": {
+        "Content-Type": "application/json"
+      },
+      "Body": {
+        "email": "",
+        "resetToken": "123456",
+        "newPassword": "NewPassword123!"
+      }
+    },
+    "Expected Result": "400 Bad Request. No response body or email-validation message is asserted.",
+    "Specification Basis": "DP-008; FR-03 line 50 and reviewed external input-validation practice. The 400 and application/json oracles are reviewed external Phase 2 assumptions.",
+    "Assumptions / Notes": "The empty email cannot preserve valid OTP binding. No trimming, normalization, or validation-order behavior is assumed."
+  },
+  {
+    "Test ID": "DOMAIN-P009",
+    "Endpoint": "POST /api/reset-password",
+    "Category": "DOMAIN",
+    "Test Objective": "Verify rejection when the required email member is omitted.",
+    "Preconditions": "OTP 123456 is a controlled usable OTP for test@domain.com; resetToken and newPassword are otherwise valid.",
+    "Request Input": {
+      "Headers": {
+        "Content-Type": "application/json"
+      },
+      "Body": {
+        "resetToken": "123456",
+        "newPassword": "NewPassword123!"
+      }
+    },
+    "Expected Result": "400 Bad Request. No response body or required-field message is asserted.",
+    "Specification Basis": "DP-009; FR-03 line 60 requires email to enforce OTP binding. Requiredness and 400 are reviewed external Phase 2 validation/HTTP assumptions.",
+    "Assumptions / Notes": "The formal source schema does not state requiredness; approval makes omission invalid."
+  },
+  {
+    "Test ID": "DOMAIN-P010",
+    "Endpoint": "POST /api/reset-password",
+    "Category": "DOMAIN",
+    "Test Objective": "Verify rejection when email is JSON null.",
+    "Preconditions": "resetToken and newPassword are valid baseline values.",
+    "Request Input": {
+      "Headers": {
+        "Content-Type": "application/json"
+      },
+      "Body": {
+        "email": null,
+        "resetToken": "123456",
+        "newPassword": "NewPassword123!"
+      }
+    },
+    "Expected Result": "400 Bad Request without coercing null. No response body or message is asserted.",
+    "Specification Basis": "DP-010; API specification line 49 shows a string and FR-03 requires an email value. Null rejection, no coercion, 400, and application/json are reviewed external Phase 2 assumptions.",
+    "Assumptions / Notes": "Source nullability is unstated; the approved partition controls."
+  },
+  {
+    "Test ID": "DOMAIN-P011",
+    "Endpoint": "POST /api/reset-password",
+    "Category": "DOMAIN",
+    "Test Objective": "Verify rejection when email has a non-string JSON type.",
+    "Preconditions": "resetToken and newPassword are valid baseline values.",
+    "Request Input": {
+      "Headers": {
+        "Content-Type": "application/json"
+      },
+      "Body": {
+        "email": 123,
+        "resetToken": "123456",
+        "newPassword": "NewPassword123!"
+      }
+    },
+    "Expected Result": "400 Bad Request without coercing the number to an email string. No response body or message is asserted.",
+    "Specification Basis": "DP-010; API specification line 49 shows a string and FR-03 requires an email value. Wrong-type rejection, no coercion, 400, and application/json are reviewed external Phase 2 assumptions.",
+    "Assumptions / Notes": "The source has no formal JSON type schema; the approved partition controls."
+  },
+  {
+    "Test ID": "DOMAIN-P012",
+    "Endpoint": "POST /api/reset-password",
+    "Category": "DOMAIN",
+    "Test Objective": "Verify rejection of an empty resetToken string.",
+    "Preconditions": "test@domain.com is registered; email and newPassword are valid baseline values.",
+    "Request Input": {
+      "Headers": {
+        "Content-Type": "application/json"
+      },
+      "Body": {
+        "email": "test@domain.com",
+        "resetToken": "",
+        "newPassword": "NewPassword123!"
+      }
+    },
+    "Expected Result": "400 Bad Request. No response body or OTP-validation message is asserted.",
+    "Specification Basis": "DP-012, DC-002; FR-03 line 51 and SEC-07 line 284. The 400 and application/json oracles are reviewed external Phase 2 assumptions.",
+    "Assumptions / Notes": "Empty is a representative inside the reviewed fewer-than-six-digit partition; no trimming behavior is assumed."
+  },
+  {
+    "Test ID": "DOMAIN-P013",
+    "Endpoint": "POST /api/reset-password",
+    "Category": "DOMAIN",
+    "Test Objective": "Verify the just-below OTP length boundary with five decimal digits.",
+    "Preconditions": "test@domain.com is registered; email and newPassword are valid baseline values.",
+    "Request Input": {
+      "Headers": {
+        "Content-Type": "application/json"
+      },
+      "Body": {
+        "email": "test@domain.com",
+        "resetToken": "12345",
+        "newPassword": "NewPassword123!"
+      }
+    },
+    "Expected Result": "400 Bad Request. No response body or OTP-validation message is asserted.",
+    "Specification Basis": "DP-012, DB-001 below boundary, DC-002; FR-03 line 51 and SEC-07 line 284. The 400 and application/json oracles are reviewed external Phase 2 assumptions.",
+    "Assumptions / Notes": "No API validation order or token lookup behavior is assumed."
+  },
+  {
+    "Test ID": "DOMAIN-P014",
+    "Endpoint": "POST /api/reset-password",
+    "Category": "DOMAIN",
+    "Test Objective": "Verify the just-above exact OTP length boundary with seven decimal digits.",
+    "Preconditions": "test@domain.com is registered; email and newPassword are valid baseline values.",
+    "Request Input": {
+      "Headers": {
+        "Content-Type": "application/json"
+      },
+      "Body": {
+        "email": "test@domain.com",
+        "resetToken": "1234567",
+        "newPassword": "NewPassword123!"
+      }
+    },
+    "Expected Result": "400 Bad Request. No response body or OTP-validation message is asserted.",
+    "Specification Basis": "DP-013, DB-001 above boundary, DC-002; FR-03 line 51 defines the generated workflow OTP as exactly six digits. The 400 and application/json oracles are reviewed external Phase 2 assumptions.",
+    "Assumptions / Notes": "SEC-07 alone says minimum six digits, but the approved domain model applies FR-03's more specific exact-six generated-token rule."
+  },
+  {
+    "Test ID": "DOMAIN-P015",
+    "Endpoint": "POST /api/reset-password",
+    "Category": "DOMAIN",
+    "Test Objective": "Verify rejection of a six-character resetToken containing a non-decimal character.",
+    "Preconditions": "test@domain.com is registered; email and newPassword are valid baseline values.",
+    "Request Input": {
+      "Headers": {
+        "Content-Type": "application/json"
+      },
+      "Body": {
+        "email": "test@domain.com",
+        "resetToken": "12A456",
+        "newPassword": "NewPassword123!"
+      }
+    },
+    "Expected Result": "400 Bad Request. No response body or OTP-validation message is asserted.",
+    "Specification Basis": "DP-014, DC-002; FR-03 line 51 specifies six digits. The 400 and application/json oracles are reviewed external Phase 2 assumptions.",
+    "Assumptions / Notes": "ASCII A is selected to avoid inventing Unicode-digit classification."
+  },
+  {
+    "Test ID": "DOMAIN-P016",
+    "Endpoint": "POST /api/reset-password",
+    "Category": "DOMAIN",
+    "Test Objective": "Verify rejection when the required resetToken member is omitted.",
+    "Preconditions": "test@domain.com is registered; email and newPassword are valid baseline values.",
+    "Request Input": {
+      "Headers": {
+        "Content-Type": "application/json"
+      },
+      "Body": {
+        "email": "test@domain.com",
+        "newPassword": "NewPassword123!"
+      }
+    },
+    "Expected Result": "400 Bad Request. No response body or required-field message is asserted.",
+    "Specification Basis": "DP-015; FR-03 line 57 requires OTP entry in step 2. Requiredness, 400, and application/json are reviewed external Phase 2 assumptions.",
+    "Assumptions / Notes": "The formal source schema does not state requiredness; approval makes omission invalid."
+  },
+  {
+    "Test ID": "DOMAIN-P017",
+    "Endpoint": "POST /api/reset-password",
+    "Category": "DOMAIN",
+    "Test Objective": "Verify rejection when resetToken is JSON null.",
+    "Preconditions": "test@domain.com is registered; email and newPassword are valid baseline values.",
+    "Request Input": {
+      "Headers": {
+        "Content-Type": "application/json"
+      },
+      "Body": {
+        "email": "test@domain.com",
+        "resetToken": null,
+        "newPassword": "NewPassword123!"
+      }
+    },
+    "Expected Result": "400 Bad Request without coercing null. No response body or message is asserted.",
+    "Specification Basis": "DP-016; API specification line 50 shows a string containing the OTP. Null rejection, no coercion, 400, and application/json are reviewed external Phase 2 assumptions.",
+    "Assumptions / Notes": "Source nullability is unstated; the approved partition controls."
+  },
+  {
+    "Test ID": "DOMAIN-P018",
+    "Endpoint": "POST /api/reset-password",
+    "Category": "DOMAIN",
+    "Test Objective": "Verify rejection when resetToken is the JSON number 123456 rather than a string.",
+    "Preconditions": "test@domain.com is registered; email and newPassword are valid baseline values.",
+    "Request Input": {
+      "Headers": {
+        "Content-Type": "application/json"
+      },
+      "Body": {
+        "email": "test@domain.com",
+        "resetToken": 123456,
+        "newPassword": "NewPassword123!"
+      }
+    },
+    "Expected Result": "400 Bad Request without coercing the number to the string 123456. No response body or message is asserted.",
+    "Specification Basis": "DP-016; API specification line 50 shows a JSON string. Wrong-type rejection, no coercion, 400, and application/json are reviewed external Phase 2 assumptions.",
+    "Assumptions / Notes": "This case intentionally distinguishes numeric value from the documented string representation."
+  },
+  {
+    "Test ID": "DOMAIN-P019",
+    "Endpoint": "POST /api/reset-password",
+    "Category": "DOMAIN",
+    "Test Objective": "Verify rejection of a well-formed six-digit token that was not issued for the baseline email.",
+    "Preconditions": "test@domain.com is registered. OTP 123456, not 654321, is the only unexpired unused OTP issued for that email.",
+    "Request Input": {
+      "Headers": {
+        "Content-Type": "application/json"
+      },
+      "Body": {
+        "email": "test@domain.com",
+        "resetToken": "654321",
+        "newPassword": "NewPassword123!"
+      }
+    },
+    "Expected Result": "400 Bad Request. The password is not validly reset with an unissued token. No response body or message is asserted.",
+    "Specification Basis": "DP-017, DC-001, DC-002; FR-03 lines 51 and 60. The 400 and application/json oracles are reviewed external Phase 2 assumptions.",
+    "Assumptions / Notes": "The fixture guarantees 654321 is not a matching issued token. Exact lookup and verification behavior are unspecified."
+  },
+  {
+    "Test ID": "DOMAIN-P020",
+    "Endpoint": "POST /api/reset-password",
+    "Category": "DOMAIN",
+    "Test Objective": "Verify rejection of an empty newPassword string.",
+    "Preconditions": "The account and usable OTP satisfy the valid baseline. The current password is recorded before the request.",
+    "Request Input": {
+      "Headers": {
+        "Content-Type": "application/json"
+      },
+      "Body": {
+        "email": "test@domain.com",
+        "resetToken": "123456",
+        "newPassword": ""
+      }
+    },
+    "Expected Result": "400 Bad Request. Under the reviewed weak-password guard assumption, the password remains unchanged and OTP 123456 remains usable. No response body or message is asserted.",
+    "Specification Basis": "DP-019, DC-005; FR-01 line 34 via FR-03 line 58. The 400/application-json oracle and weak-password no-consumption effect are reviewed external Phase 2 assumptions.",
+    "Assumptions / Notes": "Empty is a representative inside the reviewed 0-through-7-character partition."
+  },
+  {
+    "Test ID": "DOMAIN-P021",
+    "Endpoint": "POST /api/reset-password",
+    "Category": "DOMAIN",
+    "Test Objective": "Verify the just-below password length boundary with a seven-character password that otherwise contains all required classes.",
+    "Preconditions": "The account and usable OTP satisfy the valid baseline. The current password is recorded before the request.",
+    "Request Input": {
+      "Headers": {
+        "Content-Type": "application/json"
+      },
+      "Body": {
+        "email": "test@domain.com",
+        "resetToken": "123456",
+        "newPassword": "Aa1!bbb"
+      }
+    },
+    "Expected Result": "400 Bad Request. The password remains unchanged and OTP 123456 remains usable under the reviewed weak-password guard assumption. No response body or message is asserted.",
+    "Specification Basis": "DP-019, DB-002 below boundary, DC-005; FR-01 line 34 via FR-03 line 58. The 400/application-json oracle and weak-password no-consumption effect are reviewed external Phase 2 assumptions.",
+    "Assumptions / Notes": "Aa1!bbb has seven ASCII characters and isolates the minimum-length rule while satisfying all composition classes."
+  },
+  {
+    "Test ID": "DOMAIN-P022",
+    "Endpoint": "POST /api/reset-password",
+    "Category": "DOMAIN",
+    "Test Objective": "Verify the eight-character password boundary with exactly one uppercase, one digit, and one allowed special character.",
+    "Preconditions": "The account and usable OTP satisfy the valid baseline. The fixture can issue a fresh OTP because successful reset consumes the OTP.",
+    "Request Input": {
+      "Headers": {
+        "Content-Type": "application/json"
+      },
+      "Body": {
+        "email": "test@domain.com",
+        "resetToken": "123456",
+        "newPassword": "Aa1!bbbb"
+      }
+    },
+    "Expected Result": "200 OK. No response body, message, header, or media-type assertion is made.",
+    "Specification Basis": "DP-018, DB-002 boundary, DB-003 boundary, DB-005 boundary, DB-006 boundary, DC-005; FR-01 line 34 via FR-03 line 58. The 200 and application/json oracles are reviewed external Phase 2 assumptions.",
+    "Assumptions / Notes": "Aa1!bbbb is eight ASCII characters with 1 uppercase, 5 lowercase, 1 digit, and 1 listed special. Use a newly issued OTP for this independent candidate."
+  },
+  {
+    "Test ID": "DOMAIN-P023",
+    "Endpoint": "POST /api/reset-password",
+    "Category": "DOMAIN",
+    "Test Objective": "Verify the just-above password length boundary with nine characters while all composition rules remain satisfied.",
+    "Preconditions": "The account and a fresh usable OTP satisfy the valid baseline.",
+    "Request Input": {
+      "Headers": {
+        "Content-Type": "application/json"
+      },
+      "Body": {
+        "email": "test@domain.com",
+        "resetToken": "123456",
+        "newPassword": "Aa1!bbbbb"
+      }
+    },
+    "Expected Result": "200 OK. No response body, message, header, or media-type assertion is made.",
+    "Specification Basis": "DP-018, DB-002 above boundary, DC-005; FR-01 line 34 via FR-03 line 58. The 200 and application/json oracles are reviewed external Phase 2 assumptions.",
+    "Assumptions / Notes": "Aa1!bbbbb has nine ASCII characters. Use a newly issued OTP for this independent candidate."
+  },
+  {
+    "Test ID": "DOMAIN-P024",
+    "Endpoint": "POST /api/reset-password",
+    "Category": "DOMAIN",
+    "Test Objective": "Verify the just-below uppercase-count boundary with zero uppercase letters while all other password clauses remain satisfied.",
+    "Preconditions": "The account and usable OTP satisfy the valid baseline. The current password is recorded before the request.",
+    "Request Input": {
+      "Headers": {
+        "Content-Type": "application/json"
+      },
+      "Body": {
+        "email": "test@domain.com",
+        "resetToken": "123456",
+        "newPassword": "aa1!bbbb"
+      }
+    },
+    "Expected Result": "400 Bad Request. The password remains unchanged and OTP 123456 remains usable under the reviewed weak-password guard assumption. No response body or message is asserted.",
+    "Specification Basis": "DP-020, DB-003 below boundary, DC-005; FR-01 line 34 via FR-03 line 58. The 400/application-json oracle and weak-password no-consumption effect are reviewed external Phase 2 assumptions.",
+    "Assumptions / Notes": "aa1!bbbb has eight ASCII characters, zero uppercase letters, and satisfies the other composition classes."
+  },
+  {
+    "Test ID": "DOMAIN-P025",
+    "Endpoint": "POST /api/reset-password",
+    "Category": "DOMAIN",
+    "Test Objective": "Verify the just-above uppercase-count boundary with two uppercase letters while all password clauses remain satisfied.",
+    "Preconditions": "The account and a fresh usable OTP satisfy the valid baseline.",
+    "Request Input": {
+      "Headers": {
+        "Content-Type": "application/json"
+      },
+      "Body": {
+        "email": "test@domain.com",
+        "resetToken": "123456",
+        "newPassword": "AAa1!bbb"
+      }
+    },
+    "Expected Result": "200 OK. No response body, message, header, or media-type assertion is made.",
+    "Specification Basis": "DP-018, DB-003 above boundary, DC-005; FR-01 line 34 via FR-03 line 58. The 200 and application/json oracles are reviewed external Phase 2 assumptions.",
+    "Assumptions / Notes": "AAa1!bbb has eight ASCII characters and exactly two uppercase letters. Use a newly issued OTP."
+  },
+  {
+    "Test ID": "DOMAIN-P026",
+    "Endpoint": "POST /api/reset-password",
+    "Category": "DOMAIN",
+    "Test Objective": "Verify the just-below lowercase-count boundary with zero lowercase letters while all other password clauses remain satisfied.",
+    "Preconditions": "The account and usable OTP satisfy the valid baseline. The current password is recorded before the request.",
+    "Request Input": {
+      "Headers": {
+        "Content-Type": "application/json"
+      },
+      "Body": {
+        "email": "test@domain.com",
+        "resetToken": "123456",
+        "newPassword": "AA1!BBBB"
+      }
+    },
+    "Expected Result": "400 Bad Request. The password remains unchanged and OTP 123456 remains usable under the reviewed weak-password guard assumption. No response body or message is asserted.",
+    "Specification Basis": "DP-021, DB-004 below boundary, DC-005; FR-01 line 34 via FR-03 line 58. The 400/application-json oracle and weak-password no-consumption effect are reviewed external Phase 2 assumptions.",
+    "Assumptions / Notes": "AA1!BBBB has eight ASCII characters, zero lowercase letters, and satisfies the other composition classes."
+  },
+  {
+    "Test ID": "DOMAIN-P027",
+    "Endpoint": "POST /api/reset-password",
+    "Category": "DOMAIN",
+    "Test Objective": "Verify the lowercase-count boundary with exactly one lowercase letter while all password clauses remain satisfied.",
+    "Preconditions": "The account and a fresh usable OTP satisfy the valid baseline.",
+    "Request Input": {
+      "Headers": {
+        "Content-Type": "application/json"
+      },
+      "Body": {
+        "email": "test@domain.com",
+        "resetToken": "123456",
+        "newPassword": "AAa1!BBB"
+      }
+    },
+    "Expected Result": "200 OK. No response body, message, header, or media-type assertion is made.",
+    "Specification Basis": "DP-018, DB-004 boundary, DC-005; FR-01 line 34 via FR-03 line 58. The 200 and application/json oracles are reviewed external Phase 2 assumptions.",
+    "Assumptions / Notes": "AAa1!BBB has eight ASCII characters and exactly one lowercase letter. Use a newly issued OTP."
+  },
+  {
+    "Test ID": "DOMAIN-P028",
+    "Endpoint": "POST /api/reset-password",
+    "Category": "DOMAIN",
+    "Test Objective": "Verify the just-above lowercase-count boundary with exactly two lowercase letters while all password clauses remain satisfied.",
+    "Preconditions": "The account and a fresh usable OTP satisfy the valid baseline.",
+    "Request Input": {
+      "Headers": {
+        "Content-Type": "application/json"
+      },
+      "Body": {
+        "email": "test@domain.com",
+        "resetToken": "123456",
+        "newPassword": "AAaa1!BB"
+      }
+    },
+    "Expected Result": "200 OK. No response body, message, header, or media-type assertion is made.",
+    "Specification Basis": "DP-018, DB-004 above boundary, DC-005; FR-01 line 34 via FR-03 line 58. The 200 and application/json oracles are reviewed external Phase 2 assumptions.",
+    "Assumptions / Notes": "AAaa1!BB has eight ASCII characters and exactly two lowercase letters. Use a newly issued OTP."
+  },
+  {
+    "Test ID": "DOMAIN-P029",
+    "Endpoint": "POST /api/reset-password",
+    "Category": "DOMAIN",
+    "Test Objective": "Verify the just-below digit-count boundary with zero digits while all other password clauses remain satisfied.",
+    "Preconditions": "The account and usable OTP satisfy the valid baseline. The current password is recorded before the request.",
+    "Request Input": {
+      "Headers": {
+        "Content-Type": "application/json"
+      },
+      "Body": {
+        "email": "test@domain.com",
+        "resetToken": "123456",
+        "newPassword": "Aaa!bbbb"
+      }
+    },
+    "Expected Result": "400 Bad Request. The password remains unchanged and OTP 123456 remains usable under the reviewed weak-password guard assumption. No response body or message is asserted.",
+    "Specification Basis": "DP-022, DB-005 below boundary, DC-005; FR-01 line 34 via FR-03 line 58. The 400/application-json oracle and weak-password no-consumption effect are reviewed external Phase 2 assumptions.",
+    "Assumptions / Notes": "Aaa!bbbb has eight ASCII characters, zero digits, and satisfies the other composition classes."
+  },
+  {
+    "Test ID": "DOMAIN-P030",
+    "Endpoint": "POST /api/reset-password",
+    "Category": "DOMAIN",
+    "Test Objective": "Verify the just-above digit-count boundary with exactly two digits while all password clauses remain satisfied.",
+    "Preconditions": "The account and a fresh usable OTP satisfy the valid baseline.",
+    "Request Input": {
+      "Headers": {
+        "Content-Type": "application/json"
+      },
+      "Body": {
+        "email": "test@domain.com",
+        "resetToken": "123456",
+        "newPassword": "Aaa12!bb"
+      }
+    },
+    "Expected Result": "200 OK. No response body, message, header, or media-type assertion is made.",
+    "Specification Basis": "DP-018, DB-005 above boundary, DC-005; FR-01 line 34 via FR-03 line 58. The 200 and application/json oracles are reviewed external Phase 2 assumptions.",
+    "Assumptions / Notes": "Aaa12!bb has eight ASCII characters and exactly two digits. Use a newly issued OTP."
+  },
+  {
+    "Test ID": "DOMAIN-P031",
+    "Endpoint": "POST /api/reset-password",
+    "Category": "DOMAIN",
+    "Test Objective": "Verify the just-below allowed-special-count boundary with zero listed special characters while all other password clauses remain satisfied.",
+    "Preconditions": "The account and usable OTP satisfy the valid baseline. The current password is recorded before the request.",
+    "Request Input": {
+      "Headers": {
+        "Content-Type": "application/json"
+      },
+      "Body": {
+        "email": "test@domain.com",
+        "resetToken": "123456",
+        "newPassword": "Aaa1bbbb"
+      }
+    },
+    "Expected Result": "400 Bad Request. The password remains unchanged and OTP 123456 remains usable under the reviewed weak-password guard assumption. No response body or message is asserted.",
+    "Specification Basis": "DP-023, DB-006 below boundary, DC-005; FR-01 line 34 via FR-03 line 58. The 400/application-json oracle and weak-password no-consumption effect are reviewed external Phase 2 assumptions.",
+    "Assumptions / Notes": "Aaa1bbbb has eight ASCII characters and zero members of the listed special-character set."
+  },
+  {
+    "Test ID": "DOMAIN-P032",
+    "Endpoint": "POST /api/reset-password",
+    "Category": "DOMAIN",
+    "Test Objective": "Verify the just-above allowed-special-count boundary with exactly two listed special characters while all password clauses remain satisfied.",
+    "Preconditions": "The account and a fresh usable OTP satisfy the valid baseline.",
+    "Request Input": {
+      "Headers": {
+        "Content-Type": "application/json"
+      },
+      "Body": {
+        "email": "test@domain.com",
+        "resetToken": "123456",
+        "newPassword": "Aaa1!$bb"
+      }
+    },
+    "Expected Result": "200 OK. No response body, message, header, or media-type assertion is made.",
+    "Specification Basis": "DP-018, DB-006 above boundary, DC-005; FR-01 line 34 via FR-03 line 58. The 200 and application/json oracles are reviewed external Phase 2 assumptions.",
+    "Assumptions / Notes": "Aaa1!$bb has eight ASCII characters and exactly two members of the listed special-character set. Use a newly issued OTP."
+  },
+  {
+    "Test ID": "DOMAIN-P033",
+    "Endpoint": "POST /api/reset-password",
+    "Category": "DOMAIN",
+    "Test Objective": "Characterize a password that satisfies every explicit strength clause and also contains a non-listed punctuation character.",
+    "Preconditions": "The account and usable OTP satisfy the valid baseline.",
+    "Request Input": {
+      "Headers": {
+        "Content-Type": "application/json"
+      },
+      "Body": {
+        "email": "test@domain.com",
+        "resetToken": "123456",
+        "newPassword": "Aa1!bbbb#"
+      }
+    },
+    "Expected Result": "No reviewed acceptance-or-rejection oracle exists for additional non-listed characters. Record the actual status and side effects without treating acceptance or rejection as a conformance failure; do not assert a response body or message.",
+    "Specification Basis": "DP-024; FR-01 line 34 via FR-03 line 58 requires at least one listed special character but defines no complete allowed alphabet. The application/json request header is a reviewed external Phase 2 assumption.",
+    "Assumptions / Notes": "UNRESOLVED ORACLE: # is additional to, not a replacement for, the required listed special !. The sources neither prohibit nor separately permit #."
+  },
+  {
+    "Test ID": "DOMAIN-P034",
+    "Endpoint": "POST /api/reset-password",
+    "Category": "DOMAIN",
+    "Test Objective": "Verify rejection when the required newPassword member is omitted.",
+    "Preconditions": "The account and usable OTP satisfy the valid baseline.",
+    "Request Input": {
+      "Headers": {
+        "Content-Type": "application/json"
+      },
+      "Body": {
+        "email": "test@domain.com",
+        "resetToken": "123456"
+      }
+    },
+    "Expected Result": "400 Bad Request. No response body or required-field message is asserted.",
+    "Specification Basis": "DP-025; FR-03 line 57 requires a new password in step 2. Requiredness, 400, and application/json are reviewed external Phase 2 assumptions.",
+    "Assumptions / Notes": "The formal source schema does not state requiredness; approval makes omission invalid. No confirmation field is invented."
+  },
+  {
+    "Test ID": "DOMAIN-P035",
+    "Endpoint": "POST /api/reset-password",
+    "Category": "DOMAIN",
+    "Test Objective": "Verify rejection when newPassword is JSON null.",
+    "Preconditions": "The account and usable OTP satisfy the valid baseline.",
+    "Request Input": {
+      "Headers": {
+        "Content-Type": "application/json"
+      },
+      "Body": {
+        "email": "test@domain.com",
+        "resetToken": "123456",
+        "newPassword": null
+      }
+    },
+    "Expected Result": "400 Bad Request without coercing null. No response body or message is asserted.",
+    "Specification Basis": "DP-026; API specification line 51 shows a string and FR-03 lines 57-58 apply string password rules. Null rejection, no coercion, 400, and application/json are reviewed external Phase 2 assumptions.",
+    "Assumptions / Notes": "Source nullability is unstated; the approved partition controls. No confirmation field is invented."
+  },
+  {
+    "Test ID": "DOMAIN-P036",
+    "Endpoint": "POST /api/reset-password",
+    "Category": "DOMAIN",
+    "Test Objective": "Verify rejection when newPassword has a non-string JSON type.",
+    "Preconditions": "The account and usable OTP satisfy the valid baseline.",
+    "Request Input": {
+      "Headers": {
+        "Content-Type": "application/json"
+      },
+      "Body": {
+        "email": "test@domain.com",
+        "resetToken": "123456",
+        "newPassword": 12345678
+      }
+    },
+    "Expected Result": "400 Bad Request without coercing the number to a password string. No response body or message is asserted.",
+    "Specification Basis": "DP-026; API specification line 51 shows a JSON string and FR-03 lines 57-58 apply string password rules. Wrong-type rejection, no coercion, 400, and application/json are reviewed external Phase 2 assumptions.",
+    "Assumptions / Notes": "The source has no formal JSON type schema; the approved partition controls. No confirmation field is invented."
+  }
+]

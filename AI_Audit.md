@@ -515,3 +515,95 @@ All four reports are marked `PENDING`. The analysis explicitly preserves unspeci
   - Added SQL injection black-box testing.
   - Added OTP brute-force/rate-limit testing.
   - Added account-enumeration testing.
+
+### Artifact 6
+
+- **User:** Vương Ngũ Tín Thành
+- **Date and Time:** 2026-08-20 17:27:46 GMT+7
+- **Model Used:** GPT-5 (Codex; parent and inherited specialist agents)
+- **Skill Used:**
+  - `api-test-generator`
+  - `contract-test-generator`
+  - `domain-test-generator`
+  - `state-transition-test-generator`
+  - `security-test-generator`
+- **Prompt:**
+
+````markdown
+Continue Pool A from the completed Phase 1 review. I have manually revised and approved the Phase 1 reports.
+
+Shared API Context and Orchestration Status are outdated. Refresh them from the reviewed Phase 1 reports before continuing.
+
+Then proceed with Phase 2 using [$api-test-generator](D:\\GitHub\\SoftwareTesting-HW06\\.agents\\skills\\api-test-generator\\SKILL.md) and generate the Pool A test cases as previously configured. Do not redo Phase 1 unless required to resolve an inconsistency.
+````
+
+- **AI Output:**
+
+````markdown
+I’m resuming with `api-test-generator` at its Phase 2 gate. I’ll first validate the manually approved report versions, reconcile the stale shared context and orchestration status strictly from those reviewed reports, then run the four specialist generators without reopening Phase 1 unless the reports conflict.
+
+The report files still contain stale `PENDING` markers, but your current instruction explicitly approves the exact reviewed files now on disk, which satisfies the Phase 2 gate. I’m treating those files—not the stale markers or prior hashes—as the reviewed authority and checking their revisions before refreshing the parent-owned context.
+
+The approved edits are present—the report hashes changed. I found two stale narrative remnants inside the reports: the structured STATE table now says a weak-password failure preserves the OTP, while its older summary still says unspecified; the SECURITY matrix now makes JWT not applicable, while older gap text still calls it unresolved. I’ll reconcile these by treating the manually revised structured rule/scenario tables as the approved decisions and record that precedence in the refreshed shared context, without rerunning Phase 1.
+
+The parent-owned context is now synchronized with the approved report hashes and decisions. I’m beginning Phase 2 generation; each specialist will read the refreshed context plus only its reviewed report, write a category-owned JSON fragment, and leave aggregation/final IDs to the parent.
+
+Phase 2 produced 76 raw candidates: 26 CONTRACT, 36 DOMAIN, 5 STATE, and 9 SECURITY. I’m now performing the parent-only checks—schema/category/endpoint validation, within-category duplicate review, reviewed-rule coverage, and final stable ID assignment—before writing the CSV.
+
+The parent validation found no true within-category duplicates. Three case-insensitive matches were intentional uppercase/lowercase boundary pairs with different payloads and distinct reviewed coverage, so they are retained. Coverage is complete except CONTRACT `CR-008`, which is correctly unresolved because the API has no confirmation-password field; no unsupported case will be invented.
+
+The suite is aggregated and validated: 76 traceable candidates with stable IDs `API-001`–`API-076`, no records removed, and complete reviewed coverage apart from the intentionally unexecutable confirmation-field rule. I’m doing the final artifact/status integrity check now.
+
+Pool A Phase 2 is complete.
+
+- Final suite: [candidate-api-tests.csv](D:/GitHub/SoftwareTesting-HW06/review/pool-a/candidate-api-tests.csv)
+- Total: 76 cases — CONTRACT 26, DOMAIN 36, STATE 5, SECURITY 9
+- IDs: `API-001`–`API-076`
+- [Shared API context](D:/GitHub/SoftwareTesting-HW06/review/pool-a/shared-api-context.md) refreshed
+- [Orchestration status](D:/GitHub/SoftwareTesting-HW06/review/pool-a/orchestration-status.md) marked `COMPLETE`
+
+All reviewed coverage is represented except `CR-008`, because the confirmation-password field has no documented API mapping. No field or missing behavior was invented, and no tests were executed.
+````
+
+- **File Modifications:**
+  - `File:` `review/pool-a/shared-api-context.md`.
+    - `Action:` edited.
+    - `Deleted:` Stale Phase 1-only interpretations that treated reviewed requiredness, HTTP oracles, JWT applicability, weak-password OTP effects, and added security scenarios as unresolved.
+    - `Replaced With:` Phase 2 review provenance and approved report hashes; structured-row precedence for stale STATE and SECURITY narrative conflicts; reviewed required-field/type/null rules; `application/json`, `200`, `400`, and conditional `429` external oracles; SEC-02 not-applicable interpretation; reviewed STATE `TR-005`; SECURITY `SS-001`–`SS-009`; and preserved specification gaps.
+    - `Appended:` None.
+  - `File:` `review/pool-a/orchestration-status.md`.
+    - `Action:` edited.
+    - `Deleted:` Stale Phase 1 `AWAITING_HUMAN_REVIEW` state, outdated report hashes, pending generation state, and review-only gate record.
+    - `Replaced With:` Explicit-approval gate provenance, current reviewed report hashes, Phase 2 configuration, `COMPLETE` status, specialist fragment counts and hashes, parent aggregation validation, final CSV hash, and preserved limitations.
+    - `Appended:` None.
+  - `File:` `review/pool-a/candidates/contract-tests.json`.
+    - `Action:` created.
+    - `Deleted:` None.
+    - `Replaced With:` None.
+    - `Appended:` 26 Phase 2 CONTRACT candidates covering `CR-001`–`CR-007` and `CR-009`–`CR-012`; `CR-008` remained explicitly unresolved because confirmation transport is unspecified.
+  - `File:` `review/pool-a/candidates/domain-tests.json`.
+    - `Action:` created.
+    - `Deleted:` None.
+    - `Replaced With:` None.
+    - `Appended:` 36 Phase 2 DOMAIN candidates covering `DP-001`–`DP-026` and `DB-001`–`DB-006`.
+  - `File:` `review/pool-a/candidates/state-tests.json`.
+    - `Action:` created.
+    - `Deleted:` None.
+    - `Replaced With:` None.
+    - `Appended:` Five Phase 2 STATE candidates covering `TR-001`–`TR-005`, including the reviewed `TR-005` OTP-preservation decision.
+  - `File:` `review/pool-a/candidates/security-tests.json`.
+    - `Action:` created.
+    - `Deleted:` None.
+    - `Replaced With:` None.
+    - `Appended:` Nine Phase 2 SECURITY candidates covering `SS-001`–`SS-009`, including reviewed external brute-force and account-enumeration scenarios and SEC-02 not-applicable treatment.
+  - `File:` `review/pool-a/candidate-api-tests.csv`.
+    - `Action:` created.
+    - `Deleted:` None.
+    - `Replaced With:` None.
+    - `Appended:` Parent-aggregated 76-record candidate suite with exactly nine required columns, stable IDs `API-001`–`API-076`, preserved specialist IDs, and per-category counts CONTRACT 26, DOMAIN 36, STATE 5, SECURITY 9.
+- **Verdict:** INCOMPLETE
+- **Reasoning:**
+  - The generated suite has good coverage and 76 test cases, but 8 cases are incomplete or unclear.
+  - Some cases assume undefined behavior, such as OTP expiry or rate-limit thresholds.
+  - Some security cases are not directly executable with Postman.
+- **Student Fixes:** Continued guiding the agent to revise the incomplete or unclear test cases.

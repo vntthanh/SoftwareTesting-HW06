@@ -1,0 +1,57 @@
+[
+  {
+    "Test ID": "STATE-P001",
+    "Endpoint": "POST /api/reset-password",
+    "Category": "STATE",
+    "Test Objective": "Verify reviewed transition TR-001: a usable OTP for its bound email completes the intended reset and becomes invalidated after use (ST-01 to ST-03).",
+    "Preconditions": "A registered account A exists with a known current password. Through workflow step 1, generate a six-digit OTP for account A. Establish ST-01 by confirming in the test fixture that the OTP is bound to A, is within the implementation-configured validity period, and is unused. Select a new password that satisfies FR-01. At workflow level, any confirmation value equals the new password; no confirmation field is added to the API body.",
+    "Request Input": "Send one application/json POST request with body {\"email\":\"account-a@domain.com\",\"resetToken\":\"<OTP generated for account A>\",\"newPassword\":\"NewPassword123!\"}.",
+    "Expected Result": "Under the reviewed external HTTP oracle, the request returns 200 OK. The intended account-password reset occurs and the used OTP enters ST-03, so it is invalidated for later use. Do not assert any response body, message, header, session effect, notification, or exact persistence/invalidation ordering.",
+    "Specification Basis": "Reviewed STATE transition TR-001 and guards GD-01 through GD-05 in state-report.md, approved at SHA-256 59F8DAC3A97C89F3BE7CF5E286457FDAEE7ADDB54C5E1530C92B59A67878CD99; API specification lines 44-52; FR-03 lines 55-60; FR-01 line 34; SEC-07 line 284; reviewed external Phase 2 HTTP oracle: 200 OK.",
+    "Assumptions / Notes": "The ST-01 setup labels an OTP unexpired and unused without assuming an expiry lifetime. application/json and 200 OK are reviewed external assumptions, not source-defined response facts. Exact response content, commit point, atomicity, and side effects remain unresolved. This case does not invent a confirmation-password API field."
+  },
+  {
+    "Test ID": "STATE-P002",
+    "Endpoint": "POST /api/reset-password",
+    "Category": "STATE",
+    "Test Objective": "Verify reviewed invalid transition TR-002: an ST-01 OTP bound to email A cannot be used with a different email B.",
+    "Preconditions": "Distinct accounts A and B exist. Through workflow step 1, generate a six-digit OTP for account A only. Establish ST-01 for that OTP: it is bound to A, within the implementation-configured validity period, and unused. Choose a new password satisfying FR-01. Record that the request will intentionally provide B as email while providing A's OTP.",
+    "Request Input": "Send one application/json POST request with body {\"email\":\"account-b@domain.com\",\"resetToken\":\"<OTP generated for account A>\",\"newPassword\":\"NewPassword123!\"}.",
+    "Expected Result": "Under the reviewed external invalid-request oracle, the request returns 400 Bad Request. Account A's OTP is not usable to reset account B. Do not assert a response body or message, and do not assert whether the failed cross-email attempt consumes, preserves, or otherwise changes the OTP for account A because that destination is not specified.",
+    "Specification Basis": "Reviewed STATE transition TR-002 and guard GD-01 in state-report.md, approved at SHA-256 59F8DAC3A97C89F3BE7CF5E286457FDAEE7ADDB54C5E1530C92B59A67878CD99; API specification lines 44-52; FR-03 line 60; reviewed external Phase 2 HTTP oracle: 400 Bad Request.",
+    "Assumptions / Notes": "application/json and 400 Bad Request are reviewed external assumptions, not source-defined response facts. Email normalization is not assumed. The post-attempt OTP state for account A, error representation, and other side effects remain unresolved."
+  },
+  {
+    "Test ID": "STATE-P003",
+    "Endpoint": "POST /api/reset-password",
+    "Category": "STATE",
+    "Test Objective": "Verify reviewed invalid transition TR-003: an expired OTP in ST-02 cannot perform a valid password reset.",
+    "Preconditions": "A registered account A exists. Through workflow step 1, generate a six-digit OTP bound to A, then use a controlled clock or test fixture to move it beyond the implementation-configured expiry point and establish ST-02. Do not assume a numeric lifetime, boundary instant, clock source, or grace period. The submitted new password satisfies FR-01.",
+    "Request Input": "Send one application/json POST request with body {\"email\":\"account-a@domain.com\",\"resetToken\":\"<expired OTP generated for account A>\",\"newPassword\":\"NewPassword123!\"}.",
+    "Expected Result": "Under the reviewed external invalid-request oracle, the request returns 400 Bad Request. The expired OTP is not treated as valid for reset and remains non-usable under the ST-02 validity classification. Do not assert a response body, message, exact expiry boundary, or any additional endpoint-driven mutation or side effect.",
+    "Specification Basis": "Reviewed STATE transition TR-003 and guard GD-02 in state-report.md, approved at SHA-256 59F8DAC3A97C89F3BE7CF5E286457FDAEE7ADDB54C5E1530C92B59A67878CD99; API specification lines 44-52; SEC-07 line 284; reviewed external Phase 2 HTTP oracle: 400 Bad Request.",
+    "Assumptions / Notes": "application/json and 400 Bad Request are reviewed external assumptions. The setup uses the SUT's configured expiry without inventing its duration. Response content, password-side effects beyond absence of a valid reset transition, and endpoint-driven mutations remain unresolved."
+  },
+  {
+    "Test ID": "STATE-P004",
+    "Endpoint": "POST /api/reset-password",
+    "Category": "STATE",
+    "Test Objective": "Verify reviewed invalid transition TR-004: replaying an OTP after it reached ST-03 cannot perform another reset.",
+    "Preconditions": "A registered account A exists. Through workflow step 1, generate a bound, unexpired, unused OTP and establish ST-01. Complete a successful reset with that OTP and a conforming password, thereby establishing the tested transition's initial state ST-03 under SEC-07 invalidation-after-use. Preserve the exact used OTP value for the replay request.",
+    "Request Input": "Replay the used OTP in an application/json POST request with body {\"email\":\"account-a@domain.com\",\"resetToken\":\"<same OTP already used by account A>\",\"newPassword\":\"AnotherPassword123!\"}.",
+    "Expected Result": "Under the reviewed external invalid-request oracle, the replay returns 400 Bad Request. The OTP is not reusable for another reset and remains invalidated in ST-03. Do not assert a response body, message, or any additional side effect.",
+    "Specification Basis": "Reviewed STATE transition TR-004 and guard GD-03 in state-report.md, approved at SHA-256 59F8DAC3A97C89F3BE7CF5E286457FDAEE7ADDB54C5E1530C92B59A67878CD99; API specification lines 44-52; SEC-07 line 284; reviewed external Phase 2 HTTP oracle: 400 Bad Request.",
+    "Assumptions / Notes": "application/json and 400 Bad Request are reviewed external assumptions. The successful setup reset uses the separately reviewed 200 OK external oracle only to establish ST-03. No replay response representation, session behavior, notification, or password-history behavior is assumed."
+  },
+  {
+    "Test ID": "STATE-P005",
+    "Endpoint": "POST /api/reset-password",
+    "Category": "STATE",
+    "Test Objective": "Verify reviewed guard-failing transition TR-005: rejecting a weak new password preserves the usable OTP in ST-01 and leaves the account's old password unchanged.",
+    "Preconditions": "A registered account A exists with a known current password. Through workflow step 1, generate a six-digit OTP for A and establish ST-01: bound to A, within the implementation-configured validity period, and unused. Record the current password through the authorized test fixture. Use newPassword 'weakpass', which has eight lowercase characters but lacks an uppercase letter, digit, and allowed special character.",
+    "Request Input": "Send one application/json POST request with body {\"email\":\"account-a@domain.com\",\"resetToken\":\"<unexpired unused OTP generated for account A>\",\"newPassword\":\"weakpass\"}.",
+    "Expected Result": "Under the reviewed external invalid-request oracle, the request returns 400 Bad Request. The reset is rejected, the account's old password remains unchanged, and the OTP remains usable in ST-01. Do not assert a response body, message, or any unrelated side effect.",
+    "Specification Basis": "Reviewed structured STATE transition TR-005 in state-report.md, approved at SHA-256 59F8DAC3A97C89F3BE7CF5E286457FDAEE7ADDB54C5E1530C92B59A67878CD99; FR-03 line 58; FR-01 line 34; reviewed external password-reset workflow assumption that weak-password rejection preserves ST-01 and the old password; reviewed external Phase 2 HTTP oracle: 400 Bad Request.",
+    "Assumptions / Notes": "The structured TR-005 row and shared Phase 2 authority overlay control over stale narrative text that called token consumption unspecified. Preserving ST-01 and the old password is an explicitly approved external workflow assumption, not a source-defined fact. application/json and 400 Bad Request are also reviewed external assumptions. Exact error content is unresolved."
+  }
+]

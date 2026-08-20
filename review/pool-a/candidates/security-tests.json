@@ -1,0 +1,101 @@
+[
+  {
+    "Test ID": "SECURITY-P001",
+    "Endpoint": "POST /api/reset-password",
+    "Category": "SECURITY",
+    "Test Objective": "Verify that a successfully reset password is not persisted as plaintext.",
+    "Preconditions": "A registered test account exists. A random exactly 6-decimal-digit OTP was issued for that account's email, is unexpired and unused, and is available to the tester. Authorized storage inspection or equivalent implementation instrumentation is available.",
+    "Request Input": "Content-Type: application/json; body: {\"email\":\"<registered-email>\",\"resetToken\":\"<valid-unexpired-unused-6-digit-otp-for-email>\",\"newPassword\":\"StorageCheck1!\"}",
+    "Expected Result": "The normal reset succeeds with 200 OK under the reviewed external HTTP oracle. The stored credential representation produced by the reset is not equal to the submitted plaintext value StorageCheck1!.",
+    "Specification Basis": "SS-001; SEC-01 (system_requirements.md line 278: passwords must not be stored in plaintext); POST /api/reset-password and its body at api_specification.md lines 44-52; FR-03 lines 55-59.",
+    "Assumptions / Notes": "200 OK and application/json are reviewed external HTTP assumptions, not source-defined response facts. The response body, headers, persistence timing, database field, hashing/KDF algorithm, salt, format, and work factor are unspecified. Plaintext inequality checks SEC-01 but does not prove compliance with an unstated algorithmic standard. Do not run without authorized storage or implementation access."
+  },
+  {
+    "Test ID": "SECURITY-P002",
+    "Endpoint": "POST /api/reset-password",
+    "Category": "SECURITY",
+    "Test Objective": "Verify that inert SQL/query metacharacters in a client-controlled field do not bypass reset controls, affect another account, expose database information, or cause unexpected server failure.",
+    "Preconditions": "Use an isolated authorized test environment. A protected registered account exists with a known unchanged baseline password. If available, enable authorized database-call tracing or source-level query inspection.",
+    "Request Input": "Content-Type: application/json; body: {\"email\":\"probe' OR '1'='1' --\",\"resetToken\":\"123456\",\"newPassword\":\"InjectionCheck1!\"}. Treat the metacharacter string as inert test data and do not target a live service.",
+    "Expected Result": "The invalid request is rejected with 400 Bad Request under the reviewed external invalid-data oracle. It does not authorize a reset, change the protected account, expose database errors or sensitive database information, or produce an unexpected server failure. If implementation evidence is available, every executed database query binds client-controlled values as parameters rather than concatenating them into query text.",
+    "Specification Basis": "SS-002; SEC-05 (system_requirements.md line 282: database queries must use parameterized queries rather than direct string concatenation); documented client-controlled fields at api_specification.md lines 46-52; reviewed external SQL-injection testing guidance in the approved security report.",
+    "Assumptions / Notes": "400 Bad Request and application/json are reviewed external HTTP assumptions. No SQL statement, table, column, validation order, response body, or error message is specified. Black-box behavior can detect injection effects but cannot prove that every implementation query is parameterized; that stronger conclusion requires authorized inspection."
+  },
+  {
+    "Test ID": "SECURITY-P003",
+    "Endpoint": "POST /api/reset-password",
+    "Category": "SECURITY",
+    "Test Objective": "Verify the valid security control: a random exactly 6-decimal-digit, unexpired, unused OTP authorizes reset only for the email to which it is bound and is consumed on successful use.",
+    "Preconditions": "A registered test account exists. Step 1 issued a random exactly 6-decimal-digit OTP for the same email; the OTP is unexpired and unused. The new password satisfies FR-01, and any workflow-level confirmation equals it.",
+    "Request Input": "Content-Type: application/json; body: {\"email\":\"<registered-email>\",\"resetToken\":\"<valid-unexpired-unused-6-digit-otp-for-email>\",\"newPassword\":\"ValidReset1!\"}",
+    "Expected Result": "The reset succeeds with 200 OK under the reviewed external success oracle, replaces the intended account's password, and invalidates the used OTP so it cannot authorize a future reset.",
+    "Specification Basis": "SS-003; SEC-07 (system_requirements.md line 284: reset OTP has at least 6 digits, expires, and is invalidated after use); FR-03 lines 48-50 and 57-60; api_specification.md lines 44-52.",
+    "Assumptions / Notes": "200 OK and application/json are reviewed external HTTP assumptions. No success body, header, persistence sequence, exact success message, or automatic-login/session effect is specified. OTP randomness is an issuance property used as a precondition; this selected consumption endpoint cannot independently prove generation quality."
+  },
+  {
+    "Test ID": "SECURITY-P004",
+    "Endpoint": "POST /api/reset-password",
+    "Category": "SECURITY",
+    "Test Objective": "Verify that an OTP issued for one email cannot authorize a reset for another email.",
+    "Preconditions": "Registered accounts A and B exist with known unchanged baseline passwords. A random exactly 6-decimal-digit OTP was issued for email A and is unexpired and unused. The proposed new password satisfies FR-01.",
+    "Request Input": "Content-Type: application/json; body: {\"email\":\"<registered-email-B>\",\"resetToken\":\"<valid-unexpired-unused-otp-issued-for-email-A>\",\"newPassword\":\"CrossAccount1!\"}",
+    "Expected Result": "The request is rejected with 400 Bad Request under the reviewed external invalid-data oracle. The OTP does not authorize reset for email B, and neither account's password is changed by this request.",
+    "Specification Basis": "SS-004; SEC-07; FR-03 line 60 (the OTP is valid only for the requesting email and cannot be used for another email); api_specification.md lines 44-52.",
+    "Assumptions / Notes": "400 Bad Request and application/json are reviewed external HTTP assumptions. The exact error body/message, whether the failed attempt consumes the OTP, attempt counting, and validation order are unspecified."
+  },
+  {
+    "Test ID": "SECURITY-P005",
+    "Endpoint": "POST /api/reset-password",
+    "Category": "SECURITY",
+    "Test Objective": "Verify that an expired reset OTP cannot authorize a password reset.",
+    "Preconditions": "A registered test account exists with a known baseline password. An OTP was issued for the same email but is established as expired. The proposed new password satisfies FR-01.",
+    "Request Input": "Content-Type: application/json; body: {\"email\":\"<registered-email>\",\"resetToken\":\"<expired-6-digit-otp-for-email>\",\"newPassword\":\"ExpiredToken1!\"}",
+    "Expected Result": "The request is rejected with 400 Bad Request under the reviewed external invalid-data oracle. The expired OTP does not authorize the reset, and the account password remains unchanged.",
+    "Specification Basis": "SS-005; SEC-07 (system_requirements.md line 284 requires the reset OTP to expire); request mapping at api_specification.md lines 44-52.",
+    "Assumptions / Notes": "400 Bad Request and application/json are reviewed external HTTP assumptions. The expiry duration, clock source, exact boundary semantics, clock skew, error body/message, and failure effect on OTP state are unspecified; setup establishes the OTP as expired without inventing a lifetime."
+  },
+  {
+    "Test ID": "SECURITY-P006",
+    "Endpoint": "POST /api/reset-password",
+    "Category": "SECURITY",
+    "Test Objective": "Verify one-time use by rejecting replay of an OTP after it has successfully reset the bound account's password.",
+    "Preconditions": "A registered test account had an unexpired OTP bound to its email. A first reset with that OTP completed successfully with 200 OK and established a known new password. Preserve the used OTP value for the replay attempt.",
+    "Request Input": "Replay Content-Type: application/json; body: {\"email\":\"<same-registered-email>\",\"resetToken\":\"<previously-successfully-used-otp>\",\"newPassword\":\"ReplayAttempt1!\"}",
+    "Expected Result": "The replay is rejected with 400 Bad Request under the reviewed external invalid-data oracle. The consumed OTP does not authorize a second reset, and the password established by the first successful reset is not replaced by ReplayAttempt1!.",
+    "Specification Basis": "SS-006; SEC-07 (system_requirements.md line 284 requires invalidation after use); POST /api/reset-password at api_specification.md lines 44-52.",
+    "Assumptions / Notes": "The first 200 OK and replay 400 Bad Request are reviewed external HTTP assumptions; response bodies/messages are unspecified. The test setup must establish first-use success through an authorized observable effect. No assertion is made about replay attempt counters or other side effects."
+  },
+  {
+    "Test ID": "SECURITY-P007",
+    "Endpoint": "POST /api/reset-password",
+    "Category": "SECURITY",
+    "Test Objective": "Verify that a resetToken shorter than the specified six decimal digits cannot authorize reset.",
+    "Preconditions": "A registered test account exists with a known baseline password. No server-issued OTP corresponds to the submitted five-digit value. The proposed new password satisfies FR-01.",
+    "Request Input": "Content-Type: application/json; body: {\"email\":\"<registered-email>\",\"resetToken\":\"12345\",\"newPassword\":\"ShortToken1!\"}",
+    "Expected Result": "The request is rejected with 400 Bad Request under the reviewed external invalid-data oracle. The undersized value does not authorize reset, and the account password remains unchanged.",
+    "Specification Basis": "SS-007; SEC-07 (system_requirements.md line 284 sets a minimum of 6 digits); FR-03 lines 48-50 specifies a random exactly 6-digit OTP; request mapping at api_specification.md lines 46-52.",
+    "Assumptions / Notes": "400 Bad Request and application/json are reviewed external HTTP assumptions. This case does not invent a broader resetToken schema or exact error message; it checks only that a value which cannot be a specified issued OTP does not authorize reset."
+  },
+  {
+    "Test ID": "SECURITY-P008",
+    "Endpoint": "POST /api/reset-password",
+    "Category": "SECURITY",
+    "Test Objective": "Verify resistance to automated guessing of six-digit reset OTPs through rate limiting or equivalent abuse protection.",
+    "Preconditions": "A registered test account exists. The tester does not know its valid OTP. Prepare distinct incorrect six-decimal-digit values known not to be the valid OTP. Use only an isolated authorized environment and stop when protection triggers.",
+    "Request Input": "Repeated Content-Type: application/json requests using {\"email\":\"<registered-email>\",\"resetToken\":\"<different-known-incorrect-6-digit-value-per-request>\",\"newPassword\":\"GuessResistance1!\"}. Do not prescribe a request count or threshold.",
+    "Expected Result": "Incorrect guesses never authorize a reset. The endpoint activates rate limiting or equivalent automated-guessing protection. If and when rate limiting triggers, the triggering/limited requests return 429 Too Many Requests under the reviewed external oracle.",
+    "Specification Basis": "SS-008; SEC-07's expiring reset-OTP requirement at system_requirements.md line 284; reviewed external OWASP forgot-password guidance for brute-force and excessive-attempt protection in the approved security report.",
+    "Assumptions / Notes": "SS-008 is a reviewed external best-practice addition beyond the explicit source controls. 429 is expected only when rate limiting actually triggers. The threshold, request rate, observation window, recovery window, error body/message, scope key, and equivalent-protection mechanism are unspecified and must not be invented. This candidate is designed only; it was not executed."
+  },
+  {
+    "Test ID": "SECURITY-P009",
+    "Endpoint": "POST /api/reset-password",
+    "Category": "SECURITY",
+    "Test Objective": "Verify that reset failure behavior does not materially disclose whether the submitted account exists.",
+    "Preconditions": "Identify one registered test email and one syntactically comparable non-existing email in an isolated authorized environment. Use the same known-incorrect six-digit OTP and the same FR-01-conforming new password for both requests.",
+    "Request Input": "Request A body: {\"email\":\"<registered-email>\",\"resetToken\":\"654321\",\"newPassword\":\"EnumerationCheck1!\"}; Request B body: {\"email\":\"<non-existing-comparable-email>\",\"resetToken\":\"654321\",\"newPassword\":\"EnumerationCheck1!\"}; Content-Type: application/json for both.",
+    "Expected Result": "Both recovery attempts fail and return 400 Bad Request under the reviewed external invalid-data oracle. Their externally observable failure behavior does not materially reveal which email exists through different messages or other behavior, and neither request changes an account password.",
+    "Specification Basis": "SS-009 (no SEC ID; reviewed external best-practice addition); reviewed OWASP forgot-password guidance in the approved security report; selected request fields at api_specification.md lines 46-52.",
+    "Assumptions / Notes": "400 Bad Request and application/json are reviewed external HTTP assumptions. Exact response bodies/messages and timing tolerances are unspecified, so this candidate does not assert byte-identical bodies or a numeric latency threshold. A reviewer-approved comparison method is needed to judge material disclosure. This candidate is designed only; it was not executed."
+  }
+]
