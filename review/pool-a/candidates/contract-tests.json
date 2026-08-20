@@ -268,11 +268,11 @@
     "Endpoint": "POST /api/reset-password",
     "Category": "CONTRACT",
     "Test Objective": "Verify that an expired OTP cannot satisfy the reset request contract.",
-    "Preconditions": "Generate a six-digit OTP bound to the registered account, then use a controlled clock or fixture to place it beyond the implementation-configured expiry point. Do not assume an expiry duration or boundary. The new password complies with FR-01.",
+    "Preconditions": "Generate a six-digit OTP bound to the registered account. Execute this case only when the SUT's real OTP expiry point can be configured or objectively observed and the OTP has actually passed that point. Do not assume, simulate, or invent any duration, boundary, clock, or grace period. The new password complies with FR-01. If no real expiry point can be configured or objectively observed, mark the case BLOCKED / NOT EXECUTABLE rather than failed.",
     "Request Input": "Send POST /api/reset-password with Content-Type application/json and body {\"email\":\"test@domain.com\",\"resetToken\":\"<expired OTP for test@domain.com>\",\"newPassword\":\"NewPassword123!\"}.",
-    "Expected Result": "The request returns 400 Bad Request and the expired OTP is not accepted for reset. Do not assert an error body, message, or exact expiry boundary.",
+    "Expected Result": "Once actual expiry has been established through the executable precondition, the request returns 400 Bad Request and the expired OTP is not accepted for reset. Do not assert an error body, message, or exact expiry boundary. If the real expiry point cannot be configured or objectively observed, no request verdict is produced; the case is BLOCKED / NOT EXECUTABLE rather than failed.",
     "Specification Basis": "CR-009 and CR-012; SEC-07 line 284; reviewed external 400 oracle for invalid request data.",
-    "Assumptions / Notes": "The setup uses the SUT's configured expiry without inventing its duration. Content-Type and 400 Bad Request are reviewed external assumptions."
+    "Assumptions / Notes": "This case requires evidence of the SUT's real expiry point and does not use a simulated or invented lifetime, boundary, clock, or grace period. Content-Type and 400 Bad Request are reviewed external assumptions; 400 is asserted only after actual expiry is established."
   },
   {
     "Test ID": "CONTRACT-P026",

@@ -418,6 +418,7 @@ Validation passed:
   - `domain-test-generator`
   - `state-transition-test-generator`
   - `security-test-generator`
+  - `ai-audit`
 - **Prompt:**
 
 ````markdown
@@ -527,6 +528,7 @@ All four reports are marked `PENDING`. The analysis explicitly preserves unspeci
   - `domain-test-generator`
   - `state-transition-test-generator`
   - `security-test-generator`
+  - `ai-audit`
 - **Prompt:**
 
 ````markdown
@@ -607,3 +609,97 @@ All reviewed coverage is represented except `CR-008`, because the confirmation-p
   - Some cases assume undefined behavior, such as OTP expiry or rate-limit thresholds.
   - Some security cases are not directly executable with Postman.
 - **Student Fixes:** Continued guiding the agent to revise the incomplete or unclear test cases.
+
+### Artifact 7
+
+- **User:** Vương Ngũ Tín Thành
+- **Date and Time:** 2026-08-20 20:24:33 GMT+7
+- **Model Used:** GPT-5 (Codex; parent and inherited specialist agents)
+- **Skill Used:**
+  - `api-test-generator`
+  - `contract-test-generator`
+  - `domain-test-generator`
+  - `state-transition-test-generator`
+  - `security-test-generator`
+  - `ai-audit`
+- **Prompt:**
+
+````markdown
+Revise the Pool A test cases to fix these 8 issues: 
+
+- `API-030`: Make it exploratory or remove it because extra JSON properties have no defined expected behavior. 
+- `API-059`: Treat `Aa1!bbbb#` as valid because it already meets the required password rules. 
+- `API-025`, `API-065`, `API-072`: Do not assume an OTP expiry duration. Keep expiry behavior testable only if a real expiry point can be configured or observed. 
+- `API-068`: Mark it as a white-box/storage verification test because Postman alone cannot prove whether passwords are stored in plaintext. 
+- `API-075`: Do not invent a rate-limit threshold. Make the test conditional on a known configured limit. 
+- `API-076`: Replace the vague account-enumeration oracle with a clear comparison rule for status, response body, and observable behavior. 
+
+Keep the reviewed Phase-1 requirements as the source of truth. 
+
+After editing, revalidate all Pool A test cases and report which cases were changed.
+````
+
+- **AI Output:**
+
+````markdown
+I’ll use the reviewed `api-test-generator` workflow to revise the category-owned candidates behind those eight final IDs, preserve the Phase 1 authority, then rebuild and revalidate the 76-row CSV without renumbering unrelated cases. I’ll treat `API-030` as exploratory rather than remove it, preserving traceability and stable IDs.
+
+The fragments confirm the eight referenced IDs map cleanly to four specialist-owned cases/groups. Several are partially corrected already, but I’ll make each requested constraint explicit—for example, expiry cases will be conditional on an observable/configurable expiry point, and the enumeration case will compare status, normalized body structure/content, password state, and other externally observable effects.
+
+All four specialists completed scoped revisions without changing counts or coverage. I’m now checking the revised provisional cases against the eight requested fixes, then I’ll regenerate the final CSV so the same final IDs remain attached to the corrected content.
+
+Full-suite validation passes: 76 rows, 76 unique sequential IDs, zero schema/category/endpoint errors, zero true within-category duplicates, and unchanged CR/DP/DB/TR/SS coverage. I’m updating the parent traceability records with the revised fragment and CSV hashes plus the eight-case change log.
+
+Revised [Pool A test cases](D:/GitHub/SoftwareTesting-HW06/review/pool-a/candidate-api-tests.csv).
+
+Changed cases:
+
+- `API-025`, `API-065`, `API-072`: require a configurable or objectively observable expiry point; otherwise blocked.
+- `API-030`: explicitly exploratory, with no pass/fail oracle.
+- `API-059`: `Aa1!bbbb#` is valid and expects `200 OK`.
+- `API-068`: explicitly white-box/storage verification; not Postman-verifiable alone.
+- `API-075`: conditional on a known configured abuse-control limit.
+- `API-076`: precise status, body, redirect, content-type, side-effect, and timing comparison rules.
+
+Validation passed: 76 cases, 76 unique sequential IDs, nine required fields per case, unchanged coverage, and zero true duplicates. No tests were executed.
+````
+
+- **File Modifications:**
+  - `File:` `review/pool-a/candidates/contract-tests.json`.
+    - `Action:` edited.
+    - `Deleted:` `CONTRACT-P025` preconditions and oracle that did not explicitly block execution when the real expiry point could not be established.
+    - `Replaced With:` `CONTRACT-P025` preconditions, expected result, and notes requiring a real configurable or objectively observable expiry point; otherwise `BLOCKED / NOT EXECUTABLE` with no SUT verdict.
+    - `Appended:` None.
+  - `File:` `review/pool-a/candidates/domain-tests.json`.
+    - `Action:` edited.
+    - `Deleted:` `DOMAIN-P004` wording that did not explicitly exclude deterministic conformance scoring, and `DOMAIN-P033`'s unresolved acceptance oracle for `Aa1!bbbb#`.
+    - `Replaced With:` `DOMAIN-P004` as exploratory/characterization-only with no pass/fail oracle; `DOMAIN-P033` as a valid-password success case expecting reviewed `200 OK` because all required character classes are present and `#` is not prohibited.
+    - `Appended:` None.
+  - `File:` `review/pool-a/candidates/state-tests.json`.
+    - `Action:` edited.
+    - `Deleted:` `STATE-P003` setup that could be read as permitting a synthetic or assumed expiry point.
+    - `Replaced With:` `STATE-P003` execution gate requiring supported configuration or objective observation of the real SUT expiry point, with no request sent and a blocked result when ST-02 cannot be established.
+    - `Appended:` None.
+  - `File:` `review/pool-a/candidates/security-tests.json`.
+    - `Action:` edited.
+    - `Deleted:` Ambiguous executability/oracles in `SECURITY-P001`, `SECURITY-P005`, `SECURITY-P008`, and `SECURITY-P009` concerning storage verification, OTP expiry, rate-limit configuration, and account-enumeration comparison.
+    - `Replaced With:` Explicit white-box/storage access for P001; real-expiry execution gating for P005; a known authoritative abuse-control limit for P008; and exact status, semantic JSON or exact non-JSON body, content-type, redirect, password/token/metadata, and conditional timing comparison rules for P009.
+    - `Appended:` None.
+  - `File:` `review/pool-a/candidate-api-tests.csv`.
+    - `Action:` replaced content.
+    - `Deleted:` Prior aggregate representations of final IDs `API-025`, `API-030`, `API-059`, `API-065`, `API-068`, `API-072`, `API-075`, and `API-076`.
+    - `Replaced With:` Rebuilt 76-row suite preserving IDs `API-001`–`API-076` and incorporating all eight corrected cases; final SHA-256 `3C50ACA8A132222E82E6AFC0607B4C055F22069AEF9FB10429CF326CF6C24081`.
+    - `Appended:` None.
+  - `File:` `review/pool-a/orchestration-status.md`.
+    - `Action:` edited.
+    - `Deleted:` Superseded candidate-fragment and CSV hashes plus the prior statement that both DP-004 and DP-024 were characterization cases.
+    - `Replaced With:` Current fragment/CSV hashes, an eight-case post-generation revision log, revalidation results, and corrected treatment of DP-004 as exploratory and DP-024 as valid for `Aa1!bbbb#`.
+    - `Appended:` None.
+  - `File:` `review/pool-a/shared-api-context.md`.
+    - `Action:` edited.
+    - `Deleted:` Less-specific expiry, storage-verification, rate-limit, enumeration, extra-property, and additional-password-character assumptions.
+    - `Replaced With:` Real-expiry execution gates, valid treatment of `Aa1!bbbb#`, exploratory treatment of extra properties, white-box SEC-01 verification, configured-limit-only SS-008 execution, and explicit SS-009 comparison rules.
+    - `Appended:` None.
+- **Verdict:** VALID
+- **Reasoning:** The agent correctly resolved found test defects.
+- **Student Fixes:** None

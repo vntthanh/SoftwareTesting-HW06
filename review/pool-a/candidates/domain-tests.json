@@ -59,7 +59,7 @@
     "Test ID": "DOMAIN-P004",
     "Endpoint": "POST /api/reset-password",
     "Category": "DOMAIN",
-    "Test Objective": "Characterize handling of an additional JSON member while all documented members remain valid.",
+    "Test Objective": "EXPLORATORY/CHARACTERIZATION: Record how the endpoint handles an additional JSON member while all documented members remain valid.",
     "Preconditions": "The account test@domain.com is registered. OTP 123456 was issued for that email, is unexpired, and is unused.",
     "Request Input": {
       "Headers": {
@@ -72,9 +72,9 @@
         "unexpected": "value"
       }
     },
-    "Expected Result": "No reviewed acceptance-or-rejection oracle exists for additional members. Record the actual status and side effects without treating acceptance or rejection as a conformance failure; do not assert a response body or message.",
+    "Expected Result": "No pass/fail conformance oracle exists. Record the actual HTTP status, response body, and side effects; do not treat either acceptance or rejection as a conformance result.",
     "Specification Basis": "DP-004; API specification lines 46-52 list only the three documented members but define no additional-property behavior. The request application/json header is a reviewed external Phase 2 assumption.",
-    "Assumptions / Notes": "UNRESOLVED ORACLE: neither ignore nor reject behavior may be invented. This is a characterization candidate and must not be scored as a deterministic pass/fail case until the product owner defines extra-property behavior."
+    "Assumptions / Notes": "EXPLORATORY/CHARACTERIZATION ONLY. Neither ignore nor reject behavior may be invented. Do not include this candidate in deterministic automation until additional-property behavior is specified."
   },
   {
     "Test ID": "DOMAIN-P005",
@@ -638,7 +638,7 @@
     "Test ID": "DOMAIN-P033",
     "Endpoint": "POST /api/reset-password",
     "Category": "DOMAIN",
-    "Test Objective": "Characterize a password that satisfies every explicit strength clause and also contains a non-listed punctuation character.",
+    "Test Objective": "Verify successful reset with a valid password that satisfies every explicit strength clause and also contains an additional non-listed punctuation character.",
     "Preconditions": "The account and usable OTP satisfy the valid baseline.",
     "Request Input": {
       "Headers": {
@@ -650,9 +650,9 @@
         "newPassword": "Aa1!bbbb#"
       }
     },
-    "Expected Result": "No reviewed acceptance-or-rejection oracle exists for additional non-listed characters. Record the actual status and side effects without treating acceptance or rejection as a conformance failure; do not assert a response body or message.",
-    "Specification Basis": "DP-024; FR-01 line 34 via FR-03 line 58 requires at least one listed special character but defines no complete allowed alphabet. The application/json request header is a reviewed external Phase 2 assumption.",
-    "Assumptions / Notes": "UNRESOLVED ORACLE: # is additional to, not a replacement for, the required listed special !. The sources neither prohibit nor separately permit #."
+    "Expected Result": "200 OK. No response body, message, header, or media-type assertion is made.",
+    "Specification Basis": "DP-024 and DP-018; FR-01 line 34 via FR-03 line 58. Aa1!bbbb# is at least eight characters and contains uppercase A, lowercase letters, digit 1, and the allowed special !; no requirement prohibits the additional #. The 200 and application/json oracles are reviewed external Phase 2 assumptions.",
+    "Assumptions / Notes": "The password is VALID under the explicit strength rule. # is additional to, not a replacement for, the required allowed special !. Use a fresh usable OTP for this independent successful-reset candidate."
   },
   {
     "Test ID": "DOMAIN-P034",

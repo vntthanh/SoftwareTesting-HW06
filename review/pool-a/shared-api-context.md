@@ -170,10 +170,13 @@ Sensitive new credential input; OTP knowledge factor; OTP entropy, binding, expi
 
 ### Working assumptions permitted only as test setup labels
 
-- Analysts may label an OTP as unexpired/unused or expired/used to model the explicit guards, but must not invent its lifetime or API response.
+- Analysts may label an OTP as unexpired/unused or expired/used only when the real SUT expiry point is configurable or objectively observable. If it is not, expiry candidates are `BLOCKED / NOT EXECUTABLE`; never assume, simulate, estimate, or invent a duration, boundary, clock, or grace period.
 - Analysts may refer to successful password replacement as the intended effect of a reset-password operation, while noting that the exact persistence and observable response are unspecified.
 - Use `application/json`, `200 OK` for normal success, and `400 Bad Request` for invalid request data as reviewed external HTTP assumptions.
 - For `TR-005`, treat weak-password rejection as leaving the OTP usable and password unchanged.
-- For `SS-008`, require rate limiting or equivalent automated-guessing protection and use `429 Too Many Requests` when triggered, without inventing a threshold.
-- For `SS-009`, compare failures for existing and non-existing accounts and require no material account-existence disclosure; exact messages and timing tolerances remain unspecified.
+- Treat `Aa1!bbbb#` as valid: it meets the minimum length and includes uppercase, lowercase, digit, and the allowed `!`; no requirement prohibits the additional `#`.
+- Treat extra JSON properties as exploratory only because no acceptance/rejection behavior is specified.
+- `SS-001` requires authorized white-box/storage inspection; Postman or an API response alone cannot prove whether the password is stored in plaintext.
+- For `SS-008`, execute only with an authoritative configured abuse-control limit and use that exact trigger. If none is known, mark the case blocked; never invent a threshold. Use `429 Too Many Requests` only when configured rate limiting is the control that triggers.
+- For `SS-009`, require the same `400` status, semantic equality of JSON bodies after removing only predeclared nondeterministic fields (or exact equality for non-JSON bodies), the same content type and redirect behavior, no password/token/account-metadata side effects, and informational-only timing unless an approved tolerance exists.
 

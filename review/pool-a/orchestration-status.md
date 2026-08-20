@@ -34,10 +34,10 @@
 
 | Category | Fragment | Count | SHA-256 | Reviewed coverage |
 | --- | --- | ---: | --- | --- |
-| CONTRACT | `candidates/contract-tests.json` | 26 | `55B1C1BC8BE5F72096B9AE1178E108F09C5449E3E414A747D2CB24A847445366` | `CR-001`–`CR-007`, `CR-009`–`CR-012`; `CR-008` explicitly unresolved because confirmation has no API mapping |
-| DOMAIN | `candidates/domain-tests.json` | 36 | `5B0FFA2D7B8141B0AAC441491F83A46D9485518B31FB0D89D3F5EC274C4E2722` | `DP-001`–`DP-026`; `DB-001`–`DB-006` |
-| STATE | `candidates/state-tests.json` | 5 | `D0CABE4CCD3D138D30D66C0B7A7AA1C3FCA7B45B08A877C11F93A9BEBC958DB7` | `TR-001`–`TR-005` |
-| SECURITY | `candidates/security-tests.json` | 9 | `05304A346AD3DD926C2EDA410AD252EF27E3E63A9F665DF31A13459096D67F49` | `SS-001`–`SS-009`; SEC-01, SEC-05, SEC-07; SEC-02 reviewed not applicable |
+| CONTRACT | `candidates/contract-tests.json` | 26 | `4D46F5E32E8654922AB00315E935B9AAC20A3C548E04FE7209C9A46B73113361` | `CR-001`–`CR-007`, `CR-009`–`CR-012`; `CR-008` explicitly unresolved because confirmation has no API mapping |
+| DOMAIN | `candidates/domain-tests.json` | 36 | `2A69B4BAB9533AE402B4A5FEDB78C835EB98C13850B270BBC84D16B58DA6E122` | `DP-001`–`DP-026`; `DB-001`–`DB-006` |
+| STATE | `candidates/state-tests.json` | 5 | `FBC71ECC34FD29CED9F28BAC4A1414E56C87BD92CF98B1FFF6F8864D23E38B48` | `TR-001`–`TR-005` |
+| SECURITY | `candidates/security-tests.json` | 9 | `D6B7DFAB31B55472687D78EA4DAA8C737D5CDDB16EA4BF209DB698AE6447C1DD` | `SS-001`–`SS-009`; SEC-01, SEC-05, SEC-07; SEC-02 reviewed not applicable |
 
 ## Parent aggregation and validation
 
@@ -50,13 +50,25 @@
 - Allowed categories: all records use CONTRACT, DOMAIN, STATE, or SECURITY.
 - Non-empty validation: objectives, preconditions, request inputs, expected results, specification bases, and assumptions/notes are non-empty on every record.
 - Traceability: every final record preserves its provisional specialist ID in `Assumptions / Notes`.
-- Final CSV SHA-256: `3110E6ADE58A9A9F22B36E9822DD0EF82032D46D75BA059D9B7DC02BDA3D8A1B`.
+- Final CSV SHA-256: `3C50ACA8A132222E82E6AFC0607B4C055F22069AEF9FB10429CF326CF6C24081`.
 - Test execution: not performed.
+
+## Post-generation revision — eight requested cases
+
+- `API-025`: expiry execution is conditional on a real configurable or objectively observable SUT expiry point; otherwise `BLOCKED / NOT EXECUTABLE`.
+- `API-030`: explicitly exploratory/characterization-only with no deterministic conformance oracle.
+- `API-059`: `Aa1!bbbb#` is valid and expects reviewed `200 OK` because it satisfies every required password rule and no rule prohibits the additional `#`.
+- `API-065`: state expiry transition uses the same real-expiry execution gate and produces no request verdict when ST-02 cannot be established.
+- `API-068`: explicitly a white-box/storage-verification case; Postman/API response alone is insufficient.
+- `API-072`: security expiry case uses the same real-expiry execution gate and otherwise is blocked.
+- `API-075`: conditional on an authoritative configured abuse-control limit; no count, threshold, scope, or window is invented.
+- `API-076`: compares exact status, semantic JSON body or exact non-JSON body, content type, redirect behavior, token/account metadata exposure, password side effects, and treats timing as informational absent an approved tolerance.
+- Revalidation after revision: 76 records, 76 unique sequential IDs, exact nine-field schema, correct endpoint/categories, zero case-sensitive within-category request/oracle duplicates, and unchanged CR/DP/DB/TR/SS coverage.
 
 ## Preserved gaps and limitations
 
 1. CONTRACT `CR-008` cannot produce an API candidate because confirmation-password transport is unspecified; no field was invented.
-2. DOMAIN `DP-004` and `DP-024` remain characterization cases because extra-property and full-character-alphabet behavior are unspecified.
+2. DOMAIN `DP-004` remains exploratory because extra-property behavior is unspecified. `DP-024` now has a valid oracle for `Aa1!bbbb#`: it satisfies every required class and no supplied rule prohibits additional characters.
 3. Exact response bodies, messages, headers, and most media-type behavior remain unspecified.
 4. OTP expiry duration/boundary, validation precedence, atomicity, retry thresholds, and enumeration timing tolerances remain unspecified.
 5. SEC-01 and full SEC-05 verification may require authorized storage or implementation instrumentation; black-box observations alone are limited.
