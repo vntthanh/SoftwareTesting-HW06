@@ -115,7 +115,7 @@ The security model contains nine scenarios (`SS-001`–`SS-009`). In addition to
 
 The complete analysis is stored in [`review/pool-a/reports/security-report.md`](review/pool-a/reports/security-report.md).
 
-### A.6. Test Cases
+### A.6. AI-Generated Test Cases
 
 The final reviewed test cases for this pool are stored in: [`test-cases/a-forgot-password.csv`](test-cases/a-forgot-password.csv)
 
@@ -133,6 +133,17 @@ The suite uses stable IDs `API-001`–`API-076` and exactly nine traceability fi
 
 Eight cases were revised after review: `API-025`, `API-030`, `API-059`, `API-065`, `API-068`, `API-072`, `API-075`, and `API-076`. These revisions clarified exploratory behavior, valid additional password characters, observable/configurable expiry preconditions, white-box storage verification, configured rate limits, and account-enumeration comparison rules. Revalidation preserved all 76 IDs and coverage. The final CSV has SHA-256 `3C50ACA8A132222E82E6AFC0607B4C055F22069AEF9FB10429CF326CF6C24081`. Test cases were designed and validated but were not executed as part of this generation phase.
 
+### A.7. Human cases
+
+| ID | Category | Test case | Expected result | Notes |
+| --- | --- | --- | --- | --- |
+| **API-077** | STATE | Send **two concurrent** reset requests with the same email/OTP but different valid new passwords. | Exactly **one succeeds**; the other is rejected. The OTP must authorize only one reset. | Previous AI tested sequential replay but explicitly did not test concurrency. |
+| **API-078** | CONTRACT | Send otherwise valid JSON text using `Content-Type: text/plain`. Then retry normally with the same OTP using `application/json`. | First request is safely rejected (`415` expected), with no `5xx` and no OTP consumption. Second request succeeds. | It should only uses the JSON body parser. |
+| **API-079** | CONTRACT | Send `Content-Type: application/json` with an **empty HTTP body**. Then retry with a valid request using the same OTP. | Empty request returns `400`, not `5xx`; OTP remains usable and the valid retry succeeds. | Previous tests omit individual fields but do not exercise the completely missing body before destructuring. |
+| **API-080** | DOMAIN | With a valid email/OTP, send `newPassword` as an object: `{"value":"Aa1!aaaa"}`. Then retry with a valid string using the same OTP. | First request returns `400`, not `5xx`, and does not consume the OTP. Second request succeeds. | Previous AI used a number as its representative non-string value. |
+| **API-081** | SECURITY | Account A: reset using a valid OTP and a password containing SQL syntax while still meeting password rules, e.g. `Aa1!';DROP TABLE users;--`. Then use a valid OTP for Account B in another reset request. | A's password is treated only as data; its reset succeeds normally. B's reset also succeeds, proving the injected password did not damage the users data path. | Existing SQL-injection testing attacks `email` only. The `newPassword` field could also be attacked. |
+| **API-082** | SECURITY | Send a valid reset request with an invalid/garbage `Authorization: Bearer ...` header. | Reset still succeeds with `200`; an invalid JWT must not affect this public recovery endpoint. | JWT is not applicable but we should test the case where a bad JWT header is actually present. |
+
 ## Pool B: Discount Coupons
 
 ### B.1. Introduction
@@ -147,7 +158,7 @@ Pool B covers **FR-09 – Discount Coupons**. This report selects `POST /api/app
 
 ### B.5. Security Testing Analysis
 
-### B.6. Test Cases
+### B.6. AI-Generated Test Cases
 
 The final reviewed test cases for this pool are stored in: [`test-cases/b-discount-coupons.csv`](test-cases/b-discount-coupons.csv)
 
@@ -175,7 +186,7 @@ Pool C covers **FR-18 – Admin Order Management**. This report selects `PUT /ap
 
 ### C.5. Security Testing Analysis
 
-### C.6. Test Cases
+### C.6. AI-Generated Test Cases
 
 The final reviewed test cases for this pool are stored in [`test-cases/c-order-management.csv`](test-cases/c-order-management.csv).
 
