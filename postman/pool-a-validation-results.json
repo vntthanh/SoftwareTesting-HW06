@@ -1,9 +1,9 @@
 {
-  "collectionSha256": "C042A9EE0E317516C8D6EE098B6BC546CB6BD99A3FBD5D2AEC7B3D4553DFEFE6",
-  "generatedAt": "2026-08-21 11:59:33 GMT+7",
+  "collectionSha256": "F679AADE649F0AD84A3873E83A2DD4152107DEA619194C579F7FDBC9DFFD4F20",
+  "generatedAt": "2026-08-22 00:01:22 GMT+7",
   "static": {
     "status": "PASS",
-    "validatedAt": "2026-08-21 11:59:33 GMT+7",
+    "validatedAt": "2026-08-22 00:01:30 GMT+7",
     "logicalTestIds": 82,
     "generatedRequests": 88,
     "multiRequestFlows": {
@@ -21,12 +21,12 @@
   },
   "schema": {
     "status": "PASS",
-    "validatedAt": "2026-08-21 11:59:51 GMT+7",
+    "validatedAt": "2026-08-22 00:01:38 GMT+7",
     "schemaPath": "postman/postman-v2.1.0-schema.json"
   },
   "newman": {
     "status": "PASS",
-    "validatedAt": "2026-08-21 12:00:04 GMT+7",
+    "validatedAt": "2026-08-22 00:01:49 GMT+7",
     "version": "6.2.2",
     "scope": "Representative API-001 compatibility run against a local mock; not full-suite functional SUT execution",
     "requestsExecuted": 1,

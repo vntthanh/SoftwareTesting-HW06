@@ -40,7 +40,7 @@ PARTIAL_MANUAL_ORACLE_IDS = {
     "API-025", "API-046", "API-047", "API-050", "API-052", "API-055",
     "API-057", "API-063", "API-065", "API-067", "API-068", "API-069",
     "API-070", "API-071", "API-072", "API-073", "API-074", "API-076",
-    "API-077", "API-081",
+    "API-077", "API-078", "API-081",
 }
 
 
@@ -168,7 +168,7 @@ def request_specs(row):
 
 def expected_status(row, step=0):
     special = {
-        "API-076": [400, 400], "API-077": [None, None], "API-078": [415, 200],
+        "API-076": [400, 400], "API-077": [None, None], "API-078": [None, 200],
         "API-079": [400, 200], "API-080": [400, 200], "API-081": [200, 200],
     }
     test_id = row["Test ID"]
@@ -304,7 +304,12 @@ def request_item(row, spec, step=0, step_label=None):
     tests = [
         f"console.log('[Pool A evidence] {test_id}{(' ' + step_label) if step_label else ''}', pm.request.method, pm.request.url.toString(), 'status=' + pm.response.code, 'responseTimeMs=' + pm.response.responseTime);"
     ]
-    if status is not None:
+    if test_id == "API-078" and step == 0:
+        tests.extend([
+            "pm.test('API-078 - text/plain response is a 4xx client error', function () { pm.expect(pm.response.code).to.be.at.least(400); pm.expect(pm.response.code).to.be.below(500); });",
+            "if (pm.response.code !== 415) { console.warn('[API-078 human/external HTTP expectation] Preferred 415 Unsupported Media Type, but any safe 4xx rejection is accepted.'); }",
+        ])
+    elif status is not None:
         tests.append(f"pm.test('{test_id} - reviewed status is {status}', function () {{ pm.response.to.have.status({status}); }});")
     else:
         tests.append(f"console.warn('[Pool A manual oracle] {test_id}: no automatic status oracle is defined; see request description and conversion report.');")
@@ -388,6 +393,12 @@ def build_collection(rows):
         "item": [{"name": category, "item": categories[category]} for category in categories],
     }
     return collection, report_rows
+
+
+def status_oracle_label(test_id, step, status):
+    if test_id == "API-078" and step == 0:
+        return "any 4xx (415 human/external expectation; safe 400 acceptable)"
+    return str(status) if status is not None else "none (reviewed manual/conditional oracle)"
 
 
 def load_state(collection_hash=None):
@@ -620,11 +631,12 @@ def render_report():
     escape = lambda value: value.replace("|", "\\|").replace("\r", " ").replace("\n", "<br>")
     for entry in report_rows:
         row = entry["row"]
-        statuses = ", ".join(str(value) if value is not None else "none (reviewed manual/conditional oracle)" for value in entry["statuses"])
+        statuses = ", ".join(status_oracle_label(row["Test ID"], step, value) for step, value in enumerate(entry["statuses"]))
         lines.append(f"| {row['Test ID']} | {row['Category']} | {escape(entry['mapping'])} | {statuses} | {escape('; '.join(entry['required']) if entry['required'] else 'None')} | {escape('; '.join(entry['flags']) if entry['flags'] else 'FULLY AUTOMATED REVIEWED HTTP ORACLE')} |")
     lines.extend([
         "", "## Automated and manual oracle policy", "",
         "- Explicit HTTP statuses are asserted when unambiguous, but status assertions are not presented as complete when the reviewed result includes additional observable state or behavior.",
+        "- API-078 step 1 accepts only a `4xx` client-error status (`400`–`499`). `415 Unsupported Media Type` remains the preferred human/external HTTP expectation rather than a specification requirement; any safe `4xx`, including `400 Bad Request`, is acceptable when the same-OTP JSON retry succeeds.",
         "- API-076 automatically compares the two responses' status, Content-Type, redirect/no-redirect behavior, representation type, and normalized JSON or exact non-JSON body. Only fields predeclared in `api076NondeterministicFields` are removed. Password state, token leakage, and account-metadata disclosure still require the reviewed external/manual oracle.",
         "- Cases labeled `PARTIALLY AUTOMATED / MANUAL ORACLE REQUIRED` retain their full reviewed result in request descriptions; no response-body, persistence, timing, password-state, OTP-state, database, concurrency, or rate-limit assertion is invented.",
         "- API-075 is a single request template, not an automated repeated-guess loop. It remains blocked until an authoritative abuse-control limit is supplied and then requires manual or data-driven repeated execution through that exact configured trigger. API-025, API-065, and API-072 remain blocked until the real expiry point is configured or objectively observed.",
