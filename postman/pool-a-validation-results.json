@@ -1,0 +1,36 @@
+{
+  "collectionSha256": "C042A9EE0E317516C8D6EE098B6BC546CB6BD99A3FBD5D2AEC7B3D4553DFEFE6",
+  "generatedAt": "2026-08-21 11:59:33 GMT+7",
+  "static": {
+    "status": "PASS",
+    "validatedAt": "2026-08-21 11:59:33 GMT+7",
+    "logicalTestIds": 82,
+    "generatedRequests": 88,
+    "multiRequestFlows": {
+      "API-076": 2,
+      "API-077": 2,
+      "API-078": 2,
+      "API-079": 2,
+      "API-080": 2,
+      "API-081": 2
+    },
+    "undefinedVariables": [],
+    "requestBodyMismatches": [],
+    "unexpectedOrMissingTestIds": [],
+    "independentStructuredMappings": 36
+  },
+  "schema": {
+    "status": "PASS",
+    "validatedAt": "2026-08-21 11:59:51 GMT+7",
+    "schemaPath": "postman/postman-v2.1.0-schema.json"
+  },
+  "newman": {
+    "status": "PASS",
+    "validatedAt": "2026-08-21 12:00:04 GMT+7",
+    "version": "6.2.2",
+    "scope": "Representative API-001 compatibility run against a local mock; not full-suite functional SUT execution",
+    "requestsExecuted": 1,
+    "sutExecuted": false,
+    "studentIdHeaderCaptured": "23127261"
+  }
+}

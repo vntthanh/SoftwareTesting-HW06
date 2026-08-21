@@ -1,0 +1,126 @@
+# Pool A Postman Conversion Report
+
+## Source and conversion constraints
+
+- Source CSV: `test-cases/a-forgot-password.csv` (82 reviewed rows)
+- API specification: `reference/api_specification.md`
+- No logical test cases were added, removed, merged, redesigned, or renumbered. Source traceability alone was corrected for human-authored IDs API-077 through API-082.
+- Ordinary rows map to one request; the six explicitly multi-request rows map to named flow folders with two requests each.
+- Structured `Headers`, `Body`, and `Raw Body` inputs are mapped to HTTP headers and raw payloads; metadata wrappers are never transmitted.
+- `X-Student-Id` is injected by the collection-level pre-request script from `{{studentId}}` (`23127261`) and logged to the Postman/Newman console.
+- Empty required fixture variables and unconfirmed server-state fixtures throw `BLOCKED / NOT EXECUTABLE` in the request pre-request script before transmission.
+
+## Traceability, fixtures, and oracle coverage
+
+| Test ID | Category | Generated request(s) | Automated status oracle(s) | Required runtime fixtures | Execution / oracle classification |
+|---|---|---|---|---|---|
+| API-001 | CONTRACT | API-001 - Verify the documented method, path, JSON-object member representations, and reviewed successful-reset response oracle with a fully valid reset request. | 200 | fixtureReadyApi001 | SERVER-SIDE FIXTURE REQUIRED |
+| API-002 | CONTRACT | API-002 - Verify that malformed JSON is treated as invalid request data under the reviewed validation model. | 400 | None | FULLY AUTOMATED REVIEWED HTTP ORACLE |
+| API-003 | CONTRACT | API-003 - Verify that a syntactically valid non-object JSON body is treated as invalid request data. | 400 | None | FULLY AUTOMATED REVIEWED HTTP ORACLE |
+| API-004 | CONTRACT | API-004 - Verify that omission of reviewed-required member email is rejected. | 400 | fixtureReadyApi004 | SERVER-SIDE FIXTURE REQUIRED |
+| API-005 | CONTRACT | API-005 - Verify that null is rejected for reviewed-required string member email. | 400 | fixtureReadyApi005 | SERVER-SIDE FIXTURE REQUIRED |
+| API-006 | CONTRACT | API-006 - Verify that a non-string JSON value is rejected for email without coercion. | 400 | fixtureReadyApi006 | SERVER-SIDE FIXTURE REQUIRED |
+| API-007 | CONTRACT | API-007 - Verify that omission of reviewed-required member resetToken is rejected. | 400 | fixtureReadyApi007 | SERVER-SIDE FIXTURE REQUIRED |
+| API-008 | CONTRACT | API-008 - Verify that null is rejected for reviewed-required string member resetToken. | 400 | fixtureReadyApi008 | SERVER-SIDE FIXTURE REQUIRED |
+| API-009 | CONTRACT | API-009 - Verify that a numeric resetToken is rejected rather than coerced, preserving leading-zero-capable string representation. | 400 | fixtureReadyApi009 | SERVER-SIDE FIXTURE REQUIRED |
+| API-010 | CONTRACT | API-010 - Verify rejection of a five-digit token that does not meet the reviewed exact six-decimal-digit workflow shape. | 400 | fixtureReadyApi010 | SERVER-SIDE FIXTURE REQUIRED |
+| API-011 | CONTRACT | API-011 - Verify rejection of a seven-digit token under the reviewed exact six-decimal-digit reset workflow rule. | 400 | fixtureReadyApi011 | SERVER-SIDE FIXTURE REQUIRED |
+| API-012 | CONTRACT | API-012 - Verify rejection of a six-character token containing a non-decimal character. | 400 | fixtureReadyApi012 | SERVER-SIDE FIXTURE REQUIRED |
+| API-013 | CONTRACT | API-013 - Verify that an issued six-digit OTP beginning with zero remains valid through the documented string representation. | 200 | fixtureReadyApi013 | SERVER-SIDE FIXTURE REQUIRED |
+| API-014 | CONTRACT | API-014 - Verify rejection of a well-shaped six-digit token that was not issued for the submitted reset workflow. | 400 | fixtureReadyApi014 | SERVER-SIDE FIXTURE REQUIRED |
+| API-015 | CONTRACT | API-015 - Verify that a valid OTP issued for one email cannot be paired with a different email. | 400 | fixtureReadyApi015; otpIssuedForAccountA | SERVER-SIDE FIXTURE REQUIRED |
+| API-016 | CONTRACT | API-016 - Verify that omission of reviewed-required member newPassword is rejected. | 400 | fixtureReadyApi016 | SERVER-SIDE FIXTURE REQUIRED |
+| API-017 | CONTRACT | API-017 - Verify that null is rejected for reviewed-required string member newPassword. | 400 | fixtureReadyApi017 | SERVER-SIDE FIXTURE REQUIRED |
+| API-018 | CONTRACT | API-018 - Verify that a non-string JSON value is rejected for newPassword without coercion. | 400 | fixtureReadyApi018 | SERVER-SIDE FIXTURE REQUIRED |
+| API-019 | CONTRACT | API-019 - Verify acceptance of a password at the documented minimum length that contains every required character class. | 200 | fixtureReadyApi019 | SERVER-SIDE FIXTURE REQUIRED |
+| API-020 | CONTRACT | API-020 - Verify rejection of a seven-character password even when all required character classes are present. | 400 | fixtureReadyApi020 | SERVER-SIDE FIXTURE REQUIRED |
+| API-021 | CONTRACT | API-021 - Verify rejection of an otherwise conforming password that lacks an uppercase letter. | 400 | fixtureReadyApi021 | SERVER-SIDE FIXTURE REQUIRED |
+| API-022 | CONTRACT | API-022 - Verify rejection of an otherwise conforming password that lacks a lowercase letter. | 400 | fixtureReadyApi022 | SERVER-SIDE FIXTURE REQUIRED |
+| API-023 | CONTRACT | API-023 - Verify rejection of an otherwise conforming password that lacks a digit. | 400 | fixtureReadyApi023 | SERVER-SIDE FIXTURE REQUIRED |
+| API-024 | CONTRACT | API-024 - Verify rejection of a password whose only punctuation is outside the allowed special-character set. | 400 | fixtureReadyApi024 | SERVER-SIDE FIXTURE REQUIRED |
+| API-025 | CONTRACT | API-025 - Verify that an expired OTP cannot satisfy the reset request contract. | 400 | expiredOTPForTestDomainCom; fixtureReadyApi025 | SERVER-SIDE FIXTURE REQUIRED; OBSERVABLE EXPIRY POINT; BLOCKED / NOT EXECUTABLE UNTIL EXPIRY FIXTURE IS CONFIRMED; PARTIALLY AUTOMATED / MANUAL ORACLE REQUIRED |
+| API-026 | CONTRACT | API-026 - Verify that an OTP already used in a successful reset cannot satisfy a second reset request. | 400 | fixtureReadyApi026; sameOTPAlreadyUsed | SERVER-SIDE FIXTURE REQUIRED |
+| API-027 | DOMAIN | API-027 - Verify the documented JSON object shape with a registered email, its usable six-digit OTP, and a conforming password. | 200 | fixtureReadyApi027 | SERVER-SIDE FIXTURE REQUIRED |
+| API-028 | DOMAIN | API-028 - Verify rejection of a well-formed JSON request whose top-level value is an array rather than an object. | 400 | None | FULLY AUTOMATED REVIEWED HTTP ORACLE |
+| API-029 | DOMAIN | API-029 - Verify rejection of a malformed JSON request body. | 400 | None | FULLY AUTOMATED REVIEWED HTTP ORACLE |
+| API-030 | DOMAIN | API-030 - EXPLORATORY/CHARACTERIZATION: Record how the endpoint handles an additional JSON member while all documented members remain valid. | none (reviewed manual/conditional oracle) | fixtureReadyApi030 | SERVER-SIDE FIXTURE REQUIRED; EXPLORATORY / MANUAL ORACLE REQUIRED |
+| API-031 | DOMAIN | API-031 - Verify that an OTP cannot be used with a different registered email. | 400 | fixtureReadyApi031 | SERVER-SIDE FIXTURE REQUIRED |
+| API-032 | DOMAIN | API-032 - Verify handling of a syntactically ordinary email address that is not registered. | 400 | fixtureReadyApi032 | SERVER-SIDE FIXTURE REQUIRED |
+| API-033 | DOMAIN | API-033 - Verify rejection of a clearly malformed email string without imposing a restrictive email regex. | 400 | fixtureReadyApi033 | SERVER-SIDE FIXTURE REQUIRED |
+| API-034 | DOMAIN | API-034 - Verify rejection of an empty email string. | 400 | fixtureReadyApi034 | SERVER-SIDE FIXTURE REQUIRED |
+| API-035 | DOMAIN | API-035 - Verify rejection when the required email member is omitted. | 400 | fixtureReadyApi035 | SERVER-SIDE FIXTURE REQUIRED |
+| API-036 | DOMAIN | API-036 - Verify rejection when email is JSON null. | 400 | fixtureReadyApi036 | SERVER-SIDE FIXTURE REQUIRED |
+| API-037 | DOMAIN | API-037 - Verify rejection when email has a non-string JSON type. | 400 | fixtureReadyApi037 | SERVER-SIDE FIXTURE REQUIRED |
+| API-038 | DOMAIN | API-038 - Verify rejection of an empty resetToken string. | 400 | fixtureReadyApi038 | SERVER-SIDE FIXTURE REQUIRED |
+| API-039 | DOMAIN | API-039 - Verify the just-below OTP length boundary with five decimal digits. | 400 | fixtureReadyApi039 | SERVER-SIDE FIXTURE REQUIRED |
+| API-040 | DOMAIN | API-040 - Verify the just-above exact OTP length boundary with seven decimal digits. | 400 | fixtureReadyApi040 | SERVER-SIDE FIXTURE REQUIRED |
+| API-041 | DOMAIN | API-041 - Verify rejection of a six-character resetToken containing a non-decimal character. | 400 | fixtureReadyApi041 | SERVER-SIDE FIXTURE REQUIRED |
+| API-042 | DOMAIN | API-042 - Verify rejection when the required resetToken member is omitted. | 400 | fixtureReadyApi042 | SERVER-SIDE FIXTURE REQUIRED |
+| API-043 | DOMAIN | API-043 - Verify rejection when resetToken is JSON null. | 400 | fixtureReadyApi043 | SERVER-SIDE FIXTURE REQUIRED |
+| API-044 | DOMAIN | API-044 - Verify rejection when resetToken is the JSON number 123456 rather than a string. | 400 | fixtureReadyApi044 | SERVER-SIDE FIXTURE REQUIRED |
+| API-045 | DOMAIN | API-045 - Verify rejection of a well-formed six-digit token that was not issued for the baseline email. | 400 | fixtureReadyApi045 | SERVER-SIDE FIXTURE REQUIRED |
+| API-046 | DOMAIN | API-046 - Verify rejection of an empty newPassword string. | 400 | fixtureReadyApi046 | SERVER-SIDE FIXTURE REQUIRED; PARTIALLY AUTOMATED / MANUAL ORACLE REQUIRED |
+| API-047 | DOMAIN | API-047 - Verify the just-below password length boundary with a seven-character password that otherwise contains all required classes. | 400 | fixtureReadyApi047 | SERVER-SIDE FIXTURE REQUIRED; PARTIALLY AUTOMATED / MANUAL ORACLE REQUIRED |
+| API-048 | DOMAIN | API-048 - Verify the eight-character password boundary with exactly one uppercase, one digit, and one allowed special character. | 200 | fixtureReadyApi048 | SERVER-SIDE FIXTURE REQUIRED |
+| API-049 | DOMAIN | API-049 - Verify the just-above password length boundary with nine characters while all composition rules remain satisfied. | 200 | fixtureReadyApi049 | SERVER-SIDE FIXTURE REQUIRED |
+| API-050 | DOMAIN | API-050 - Verify the just-below uppercase-count boundary with zero uppercase letters while all other password clauses remain satisfied. | 400 | fixtureReadyApi050 | SERVER-SIDE FIXTURE REQUIRED; PARTIALLY AUTOMATED / MANUAL ORACLE REQUIRED |
+| API-051 | DOMAIN | API-051 - Verify the just-above uppercase-count boundary with two uppercase letters while all password clauses remain satisfied. | 200 | fixtureReadyApi051 | SERVER-SIDE FIXTURE REQUIRED |
+| API-052 | DOMAIN | API-052 - Verify the just-below lowercase-count boundary with zero lowercase letters while all other password clauses remain satisfied. | 400 | fixtureReadyApi052 | SERVER-SIDE FIXTURE REQUIRED; PARTIALLY AUTOMATED / MANUAL ORACLE REQUIRED |
+| API-053 | DOMAIN | API-053 - Verify the lowercase-count boundary with exactly one lowercase letter while all password clauses remain satisfied. | 200 | fixtureReadyApi053 | SERVER-SIDE FIXTURE REQUIRED |
+| API-054 | DOMAIN | API-054 - Verify the just-above lowercase-count boundary with exactly two lowercase letters while all password clauses remain satisfied. | 200 | fixtureReadyApi054 | SERVER-SIDE FIXTURE REQUIRED |
+| API-055 | DOMAIN | API-055 - Verify the just-below digit-count boundary with zero digits while all other password clauses remain satisfied. | 400 | fixtureReadyApi055 | SERVER-SIDE FIXTURE REQUIRED; PARTIALLY AUTOMATED / MANUAL ORACLE REQUIRED |
+| API-056 | DOMAIN | API-056 - Verify the just-above digit-count boundary with exactly two digits while all password clauses remain satisfied. | 200 | fixtureReadyApi056 | SERVER-SIDE FIXTURE REQUIRED |
+| API-057 | DOMAIN | API-057 - Verify the just-below allowed-special-count boundary with zero listed special characters while all other password clauses remain satisfied. | 400 | fixtureReadyApi057 | SERVER-SIDE FIXTURE REQUIRED; PARTIALLY AUTOMATED / MANUAL ORACLE REQUIRED |
+| API-058 | DOMAIN | API-058 - Verify the just-above allowed-special-count boundary with exactly two listed special characters while all password clauses remain satisfied. | 200 | fixtureReadyApi058 | SERVER-SIDE FIXTURE REQUIRED |
+| API-059 | DOMAIN | API-059 - Verify successful reset with a valid password that satisfies every explicit strength clause and also contains an additional non-listed punctuation character. | 200 | fixtureReadyApi059 | SERVER-SIDE FIXTURE REQUIRED |
+| API-060 | DOMAIN | API-060 - Verify rejection when the required newPassword member is omitted. | 400 | fixtureReadyApi060 | SERVER-SIDE FIXTURE REQUIRED |
+| API-061 | DOMAIN | API-061 - Verify rejection when newPassword is JSON null. | 400 | fixtureReadyApi061 | SERVER-SIDE FIXTURE REQUIRED |
+| API-062 | DOMAIN | API-062 - Verify rejection when newPassword has a non-string JSON type. | 400 | fixtureReadyApi062 | SERVER-SIDE FIXTURE REQUIRED |
+| API-063 | STATE | API-063 - Verify reviewed transition TR-001: a usable OTP for its bound email completes the intended reset and becomes invalidated after use (ST-01 to ST-03). | 200 | fixtureReadyApi063; otpGeneratedForAccountA | SERVER-SIDE FIXTURE REQUIRED; PARTIALLY AUTOMATED / MANUAL ORACLE REQUIRED |
+| API-064 | STATE | API-064 - Verify reviewed invalid transition TR-002: an ST-01 OTP bound to email A cannot be used with a different email B. | 400 | fixtureReadyApi064; otpGeneratedForAccountA | SERVER-SIDE FIXTURE REQUIRED |
+| API-065 | STATE | API-065 - Verify reviewed invalid transition TR-003: an expired OTP in ST-02 cannot perform a valid password reset. | 400 | fixtureReadyApi065; objectivelyConfirmedExpiredOTPGeneratedForAccountA | SERVER-SIDE FIXTURE REQUIRED; OBSERVABLE EXPIRY POINT; BLOCKED / NOT EXECUTABLE UNTIL EXPIRY FIXTURE IS CONFIRMED; PARTIALLY AUTOMATED / MANUAL ORACLE REQUIRED |
+| API-066 | STATE | API-066 - Verify reviewed invalid transition TR-004: replaying an OTP after it reached ST-03 cannot perform another reset. | 400 | fixtureReadyApi066; sameOTPAlreadyUsedByAccountA | SERVER-SIDE FIXTURE REQUIRED |
+| API-067 | STATE | API-067 - Verify reviewed guard-failing transition TR-005: rejecting a weak new password preserves the usable OTP in ST-01 and leaves the account's old password unchanged. | 400 | fixtureReadyApi067; unexpiredUnusedOTPGeneratedForAccountA | SERVER-SIDE FIXTURE REQUIRED; PARTIALLY AUTOMATED / MANUAL ORACLE REQUIRED |
+| API-068 | SECURITY | API-068 - WHITE-BOX/STORAGE VERIFICATION: Verify that a successfully reset password is not persisted as plaintext. | 200 | fixtureReadyApi068; registeredEmail; validUnexpiredUnused6DigitOtpForEmail | SERVER-SIDE FIXTURE REQUIRED; WHITE-BOX VERIFICATION; PARTIALLY AUTOMATED / MANUAL ORACLE REQUIRED |
+| API-069 | SECURITY | API-069 - Verify that inert SQL/query metacharacters in a client-controlled field do not bypass reset controls, affect another account, expose database information, or cause unexpected server failure. | 400 | fixtureReadyApi069 | SERVER-SIDE FIXTURE REQUIRED; PARTIALLY AUTOMATED / MANUAL ORACLE REQUIRED |
+| API-070 | SECURITY | API-070 - Verify the valid security control: a random exactly 6-decimal-digit, unexpired, unused OTP authorizes reset only for the email to which it is bound and is consumed on successful use. | 200 | fixtureReadyApi070; registeredEmail; validUnexpiredUnused6DigitOtpForEmail | SERVER-SIDE FIXTURE REQUIRED; PARTIALLY AUTOMATED / MANUAL ORACLE REQUIRED |
+| API-071 | SECURITY | API-071 - Verify that an OTP issued for one email cannot authorize a reset for another email. | 400 | fixtureReadyApi071; registeredEmailB; validUnexpiredUnusedOtpIssuedForEmailA | SERVER-SIDE FIXTURE REQUIRED; PARTIALLY AUTOMATED / MANUAL ORACLE REQUIRED |
+| API-072 | SECURITY | API-072 - Verify that an expired reset OTP cannot authorize a password reset. | 400 | fixtureReadyApi072; objectivelyExpired6DigitOtpForEmail; registeredEmail | SERVER-SIDE FIXTURE REQUIRED; OBSERVABLE EXPIRY POINT; BLOCKED / NOT EXECUTABLE UNTIL EXPIRY FIXTURE IS CONFIRMED; PARTIALLY AUTOMATED / MANUAL ORACLE REQUIRED |
+| API-073 | SECURITY | API-073 - Verify one-time use by rejecting replay of an OTP after it has successfully reset the bound account's password. | 400 | fixtureReadyApi073; previouslySuccessfullyUsedOtp; sameRegisteredEmail | SERVER-SIDE FIXTURE REQUIRED; PARTIALLY AUTOMATED / MANUAL ORACLE REQUIRED |
+| API-074 | SECURITY | API-074 - Verify that a resetToken shorter than the specified six decimal digits cannot authorize reset. | 400 | fixtureReadyApi074; registeredEmail | SERVER-SIDE FIXTURE REQUIRED; PARTIALLY AUTOMATED / MANUAL ORACLE REQUIRED |
+| API-075 | SECURITY | API-075 - Verify resistance to automated guessing of six-digit reset OTPs through rate limiting or equivalent abuse protection. | none (reviewed manual/conditional oracle) | differentKnownIncorrect6DigitValuePerRequest; fixtureReadyApi075; registeredEmail | SERVER-SIDE FIXTURE REQUIRED; CONFIGURED RATE LIMIT; BLOCKED / NOT EXECUTABLE UNTIL AUTHORITATIVE LIMIT IS SUPPLIED; MANUAL / DATA-DRIVEN REPEATED EXECUTION REQUIRED; SINGLE REQUEST TEMPLATE ONLY — REPEAT THROUGH THE AUTHORITATIVE CONFIGURED TRIGGER |
+| API-076 | SECURITY | API-076 - Verify that reset failure behavior does not materially disclose whether the submitted account exists. [Request A - registered email]; API-076 - Verify that reset failure behavior does not materially disclose whether the submitted account exists. [Request B - non-existing email] | 400, 400 | fixtureReadyApi076; nonExistingComparableEmail; registeredEmail | SERVER-SIDE FIXTURE REQUIRED; PARTIALLY AUTOMATED / MANUAL ORACLE REQUIRED |
+| API-077 | STATE | API-077 - Verify atomic one-time OTP consumption when two password-reset requests race concurrently. [Request A - concurrent participant]; API-077 - Verify atomic one-time OTP consumption when two password-reset requests race concurrently. [Request B - concurrent participant] | none (reviewed manual/conditional oracle), none (reviewed manual/conditional oracle) | fixtureReadyApi077; registeredEmail; sameValidOTP | SERVER-SIDE FIXTURE REQUIRED; MANUAL CONCURRENT DISPATCH; PARTIALLY AUTOMATED / MANUAL ORACLE REQUIRED |
+| API-078 | CONTRACT | API-078 - Verify that otherwise valid JSON text sent as text/plain is rejected without consuming the OTP. [Step 1 - text/plain]; API-078 - Verify that otherwise valid JSON text sent as text/plain is rejected without consuming the OTP. [Step 2 - JSON retry] | 415, 200 | fixtureReadyApi078; registeredEmail; sameValidOTP; validOTP | SERVER-SIDE FIXTURE REQUIRED |
+| API-079 | CONTRACT | API-079 - Verify that an empty application/json request body is rejected safely without consuming the OTP. [Step 1 - empty body]; API-079 - Verify that an empty application/json request body is rejected safely without consuming the OTP. [Step 2 - valid retry] | 400, 200 | fixtureReadyApi079; registeredEmail; sameValidOTP | SERVER-SIDE FIXTURE REQUIRED |
+| API-080 | DOMAIN | API-080 - Verify that an object-valued newPassword is rejected without consuming the OTP. [Step 1 - object password]; API-080 - Verify that an object-valued newPassword is rejected without consuming the OTP. [Step 2 - string retry] | 400, 200 | fixtureReadyApi080; registeredEmail; sameValidOTP; validOTP | SERVER-SIDE FIXTURE REQUIRED |
+| API-081 | SECURITY | API-081 - Verify that SQL syntax in a rule-conforming new password is treated as data and does not damage another account's reset path. [Step 1 - Account A injection string]; API-081 - Verify that SQL syntax in a rule-conforming new password is treated as data and does not damage another account's reset path. [Step 2 - Account B integrity check] | 200, 200 | accountAEmail; accountAValidOTP; accountBEmail; accountBValidOTP; fixtureReadyApi081 | SERVER-SIDE FIXTURE REQUIRED; PARTIALLY AUTOMATED / MANUAL ORACLE REQUIRED |
+| API-082 | SECURITY | API-082 - Verify that an invalid bearer token does not interfere with the public password-recovery endpoint. | 200 | fixtureReadyApi082; registeredEmail; validOTP | SERVER-SIDE FIXTURE REQUIRED |
+
+## Automated and manual oracle policy
+
+- Explicit HTTP statuses are asserted when unambiguous, but status assertions are not presented as complete when the reviewed result includes additional observable state or behavior.
+- API-076 automatically compares the two responses' status, Content-Type, redirect/no-redirect behavior, representation type, and normalized JSON or exact non-JSON body. Only fields predeclared in `api076NondeterministicFields` are removed. Password state, token leakage, and account-metadata disclosure still require the reviewed external/manual oracle.
+- Cases labeled `PARTIALLY AUTOMATED / MANUAL ORACLE REQUIRED` retain their full reviewed result in request descriptions; no response-body, persistence, timing, password-state, OTP-state, database, concurrency, or rate-limit assertion is invented.
+- API-075 is a single request template, not an automated repeated-guess loop. It remains blocked until an authoritative abuse-control limit is supplied and then requires manual or data-driven repeated execution through that exact configured trigger. API-025, API-065, and API-072 remain blocked until the real expiry point is configured or objectively observed.
+
+## Reproducible validation workflow
+
+The generator does not rewrite this report during `generate`. Results are keyed to the collection SHA-256 in `postman/pool-a-validation-results.json`, so rerunning deterministic generation preserves successful results for the identical collection. The final report is written only after all gates pass:
+
+```powershell
+python -m pip install -r postman/requirements-validation.txt
+python postman/generate_pool_a.py generate
+python postman/generate_pool_a.py validate-static
+python postman/generate_pool_a.py validate-schema --schema postman/postman-v2.1.0-schema.json
+python postman/generate_pool_a.py validate-newman --newman-command newman
+python postman/generate_pool_a.py report
+```
+
+## Validation results
+
+- Collection SHA-256: `C042A9EE0E317516C8D6EE098B6BC546CB6BD99A3FBD5D2AEC7B3D4553DFEFE6`
+- Deterministic whole-collection static validation: **PASS** (2026-08-21 11:59:33 GMT+7). Verified 82 logical IDs, 88 generated requests, all six expected two-request flows, no unexpected/missing IDs, no undefined variables, and no request body/header mismatches against the reviewed CSV representation. A separate validation path independently checked all 36 structured `Headers`/`Body`/`Raw Body` rows without using the generator's `request_specs()` mapping.
+- Full supplied Postman Collection v2.1 schema validation: **PASS** (2026-08-21 11:59:51 GMT+7) using `postman/postman-v2.1.0-schema.json`.
+- Newman 6.2.2 structural/script compatibility: **PASS** (2026-08-21 12:00:04 GMT+7). One representative API-001 request ran against a local mock; collection-level header injection, fixture gating, request serialization, console scripting, and the status assertion executed successfully.
+- Actual SUT execution: **NOT PERFORMED**. The Newman compatibility result does not claim that the full 82-case suite was functionally executed or that any SUT behavior passed.

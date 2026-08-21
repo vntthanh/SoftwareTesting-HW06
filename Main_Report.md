@@ -12,7 +12,7 @@
 | SUT repository | <https://github.com/ttbhanh/eshop-sut> |
 | Submission repository | <https://github.com/vntthanh/SoftwareTesting-HW06> |
 | Report date | 2026-08-18 |
-| Last updated | 2026-08-20 |
+| Last updated | 2026-08-21 |
 
 ## 2. Selected APIs
 
@@ -123,15 +123,15 @@ The test cases were derived from the reviewed analyses in Sections A.2–A.5.
 
 | Testing Type | Number of Test Cases |
 | --- | ---: |
-| Contractual Testing | 26 |
-| Domain Testing | 36 |
-| State Transition Testing | 5 |
-| Security Testing | 9 |
-| **Total** | **76** |
+| Contractual Testing | 28 |
+| Domain Testing | 37 |
+| State Transition Testing | 6 |
+| Security Testing | 11 |
+| **Total** | **82** |
 
-The suite uses stable IDs `API-001`–`API-076` and exactly nine traceability fields per record. Every case targets `POST /api/reset-password` and retains its provisional specialist ID in `Assumptions / Notes`. Parent validation found no missing fields, duplicate IDs, endpoint/category mismatches, or true within-category request/oracle duplicates. Coverage includes `CR-001`–`CR-007`, `CR-009`–`CR-012`, `DP-001`–`DP-026`, `DB-001`–`DB-006`, `TR-001`–`TR-005`, and `SS-001`–`SS-009`; `CR-008` is explicitly unresolved because confirmation-password transport is not documented.
+The suite uses stable IDs `API-001`–`API-082` and exactly nine traceability fields per record. Every case targets `POST /api/reset-password`. The 76 specialist-generated cases retain their provisional specialist IDs in `Assumptions / Notes`; `API-077`–`API-082` are the six human-authored additions documented in Section A.7. Validation found no missing fields, duplicate IDs, endpoint/category mismatches, or unexpected logical cases. Coverage includes `CR-001`–`CR-007`, `CR-009`–`CR-012`, `DP-001`–`DP-026`, `DB-001`–`DB-006`, `TR-001`–`TR-005`, and `SS-001`–`SS-009`; `CR-008` is explicitly unresolved because confirmation-password transport is not documented.
 
-Eight cases were revised after review: `API-025`, `API-030`, `API-059`, `API-065`, `API-068`, `API-072`, `API-075`, and `API-076`. These revisions clarified exploratory behavior, valid additional password characters, observable/configurable expiry preconditions, white-box storage verification, configured rate limits, and account-enumeration comparison rules. Revalidation preserved all 76 IDs and coverage. The final CSV has SHA-256 `3C50ACA8A132222E82E6AFC0607B4C055F22069AEF9FB10429CF326CF6C24081`. Test cases were designed and validated but were not executed as part of this generation phase.
+Eight specialist-generated cases were revised after review: `API-025`, `API-030`, `API-059`, `API-065`, `API-068`, `API-072`, `API-075`, and `API-076`. These revisions clarified exploratory behavior, valid additional password characters, observable/configurable expiry preconditions, white-box storage verification, configured rate limits, and account-enumeration comparison rules. Six human-authored cases were then added as `API-077`–`API-082`. Revalidation preserved all 82 IDs and coverage. The final CSV has SHA-256 `FA7402AB0B677D68AF909C2E326DA83FDF6F41C239DB4DF689B93A47F2201DE6`. Test cases were designed and structurally validated but were not executed against the real SUT during collection generation.
 
 ### A.7. Human cases
 

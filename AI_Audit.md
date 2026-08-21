@@ -745,3 +745,245 @@ All report links, IDs, counts, and the final CSV checksum were verified. Pools B
 - **Verdict:** VALID
 - **Reasoning:** The agent correctly summarized pool A process into main report.
 - **Student Fixes:** None
+
+### Artifact 9
+
+- **User:** Vương Ngũ Tín Thành
+- **Date and Time:** 2026-08-21 10:44:39 GMT+7
+- **Model Used:** GPT-5.6 Sol
+- **Skill Used:** `postman-test-generator`
+- **Prompt:**
+
+````markdown
+Use [$postman-test-generator](D:\GitHub\SoftwareTesting-HW06\\.agents\skills\postman-test-generator\SKILL.md) to convert the final reviewed Pool A test cases into a Postman Collection v2.1.
+
+Inputs:
+
+- [a-forgot-password.csv](test-cases/a-forgot-password.csv)&#x20;
+- [api\_specification.md](reference/api_specification.md)&#x20;
+- collection\_output\_path: postman/pool-a-forgot-password.postman\_collection.json
+- conversion\_report\_path: postman/pool-a-conversion-report.md
+
+For this homework, implement `X-Student-Id` through a collection-level pre-request script using `{{studentId}}` is `23127261`, and log evidence that can be captured from the Postman console.
+
+
+
+Do not redesign or add test cases. Preserve all preconditions and traceability. Clearly flag tests that require manual setup, white-box verification, an observable expiry point, or a configured rate limit instead of inventing executable behavior.
+
+
+
+Validate the final collection against the full Postman Collection v2.1 schema and verify Newman compatibility.
+````
+
+- **AI Output:**
+
+````markdown
+Created the requested Postman artifacts:
+
+- [Postman Collection v2.1](D:\GitHub\SoftwareTesting-HW06\postman\pool-a-forgot-password.postman_collection.json)
+- [Conversion report](D:\GitHub\SoftwareTesting-HW06\postman\pool-a-conversion-report.md)
+
+Verification completed:
+
+- All 82 reviewed test IDs and preconditions are preserved.
+- `X-Student-Id: 23127261` is injected from `{{studentId}}` by a collection-level pre-request script.
+- Console evidence includes the injected student ID, request name, URL, status, and response time.
+- Manual setup, white-box checks, observable expiry cases, concurrency, and configured rate limiting are explicitly flagged.
+- Full official Postman Collection v2.1 schema validation: passed.
+- Newman 6.2.2 compatibility execution: passed with zero failures on the representative compatibility run.
+- No test cases were added or redesigned.
+````
+
+- **File Modifications:**
+  - `File:` `postman/pool-a-forgot-password.postman_collection.json`.
+    - `Action:` created.
+    - `Deleted:` None.
+    - `Replaced With:` None.
+    - `Appended:` Postman Collection v2.1 containing all 82 reviewed Pool A cases, category folders, reviewed multi-request flows, preserved descriptions and preconditions, status assertions where machine-checkable, collection variables, collection-level `X-Student-Id` injection, and console evidence scripts.
+  - `File:` `postman/pool-a-conversion-report.md`.
+    - `Action:` created, then edited.
+    - `Deleted:` Pending schema-validation and Newman-compatibility status placeholders.
+    - `Replaced With:` Passing full-schema validation and Newman 6.2.2 compatibility evidence.
+    - `Appended:` Row-to-request traceability for all 82 cases, preserved preconditions, generated assertion mapping, manual/setup flags, unresolved oracle notes, and validation results.
+  - `File:` `postman/generate_pool_a.py`.
+    - `Action:` created, then edited.
+    - `Deleted:` Over-broad observable-expiry flag detection based on text matching.
+    - `Replaced With:` Exact observable-expiry flagging for `API-025`, `API-065`, and `API-072`.
+    - `Appended:` Deterministic CSV-to-Postman conversion logic and conversion-report generation.
+  - `File:` `postman/postman-v2.1.0-schema.json`.
+    - `Action:` created.
+    - `Deleted:` None.
+    - `Replaced With:` None.
+    - `Appended:` Official Postman Collection Format v2.1.0 JSON Schema used for full validation.
+  - `File:` `postman/newman_compat_server.js`.
+    - `Action:` temporary file created and deleted.
+    - `Deleted:` Local HTTP compatibility server after the representative Newman run completed.
+    - `Replaced With:` None.
+    - `Appended:` None.
+  - `File:` `postman/.validation_deps/**`.
+    - `Action:` temporary validator dependencies created and deleted.
+    - `Deleted:` Isolated `jsonschema` validation dependency directory after final schema validation.
+    - `Replaced With:` None.
+    - `Appended:` None.
+- **Verdict:** INCOMPLETE
+- **Reasoning:**
+  - Domain test request bodies are generated incorrectly.
+  - Some `{{variables}}` are used but not defined.
+  - Some tests check only the HTTP status, not the full expected result.
+  - Manual/setup-required tests are not always marked correctly.
+  - Human test case references still have off-by-one IDs.
+  - Re-running the generator resets validation results back to `PENDING`.
+  - Newman compatibility was checked with only one representative test, not the full suite.
+- **Student Fixes:** Guide the agent to fix found defects.
+
+### Artifact 10
+
+- **User:** Vương Ngũ Tín Thành
+- **Date and Time:** 2026-08-21 11:25:08 GMT+7
+- **Model Used:** GPT-5.6 Sol
+- **Skill Used:** `postman-test-generator`
+- **Prompt:**
+
+````markdown
+Keep the existing reviewed test cases unchanged. Do not redesign, add, remove, merge, or renumber test cases unless required to correct traceability.
+
+Fix the following issues:
+- Incorrect Domain request bodies
+  - Correctly interpret structured `Request Input` values containing `Headers`, `Body`, or `Raw Body`.
+  - `Headers` must become actual HTTP headers.
+  - `Body` must become the actual request body. 
+  - `Raw Body` must be sent exactly as raw content. 
+  - Do not send the metadata wrapper itself. 
+  - Preserve intentionally malformed JSON exactly. 
+
+- Undefined Postman variables
+  - Detect every `{{variable}}` referenced by generated requests. 
+  - Ensure every required variable is defined or explicitly marked as a required runtime fixture. 
+  - Never allow an unresolved variable to accidentally make a negative test pass. 
+  - If a required fixture is unavailable, clearly mark the test as blocked/not executable. 
+
+- Incomplete automated oracles
+  - Do not treat an HTTP-status assertion as the complete result when the reviewed expected result contains additional observable checks. 
+  - Automate directly observable checks where practical, especially multi-request comparisons such as API-076. 
+  - For checks that cannot be automated reliably, explicitly mark the case as `PARTIALLY AUTOMATED / MANUAL ORACLE REQUIRED`. 
+  - Do not invent response-body, persistence, timing, or state assertions. 
+- Incorrect manual/setup flags
+  - Improve fixture detection so tests requiring registered accounts, issued OTPs, previous state, expiry configuration, rate limits, or other server-side setup are correctly marked. 
+  - Prefer explicit execution classification over fragile keyword matching where possible. 
+
+- Human test-case traceability 
+  - Fix the remaining off-by-one references for the human-authored cases. 
+  - The final IDs must consistently reference `API-077` through `API-082`. 
+  - Update source/report references rather than hiding the mismatch only inside the Postman collection. 
+  - Non-reproducible validation report 
+  - Do not overwrite successful validation results with `PENDING` when the generator is rerun. 
+  - Make the workflow reproducible: `generate → schema validation → Newman compatibility validation → final conversion report`. 
+  - The report must clearly distinguish structural/Newman compatibility validation from actual SUT test execution. 
+
+- Newman compatibility scope
+  - Keep the existing representative compatibility check if appropriate, but clearly state that it does not mean the full 82-case suite was functionally executed. 
+  - Add deterministic static validation for the whole generated collection, including: 
+    - all 82 logical test IDs are present; 
+    - expected multi-request flows are preserved; 
+    - no unexpected test cases are added or removed; 
+    - all referenced Postman variables are defined or explicitly blocked; 
+    - request bodies match the reviewed CSV representation. 
+
+After revising:
+
+- Regenerate `pool-a-forgot-password.postman_collection.json`. 
+- Regenerate `pool-a-conversion-report.md`. 
+- Update `generate_pool_a.py` as needed. 
+- Validate the collection against the full supplied Postman Collection v2.1 schema. 
+- Verify Newman compatibility. 
+- Do **not** perform the real SUT execution yet. 
+- Report the files changed and briefly explain how each defect was fixed. 
+````
+
+- **AI Output:**
+
+````markdown
+Revised and regenerated the Pool A Postman artifacts without changing test intent, IDs, or case count.
+
+Changed files:
+
+- [generate_pool_a.py](D:\GitHub\SoftwareTesting-HW06\postman\generate_pool_a.py)
+  - Correctly parses `Headers`, `Body`, and `Raw Body`.
+  - Adds explicit fixture readiness gates and variable validation.
+  - Adds API-076 response comparison automation.
+  - Adds deterministic static, schema, Newman, and report stages.
+  - Preserves successful validation results across identical regeneration.
+
+- [Postman collection](D:\GitHub\SoftwareTesting-HW06\postman\pool-a-forgot-password.postman_collection.json)
+  - Regenerated with corrected bodies, headers, variables, fixture gates, and oracle classifications.
+
+- [Conversion report](D:\GitHub\SoftwareTesting-HW06\postman\pool-a-conversion-report.md)
+  - Regenerated with fixture requirements, partial/manual oracle classifications, reproducible commands, and clear validation scope.
+
+- [Validation results](D:\GitHub\SoftwareTesting-HW06\postman\pool-a-validation-results.json)
+  - Stores validation results keyed to collection SHA-256.
+
+- [Validation requirements](D:\GitHub\SoftwareTesting-HW06\postman\requirements-validation.txt)
+  - Pins the schema-validation dependency.
+
+- [Reviewed CSV](D:\GitHub\SoftwareTesting-HW06\test-cases\a-forgot-password.csv)
+  - Corrected only the six off-by-one human-case references to consistently use `API-077`–`API-082`.
+
+Validation results:
+
+- 82 logical test cases preserved.
+- 88 requests generated.
+- All six expected two-request flows preserved.
+- No undefined Postman variables.
+- No request body or header mismatches.
+- Full Postman Collection v2.1 schema: passed.
+- Newman 6.2.2 representative compatibility check: passed.
+- Identical regeneration preserves the final report and validation state.
+- Collection SHA-256: `49134CF344C65181C4F5FE9A65802867A236B86E427BEF7414BCA6C33539921F`
+- Real SUT execution was not performed.
+````
+
+- **File Modifications:**
+  - `File:` `test-cases/a-forgot-password.csv`.
+    - `Action:` edited.
+    - `Deleted:` Off-by-one `Main_Report.md` human-case references `API-078` through `API-083` on final cases `API-077` through `API-082`.
+    - `Replaced With:` Matching references `API-077` through `API-082`; no test intent, request, oracle, ID, ordering, or case count changed.
+    - `Appended:` None.
+  - `File:` `postman/generate_pool_a.py`.
+    - `Action:` replaced content, then edited.
+    - `Deleted:` Heuristic first-JSON-fragment body mapping, keyword-based fixture classification, status-only oracle reporting, report generation that reset validation to `PENDING`, and non-persistent validation workflow.
+    - `Replaced With:` Structured `Headers`/`Body`/`Raw Body` parsing; exact malformed-body preservation; explicit fixture classifications and request-blocking pre-request scripts; complete variable discovery; API-076 response comparison with redirect following disabled; API-075 classification as a single template requiring manual/data-driven repeated execution; partial/manual oracle classifications; deterministic whole-collection validation including an independent 36-row structured-input assertion path that does not use `request_specs()`; hash-keyed validation state; full-schema validation; representative Newman/local-mock validation; and gated final report generation.
+    - `Appended:` None.
+  - `File:` `postman/pool-a-forgot-password.postman_collection.json`.
+    - `Action:` replaced content.
+    - `Deleted:` Prior collection with Domain metadata wrappers used as bodies, incomplete variable handling, fragile setup flags, status-only reporting for additional reviewed checks, and no API-076 automated response comparison.
+    - `Replaced With:` Regenerated 82-logical-case/88-request collection with correct reviewed headers and bodies, exact raw malformed content, defined runtime variables, fixture readiness gates, blocked execution on unavailable fixtures, partial/manual oracle warnings, API-075 marked as a single request template requiring manual/data-driven repetition through the authoritative configured trigger, API-076 comparison assertions, all six reviewed two-request flows, and collection-level `X-Student-Id` evidence logging.
+    - `Appended:` None.
+  - `File:` `postman/pool-a-conversion-report.md`.
+    - `Action:` replaced content.
+    - `Deleted:` Prior traceability table and manually patched validation section that could be reset to `PENDING` by regeneration.
+    - `Replaced With:` Regenerated traceability, fixture requirements, execution/oracle classifications, explicit API-075 repeated-execution limitations, API-076 automation scope, reproducible validation commands, independent validation evidence for all 36 structured request inputs, hash-keyed validation evidence, and an explicit statement that the real SUT and full functional suite were not executed.
+    - `Appended:` None.
+  - `File:` `postman/pool-a-validation-results.json`.
+    - `Action:` created and updated.
+    - `Deleted:` None.
+    - `Replaced With:` None.
+    - `Appended:` Collection-SHA-keyed PASS evidence for deterministic static validation of 82 logical IDs, 88 requests, six multi-request flows, and 36 independently checked structured mappings; full Postman v2.1 schema validation; and Newman 6.2.2 representative local-mock compatibility validation.
+  - `File:` `postman/requirements-validation.txt`.
+    - `Action:` created.
+    - `Deleted:` None.
+    - `Replaced With:` None.
+    - `Appended:` Pinned `jsonschema==4.26.0` dependency for reproducible full-schema validation.
+  - `File:` `Main_Report.md`.
+    - `Action:` edited.
+    - `Deleted:` Stale Pool A totals of 26 CONTRACT, 36 DOMAIN, 5 STATE, 9 SECURITY, and 76 total; stale ID range `API-001`–`API-076`; stale 76-ID validation statement; and obsolete CSV checksum `3C50ACA8A132222E82E6AFC0607B4C055F22069AEF9FB10429CF326CF6C24081`.
+    - `Replaced With:` Correct final totals of 28 CONTRACT, 37 DOMAIN, 6 STATE, 11 SECURITY, and 82 total; ID range `API-001`–`API-082`; explicit distinction between 76 specialist-generated and six human-authored cases `API-077`–`API-082`; current CSV checksum `FA7402AB0B677D68AF909C2E326DA83FDF6F41C239DB4DF689B93A47F2201DE6`; and last-updated date `2026-08-21`.
+    - `Appended:` None.
+  - `File:` `postman/.validation_deps/**` and `postman/__pycache__/**`.
+    - `Action:` temporary content created and deleted.
+    - `Deleted:` Temporary isolated schema-validation dependencies and compiled Python cache after validation.
+    - `Replaced With:` None.
+    - `Appended:` None.
+- **Verdict:** VALID
+- **Reasoning:** The agent correctly resolved all found defects.
+- **Student Fixes:** None
