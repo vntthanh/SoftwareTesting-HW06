@@ -346,23 +346,23 @@ No HTTP status, error schema, or message is invented for the negative security s
 
 ### B.6. AI-Generated Test Cases
 
-The final reviewed test cases for this pool are stored in: [`test-cases/b-discount-coupons.csv`](test-cases/b-discount-coupons.csv)
+The final reviewed test cases for this pool are stored in: [`test-cases/b-discount-coupons.csv`](test-cases/b-discount-coupons.csv). The audited AI-generated subset is stored in [`review/pool-b/candidate-api-tests.csv`](review/pool-b/candidate-api-tests.csv).
 
-The test cases were derived from the reviewed analyses in Sections B.2–B.5.
+The AI-generated test cases were derived from the reviewed analyses in Sections B.2–B.5, then seven human-authored cases from Section B.7 were merged into the final CSV.
 
-| Testing Type | Number of Test Cases |
-| --- | ---: |
-| Contractual Testing | 15 |
-| Domain Testing | 44 |
-| State Transition Testing | 0 |
-| Security Testing | 8 |
-| **Total** | **67** |
+| Testing Type | AI-generated | Human-added | Final total |
+| --- | ---: | ---: | ---: |
+| Contractual Testing | 15 | 2 | 17 |
+| Domain Testing | 44 | 4 | 48 |
+| State Transition Testing | 0 | 0 | 0 |
+| Security Testing | 8 | 1 | 9 |
+| **Total** | **67** | **7** | **74** |
 
-The suite uses sequential IDs `API-001`–`API-067` and exactly nine traceability fields per record. Every case targets `POST /api/apply-coupon`. Coverage includes `CR-001`–`CR-012`, `DP-001`–`DP-037`, `DB-001`–`DB-007`, and `SS-001`–`SS-008`; applicable security requirements are `SEC-02` and `SEC-05`. No placeholder STATE cases were generated.
+The final suite uses sequential IDs `API-001`–`API-074` and exactly nine traceability fields per record. Every case targets `POST /api/apply-coupon`. The 67-case AI subset covers `CR-001`–`CR-012`, `DP-001`–`DP-037`, `DB-001`–`DB-007`, and `SS-001`–`SS-008`; applicable security requirements are `SEC-02` and `SEC-05`. No placeholder STATE cases were generated. The review artifact preserves the same first nine fields for all AI-generated cases and adds an explicit `VALID` audit result with a brief case-level reason; no invalid or incomplete case remains in the retained AI subset.
 
 Human review corrected inclusive minimum-threshold labels, the mathematical oracle for `SAVE10` with `total_amount = 300001`, and the fixture preconditions for `BIGBUY`, `EXPIRED`, and nonexistent coupon codes. Same-category semantic deduplication removed 14 redundant DOMAIN records while preserving every partition/boundary basis and provisional specialist ID on retained cases. The final merged coverage includes `DP-021 + DB-001` just-below, `DP-013 + DB-004` equal-to-expiry, and `DP-030/DP-031 + DB-006` at/above the usage limit.
 
-Final validation confirmed sequential unique IDs, the exact nine-column schema, endpoint/category consistency, non-empty required content, complete reviewed traceability, and no remaining same-category semantic duplicate groups. Undocumented statuses, error representations, coercion, identity binding, rounding/precision, and endpoint-driven state mutation remain explicit gaps rather than invented behavior. These are candidate test cases only; the API tests have not yet been executed. Generation and validation details are recorded in [`review/pool-b/orchestration-status.md`](review/pool-b/orchestration-status.md).
+Final validation confirmed 74 sequential unique IDs, the exact nine-column final schema, endpoint/category consistency, non-empty required content, complete reviewed AI traceability, no duplicate IDs or rows, no remaining same-category semantic duplicate groups in the AI subset, and report/CSV count consistency. Undocumented statuses, error representations, coercion, identity binding, rounding/precision, and endpoint-driven state mutation remain explicit gaps rather than invented behavior. These are candidate test cases only; no Postman collection has been generated and the API tests have not yet been executed. Generation and validation details are recorded in [`review/pool-b/orchestration-status.md`](review/pool-b/orchestration-status.md).
 
 ### B.7. Human Cases
 
@@ -383,6 +383,8 @@ The generated domain tests also covered the main documented coupon fixtures and 
 The security analysis tested JWT validity, SQL-like inputs, and per-user usage limits, but did not combine authentication identity with a manipulated `user_id` to check for usage-limit bypass. This gap requires a human security assumption because the exact JWT-to-body-user binding rule is not documented.
 
 These gaps show that specification-based AI generation can provide broad coverage, but human review is still useful for finding robustness cases, additional boundary combinations, and security interactions between otherwise separate input conditions.
+
+The seven human-authored cases above are merged into the final CSV as `API-068`–`API-074`.
 
 ### B.8. Newman Execution Analysis
 

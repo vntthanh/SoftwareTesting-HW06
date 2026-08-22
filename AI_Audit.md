@@ -2115,3 +2115,85 @@ The obsolete duplicate B.6 placeholder was also removed.
 - **Verdict:** VALID
 - **Reasoning:** The AI correctly summarized the test cases analysis into Main Report.
 - **Student Fixes:** None
+
+### Artifact 23
+
+- **User:** Vương Ngũ Tín Thành
+- **Date and Time:** 2026-08-22 16:38:22 GMT+7
+- **Model Used:** TODO: Unknown
+- **Skill Used:**
+  - `api-test-generator`
+  - `ai-audit`
+- **Prompt:**
+
+````markdown
+Fix the remaining Pool B issues before Postman generation.
+
+- Copy current [b-discount-coupons.csv](test-cases/b-discount-coupons.csv) to [pool-b](review/pool-b/) named `candidate-api-tests.csv`.
+- Add explicit `VALID / INVALID / INCOMPLETE` audit results with brief reasoning for every AI-generated case in the appropriate review artifact.
+- Merge human-added cases `API-068`–`API-074` into `test-cases/b-discount-coupons.csv`, preserving the existing schema and intended content.
+- Revalidate Pool B: 74 unique sequential IDs, no duplicates, required fields complete, and report/CSV counts consistent.
+- Update only affected artifacts. Do not generate the Postman collection yet.
+
+Finish with the files changed and validation results.
+````
+
+- **AI Output:**
+
+````markdown
+I’m using the API test-generation workflow instructions to preserve Pool B’s review and traceability conventions. I’ll first inspect the repository guidance and current Pool B artifacts, then make only the requested CSV/review updates and run structural validation.
+
+The current Pool B final CSV has 67 cases, while the report already contains the seven human-authored additions as `API-068`–`API-074`. I’m tracing the exact intended rows and the existing Pool A audit convention so the Pool B review copy can distinguish AI-generated cases from human-added ones without altering the final test-case schema.
+
+The repository’s AI-audit skill also applies because this task explicitly requires audit documentation for AI-produced cases. I’m reading its append rules now; its output will be limited to the standard audit log entry plus the Pool B artifacts directly requested.
+
+The audit disposition is clear: all 67 retained AI-generated rows are `VALID` in their current reviewed form. Earlier incomplete generations were corrected and deduplicated before this snapshot; no rejected case remains in the final AI subset. I’ll record a per-row reason tied to each case’s category and trace IDs, then append the seven human rows only to the nine-column final CSV.
+
+The merge and report synchronization are complete. I’m running the final structural audit now: exact schemas, all required cells, ID sequence and uniqueness, duplicate row signatures, category totals, AI audit completeness, first-nine-field preservation, and report/status count consistency.
+
+Pool B is ready for Postman generation; no collection was generated yet.
+
+Files changed:
+
+- [candidate-api-tests.csv](D:/GitHub/SoftwareTesting-HW06/review/pool-b/candidate-api-tests.csv) — copied 67 AI cases with `Audit Result` and case-specific `Audit Reason`; all 67 are `VALID`.
+- [b-discount-coupons.csv](D:/GitHub/SoftwareTesting-HW06/test-cases/b-discount-coupons.csv) — added human cases `API-068`–`API-074`.
+- [orchestration-status.md](D:/GitHub/SoftwareTesting-HW06/review/pool-b/orchestration-status.md) — updated final counts and validation status.
+- [Main_Report.md](D:/GitHub/SoftwareTesting-HW06/Main_Report.md) — synchronized AI/human/final counts.
+
+Validation results:
+
+- PASS — 74 sequential IDs, `API-001`–`API-074`
+- PASS — 74 unique IDs; zero exact duplicate rows
+- PASS — all nine required fields complete
+- PASS — final categories: CONTRACT 17, DOMAIN 48, SECURITY 9, STATE 0
+- PASS — AI subset: 67 cases with 67 audit results and reasons
+- PASS — review copy preserves the original nine fields for all AI cases
+- PASS — report and CSV counts are consistent
+- PASS — `git diff --check`
+- Postman collection: not generated
+````
+
+- **File Modifications:**
+  - `File:` `review/pool-b/candidate-api-tests.csv`.
+    - `Action:` created.
+    - `Deleted:` None.
+    - `Replaced With:` None.
+    - `Appended:` A 67-row review copy of the AI-generated Pool B cases preserving the original nine fields and adding `Audit Result` and `Audit Reason`; every retained case is marked `VALID` with case-level reasoning.
+  - `File:` `test-cases/b-discount-coupons.csv`.
+    - `Action:` appended.
+    - `Deleted:` None.
+    - `Replaced With:` None.
+    - `Appended:` Seven human-authored cases `API-068`–`API-074` in the existing nine-column schema, covering unsupported `text/plain`, a zero-byte body, an empty coupon code, VIP100 at its exact minimum, JWT/body `user_id` usage-limit bypass, and 1%/100% percent coupons.
+  - `File:` `review/pool-b/orchestration-status.md`.
+    - `Action:` edited.
+    - `Deleted:` The prior Phase-2-only 67-case completion/count statements and execution wording that did not mention Postman generation.
+    - `Replaced With:` Pre-Postman completion status for 74 cases, AI/human and category breakdowns, AI audit disposition, merged human coverage, updated validation through `API-074`, and explicit confirmation that no Postman collection was generated.
+    - `Appended:` The AI review artifact path and audit summary.
+  - `File:` `Main_Report.md`.
+    - `Action:` edited and appended.
+    - `Deleted:` The prior Pool B B.6 table and narrative reporting only 67 final cases through `API-067`.
+    - `Replaced With:` An AI-generated/human-added/final count table totaling 74 cases, IDs through `API-074`, the review-artifact audit summary, updated validation, and the no-Postman-generation statement.
+    - `Appended:` A B.7 statement confirming that the seven human-authored cases are merged into the final CSV.
+- **Verdict:** VALID
+- **Reasoning:** The agent merged human cases and human review into single csv file correctly.
+- **Student Fixes:** None
