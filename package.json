@@ -1,0 +1,10 @@
+{
+  "allowScripts": {
+    "newman@2.1.2": true,
+    "highlight.js@9.18.5": true
+  },
+  "devDependencies": {
+    "newman": "6.2.2",
+    "newman-reporter-htmlextra": "1.23.1"
+  }
+}

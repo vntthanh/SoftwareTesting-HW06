@@ -1,2 +1,11 @@
+# Python
 __pycache__/
 *.py[cod]
+
+# Postman Desktop local workspace files
+.postman/
+postman/collections/
+postman/globals/
+
+# Node
+node_modules/
