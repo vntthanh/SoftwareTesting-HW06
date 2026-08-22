@@ -1,0 +1,4 @@
+interface:
+  display_name: "Append Bug"
+  short_description: "Append structured bug entries to reports"
+  default_prompt: "Use $append-bug to add a bug from a test case result into Bug_Report.md."
