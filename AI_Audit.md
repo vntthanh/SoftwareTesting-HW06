@@ -3107,8 +3107,8 @@ Verified:
 
 - **User:** Vương Ngũ Tín Thành
 - **Date and Time:** 2026-08-22 22:41:57 GMT+7
-- **Model Used:** GPT-5 (primary Codex agent)
-- **Skill Used:** ai-audit
+- **Model Used:** GPT-5.6 Sol
+- **Skill Used:** `ai-audit`
 - **Prompt:**
 
 ````markdown
@@ -3146,4 +3146,188 @@ Verified all counts against the CSVs, sequential `API-001`–`API-085`, and that
 - **Reasoning:**
   - C.2–C.6 are now completed from the reviewed Pool C analyses.
   - C.7 remains unchanged.
+- **Student Fixes:** None
+
+### Artifact 36
+
+- **User:** Vương Ngũ Tín Thành
+- **Date and Time:** 2026-08-22 23:03:23 GMT+7
+- **Model Used:** GPT-5.6 Sol
+- **Skill Used:**
+  - `postman-test-generator`
+  - `ai-audit`
+- **Prompt:**
+
+````markdown
+[$postman-test-generator](D:\GitHub\SoftwareTesting-HW06\\.agents\skills\postman-test-generator\SKILL.md) [$ai-audit](D:\GitHub\SoftwareTesting-HW06\\.agents\skills\ai-audit\SKILL.md)&#x20;
+
+
+
+Generate the Pool C Postman collection using the reviewed cases in [c-order-management.csv](test-cases/c-order-management.csv) and [pool-c](review/pool-c/).
+
+- Generate all 85 cases for `PUT /api/admin/orders/:id/status`.
+- Preserve multi-step human cases API-080–API-085 as ordered flows.
+- Create deterministic, isolated fixtures for each case.
+- Include valid Admin/non-Admin JWT setup as required.
+- Add the required `X-Student-Id` pre-request behavior.
+- Keep reviewed expected results unchanged.
+- Output the collection under `postman/` and any fixture scripts needed.
+- Validate the collection, but do not run Newman yet.
+
+
+
+Take [run\_pool\_b\_with\_fixtures.py](postman/run_pool_b_with_fixtures.py) as example
+````
+
+- **AI Output:**
+
+````markdown
+Generated Pool C with all 85 reviewed cases, represented as 93 requests. API-080–API-085 remain ordered 2/2/2/2/4/2-step flows.
+
+Key outputs:
+
+- [Collection](D:/GitHub/SoftwareTesting-HW06/postman/pool-c-order-management.postman_collection.json)
+- [Fixture runner](D:/GitHub/SoftwareTesting-HW06/postman/run_pool_c_with_fixtures.py)
+- [Fixture definitions](D:/GitHub/SoftwareTesting-HW06/postman/pool_c_fixtures.py)
+- [Conversion report](D:/GitHub/SoftwareTesting-HW06/postman/pool-c-conversion-report.md)
+- [Validation results](D:/GitHub/SoftwareTesting-HW06/postman/pool-c-validation-results.json)
+- [Runtime instructions](D:/GitHub/SoftwareTesting-HW06/postman/pool-c-runtime-setup.md)
+- [AI audit](D:/GitHub/SoftwareTesting-HW06/AI_Audit.md)
+
+Validation passed: full Postman v2.1 schema, exact CSV traceability, deterministic generation, all fixture reset/restore checks, Admin/non-Admin and invalid JWT fixtures, live SUT schema compatibility (read-only), and compilation of all 94 Postman event scripts. `X-Student-Id` is upserted collection-wide before every SUT request.
+
+Newman was not run, as requested.
+````
+
+- **File Modifications:**
+  - `File:` `postman/generate_pool_c.py`.
+    - `Action:` created.
+    - `Deleted:` None.
+    - `Replaced With:` None.
+    - `Appended:` Deterministic generator mapping all 85 reviewed CSV cases to 93 Postman requests, including six ordered flows, source descriptions, reviewed assertions, variables, and conversion reporting.
+  - `File:` `postman/pool-c-order-management.postman_collection.json`.
+    - `Action:` created.
+    - `Deleted:` None.
+    - `Replaced With:` None.
+    - `Appended:` Postman Collection v2.1 containing all reviewed Pool C cases, collection-wide `X-Student-Id` and fixture-reset behavior, step-specific assertions, and fixture-backed state oracles.
+  - `File:` `postman/pool-c-conversion-report.md`.
+    - `Action:` created.
+    - `Deleted:` None.
+    - `Replaced With:` None.
+    - `Appended:` Complete row-to-request traceability for API-001 through API-085, preserved preconditions and expected results, generated assertions, manual-oracle notes, fixture strategy, schema status, and Newman-compatibility status.
+  - `File:` `postman/pool_c_fixtures.py`.
+    - `Action:` created.
+    - `Deleted:` None.
+    - `Replaced With:` None.
+    - `Appended:` Deterministic isolated order fixtures, initial-state matrix, Admin/non-Admin and invalid JWT construction, schema validation, snapshot/reset/inspect/restore logic, and fixture summary.
+  - `File:` `postman/run_pool_c_with_fixtures.py`.
+    - `Action:` created.
+    - `Deleted:` None.
+    - `Replaced With:` None.
+    - `Appended:` Pool B-style authenticated loopback fixture runner that resets once per reviewed case, preserves ordered flows, supplies runtime variables, invokes Newman only when explicitly run later, and restores orders in `finally`.
+  - `File:` `postman/validate_pool_c_runtime.py`.
+    - `Action:` created.
+    - `Deleted:` None.
+    - `Replaced With:` None.
+    - `Appended:` Non-Newman validation for full Collection v2.1 schema conformance, exact CSV traceability, 85-case/93-request mapping, flow counts, fixture isolation/restoration, JWT semantics, runtime hooks, JavaScript compatibility markers, and optional read-only live SUT schema compatibility.
+  - `File:` `postman/pool-c-validation-results.json`.
+    - `Action:` created.
+    - `Deleted:` None.
+    - `Replaced With:` None.
+    - `Appended:` Passing validation record showing 85 reviewed IDs, 93 requests, all six ordered flows, full schema success, fixture/JWT/traceability/static compatibility success, read-only SUT schema success, and `newmanExecuted: false`.
+  - `File:` `postman/pool-c-runtime-setup.md`.
+    - `Action:` created.
+    - `Deleted:` None.
+    - `Replaced With:` None.
+    - `Appended:` Fixture, JWT, validation, restoration, and later Newman execution instructions.
+  - `File:` `AI_Audit.md`.
+    - `Action:` appended.
+    - `Deleted:` None.
+    - `Replaced With:` None.
+    - `Appended:` Artifact 36 containing the exact prompt, final AI output, and file-modification record for Pool C Postman generation.
+- **Verdict:** INCOMPLETE
+- **Reasoning:**
+  - The invalid transition cases API-055–API-069 do not verify that the order state remains unchanged.
+  - Their current automated check accepts either an HTTP error or any JSON `message`.
+  - A wrong transition could therefore update the order successfully and still pass because a successful response may also contain a `message`.
+- **Student Fixes:**
+  - Asked the agent to add fixture-backed unchanged-state assertions to API-055–API-069.
+  - Asked the agent to regenerate and revalidate the Pool C collection.
+
+### Artifact 37
+
+- **User:** Vương Ngũ Tín Thành
+- **Date and Time:** 2026-08-22 23:19:45 GMT+7
+- **Model Used:** GPT-5.6 Sol
+- **Skill Used:**
+  - `postman-test-generator`
+  - `ai-audit`
+- **Prompt:**
+
+````markdown
+API-055–API-069 are invalid-transition cases and must also assert that the target order remains in its original state. Their current error/message assertions alone can accept a successful mutation.
+
+Add fixture-backed unchanged-state assertions for all API-055–API-069, regenerate the collection/report, and rerun validation.
+
+Do not run Newman yet.
+````
+
+- **AI Output:**
+
+````markdown
+Added fixture-backed unchanged-state assertions for API-055–API-069 and regenerated the Pool C collection and conversion report.
+
+Original-state assertions now enforce:
+
+- API-055–API-058: `delivered`
+- API-059–API-062: `canceled`
+- API-063–API-064: `pending`
+- API-065–API-066: `confirmed`
+- API-067–API-069: `shipping`
+
+Validation passed for all 85 cases and 93 requests, including the new dedicated API-055–API-069 state-oracle gate, full Postman v2.1 schema validation, fixture reset/restore, exact traceability, deterministic regeneration, and compilation of all 94 Postman scripts.
+
+Updated files: [collection](D:/GitHub/SoftwareTesting-HW06/postman/pool-c-order-management.postman_collection.json), [conversion report](D:/GitHub/SoftwareTesting-HW06/postman/pool-c-conversion-report.md), [generator](D:/GitHub/SoftwareTesting-HW06/postman/generate_pool_c.py), [validator](D:/GitHub/SoftwareTesting-HW06/postman/validate_pool_c_runtime.py), and [validation results](D:/GitHub/SoftwareTesting-HW06/postman/pool-c-validation-results.json).
+
+Newman was not run.
+
+Artifacts 37-37 successfully appended to `AI_Audit.md`.
+````
+
+- **File Modifications:**
+  - `File:` `postman/generate_pool_c.py`.
+    - `Action:` edited.
+    - `Deleted:` The unchanged-state case set omitted API-055 through API-069.
+    - `Replaced With:` The unchanged-state case set now includes every ID from API-055 through API-069.
+    - `Appended:` None.
+  - `File:` `postman/pool-c-order-management.postman_collection.json`.
+    - `Action:` regenerated and replaced content.
+    - `Deleted:` API-055 through API-069 test scripts containing only error/message assertions and no post-request target-state oracle.
+    - `Replaced With:` API-055 through API-069 test scripts retaining their error/message assertions and adding authenticated fixture-controller state inspection plus exact original-state assertions.
+    - `Appended:` None.
+  - `File:` `postman/pool-c-conversion-report.md`.
+    - `Action:` regenerated and replaced content.
+    - `Deleted:` API-055 through API-069 traceability rows that listed only error/message assertions.
+    - `Replaced With:` API-055 through API-069 traceability rows that also record the fixture-backed target-state assertion.
+    - `Appended:` None.
+  - `File:` `postman/validate_pool_c_runtime.py`.
+    - `Action:` edited.
+    - `Deleted:` None.
+    - `Replaced With:` None.
+    - `Appended:` A dedicated validation matrix requiring the correct original-state marker and equality assertion for every request from API-055 through API-069.
+  - `File:` `postman/pool-c-validation-results.json`.
+    - `Action:` regenerated and replaced content.
+    - `Deleted:` Prior validation timestamp and result serialization.
+    - `Replaced With:` Passing validation results dated 2026-08-22 23:19:26 GMT+7 after the unchanged-state correction; `newmanExecuted` remains `false`.
+    - `Appended:` None.
+  - `File:` `AI_Audit.md`.
+    - `Action:` appended.
+    - `Deleted:` None.
+    - `Replaced With:` None.
+    - `Appended:` Artifact 37 containing the exact correction prompt, AI output, and file-modification record.
+- **Verdict:** VALID
+- **Reasoning:**
+  - API-055–API-069 now verify the order state after each invalid transition.
+  - The expected original states are mapped correctly across delivered, canceled, pending, confirmed, and shipping cases.
+  - The existing response checks are preserved, while the new fixture-backed assertion prevents a successful mutation from being accepted.
 - **Student Fixes:** None
