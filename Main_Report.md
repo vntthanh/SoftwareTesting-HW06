@@ -280,27 +280,109 @@ Pool B covers **FR-09 – Discount Coupons**. This report selects `POST /api/app
 
 ### B.2. Contractual Testing Analysis
 
+The selected endpoint is documented as `POST /api/apply-coupon`. It uses a JSON body with three top-level fields and requires a valid JWT under FR-09 C4:
+
+| Input | Documented representation | Reviewed constraint |
+| --- | --- | --- |
+| `Authorization` | `Bearer <token>` header | The JWT must be valid; token claims and authentication-failure responses are not specified |
+| `code` | JSON string | The coupon must exist and have `is_active = 1` to satisfy FR-09 C1 |
+| `total_amount` | JSON number | Must be greater than or equal to the selected coupon's `min_order_amount` |
+| `user_id` | JSON number | The user's prior use count for the coupon must be below `max_uses_per_user` |
+
+The reviewed contract model contains rules `CR-001`–`CR-012`. It covers the method and path, documented JSON representation, the three body members, valid-JWT prerequisite, successful response structure, percent and fixed discount calculations, final-amount calculation, and exact calculation oracles for the documented `SAVE10` and `BIGBUY` fixtures.
+
+On a qualifying request, the response is documented as JSON containing `discount_amount` and `final_amount`. For a percent coupon, `discount_amount = total × discount_value / 100`; for a fixed coupon, `discount_amount = discount_value`; and `final_amount = total - discount_amount`.
+
+The API specification does not provide a formal request or response schema. Field requiredness, nullability, coercion, additional-property handling, concrete MIME values, HTTP statuses, error bodies, response headers, rounding, and validation precedence are not documented. The reviewed model therefore treats malformed bodies, omitted members, wrong types, and similar mutations as bounded contract explorations without inventing rejection statuses or messages. It also does not infer that body `user_id` must match the JWT subject. The complete analysis is stored in [`review/pool-b/reports/contract-report.md`](review/pool-b/reports/contract-report.md).
+
 ### B.3. Domain Testing Analysis
+
+Domain analysis uses a qualifying `SAVE10` request as its baseline: the coupon is arranged as active and unexpired, `total_amount` is `500000`, the selected user has zero prior uses, and a valid JWT is supplied. This produces the mathematical oracle `discount_amount = 50000` and `final_amount = 450000`. Tests vary one input or one controlled coupon/user condition at a time where possible.
+
+The reviewed model defines 37 equivalence partitions (`DP-001`–`DP-037`) across the JSON container, JWT header, and three body fields. Important partitions include:
+
+- JSON object, malformed/non-object body, and additional-member representations;
+- valid, missing, malformed, invalid, and expired JWT values;
+- existing active percent/fixed coupons, nonexistent or inactive coupons, and coupons before, at, or after expiry;
+- totals below, equal to, and above the selected coupon's minimum, including zero, negative, decimal, very large, wrong-type, omitted, and `null` values;
+- per-user use counts below, at, and above `max_uses_per_user`;
+- matching or mismatched JWT/body identities, nonexistent users, unusual identifier values, wrong types, omission, and `null`.
+
+Seven boundary models (`DB-001`–`DB-007`) cover:
+
+| Boundary group | Reviewed points |
+| --- | --- |
+| `SAVE10` / `VIP100` minimum `300000` | `299999` outside; `300000` and `300001` inside |
+| `BIGBUY` minimum `500000` | `499999` outside; `500000` and `500001` inside |
+| Minimum allowed coupon threshold `0` | `-1` outside; `0` and `1` inside |
+| Expiry date | before expiry qualifies; equality and after expiry do not qualify |
+| Generic and fixture-specific usage limits | `M - 1` qualifies; `M` and `M + 1` do not qualify |
+
+Coupon activity, expiry, and prior-use count are state-dependent eligibility preconditions, but they remain DOMAIN coverage because this endpoint documents calculation rather than a state change. The analysis does not infer integer-only amounts, currency precision, rounding, maximum discounts, a zero floor for `final_amount`, identifier ranges, case normalization, or undocumented error responses. The complete analysis is stored in [`review/pool-b/reports/domain-report.md`](review/pool-b/reports/domain-report.md).
 
 ### B.4. State Transition Testing Analysis
 
+State-transition testing is **not applicable** to the selected endpoint. FR-09 C1, C2, and C5 make coupon eligibility depend on stored conditions—active/inactive status, expiry, and the user's prior-use count—but the API specification describes `POST /api/apply-coupon` only as calculating discounted amounts.
+
+Neither authoritative source states that this call increments coupon usage, consumes or reserves a coupon, changes `is_active`, creates a destination state, follows a lifecycle sequence, or has an idempotency rule. A transition model would therefore invent behavior. Active/inactive, before/equal/after-expiry, and below/at/above-use-limit cases are covered under DOMAIN instead. The Phase-2 STATE candidate fragment is exactly `[]`. The applicability record is stored in [`review/pool-b/reports/state-report.md`](review/pool-b/reports/state-report.md).
+
 ### B.5. Security Testing Analysis
+
+All supplied requirements `SEC-01`–`SEC-07` were evaluated for this endpoint:
+
+| Requirement | Applicability and treatment |
+| --- | --- |
+| `SEC-01` | Not applicable: the endpoint has no password input, output, or storage behavior. |
+| `SEC-02` | Applicable: FR-09 C4 explicitly requires a valid JWT. Coverage includes a valid control and missing, malformed, invalid-signature, and expired JWT classes. |
+| `SEC-03` | Not applicable: this Checkout operation is not an Admin API. |
+| `SEC-04` | No direct API scenario: no UI rendering or response-reflection sink is documented for coupon input. |
+| `SEC-05` | Applicable at the query/implementation layer: controlled inert SQL/metacharacter values are applied to both `code` and client-controlled `user_id`. |
+| `SEC-06` | Not applicable: this is not a profile-update API and has no documented `role` input. |
+| `SEC-07` | Not applicable: the endpoint has no password-reset OTP behavior. |
+
+The reviewed security model contains eight scenarios (`SS-001`–`SS-008`). `SS-001`–`SS-005` cover the valid JWT control and missing or invalid credential classes. `SS-006`–`SS-008` cover inert query-like values in coupon `code` and `user_id`; these values must remain data and must not alter query semantics, broaden the per-user usage scope, select another user's record, modify database state, or expose query diagnostics.
+
+No HTTP status, error schema, or message is invented for the negative security scenarios. Black-box results may reveal unsafe behavior but cannot conclusively prove that parameterized queries are used; source review, query instrumentation, or equivalent implementation evidence is required for that claim. The sources also do not define JWT claims, issuer, audience, accepted algorithms, clock skew, or a binding between the JWT identity and body `user_id`. The complete analysis is stored in [`review/pool-b/reports/security-report.md`](review/pool-b/reports/security-report.md).
 
 ### B.6. AI-Generated Test Cases
 
 The final reviewed test cases for this pool are stored in: [`test-cases/b-discount-coupons.csv`](test-cases/b-discount-coupons.csv)
 
-The test cases were derived from the reviewed analyses in Sections A.2–A.5.
+The test cases were derived from the reviewed analyses in Sections B.2–B.5.
 
 | Testing Type | Number of Test Cases |
 | --- | ---: |
-| Contractual Testing | |
-| Domain Testing | |
-| State Transition Testing | |
-| Security Testing | |
-| **Total** | |
+| Contractual Testing | 15 |
+| Domain Testing | 44 |
+| State Transition Testing | 0 |
+| Security Testing | 8 |
+| **Total** | **67** |
+
+The suite uses sequential IDs `API-001`–`API-067` and exactly nine traceability fields per record. Every case targets `POST /api/apply-coupon`. Coverage includes `CR-001`–`CR-012`, `DP-001`–`DP-037`, `DB-001`–`DB-007`, and `SS-001`–`SS-008`; applicable security requirements are `SEC-02` and `SEC-05`. No placeholder STATE cases were generated.
+
+Human review corrected inclusive minimum-threshold labels, the mathematical oracle for `SAVE10` with `total_amount = 300001`, and the fixture preconditions for `BIGBUY`, `EXPIRED`, and nonexistent coupon codes. Same-category semantic deduplication removed 14 redundant DOMAIN records while preserving every partition/boundary basis and provisional specialist ID on retained cases. The final merged coverage includes `DP-021 + DB-001` just-below, `DP-013 + DB-004` equal-to-expiry, and `DP-030/DP-031 + DB-006` at/above the usage limit.
+
+Final validation confirmed sequential unique IDs, the exact nine-column schema, endpoint/category consistency, non-empty required content, complete reviewed traceability, and no remaining same-category semantic duplicate groups. Undocumented statuses, error representations, coercion, identity binding, rounding/precision, and endpoint-driven state mutation remain explicit gaps rather than invented behavior. These are candidate test cases only; the API tests have not yet been executed. Generation and validation details are recorded in [`review/pool-b/orchestration-status.md`](review/pool-b/orchestration-status.md).
 
 ### B.7. Human Cases
+
+| ID | Category | Test case | Expected result | Notes |
+| --- | --- | --- | --- | --- |
+| **API-068** | CONTRACT | Send otherwise valid JSON text using `Content-Type: text/plain`. | The request does not produce a successful coupon calculation. It is handled safely without a `5xx` server error. | The specification documents a JSON request body but does not define behavior for unsupported content types. The safe rejection expectation is human-added. |
+| **API-069** | CONTRACT | Send `Content-Type: application/json` with a completely **empty HTTP body**. | The request does not apply a coupon and does not return a successful calculation. It is handled safely without a `5xx` server error. | Previous AI cases tested missing fields and malformed JSON, but not a completely missing body. |
+| **API-070** | DOMAIN | Send an empty coupon code `""` while all other request conditions are valid. | The coupon is not applied because the submitted code does not identify an existing active coupon. | The AI tested unusual, null, numeric, and modified coupon-code values, but did not use the empty string as a separate representative. |
+| **API-071** | DOMAIN | Apply `VIP100` with `total_amount = 300000`, exactly equal to its documented minimum, with zero prior uses. | The coupon qualifies. `discount_amount = 100000` and `final_amount = 200000`. | The generated boundary cases covered SAVE10 and BIGBUY minimum amounts, but did not test the exact minimum of VIP100. |
+| **API-072** | SECURITY | An authenticated user has already reached the SAVE10 usage limit. Send another request with the same valid JWT but body `user_id = 0`. | The coupon must not be applied. Changing the client-supplied `user_id` must not allow the authenticated user to bypass the per-user usage limit. | JWT-to-body-user binding is not explicitly defined by the specification. This is a human-added security expectation based on FR-09 C4 and C5. |
+| **API-073** | DOMAIN | Arrange an active percent coupon with `discount_value = 1`, `min_order_amount = 0`, and remaining usage. Apply it to `total_amount = 500000`. | `discount_amount = 5000` and `final_amount = 495000`. | The AI tested the documented percentage coupon but did not test the lower positive percentage boundary allowed by the documented coupon rules. |
+| **API-074** | DOMAIN | Arrange an active percent coupon with `discount_value = 100`, `min_order_amount = 0`, and remaining usage. Apply it to `total_amount = 500000`. | `discount_amount = 500000` and `final_amount = 0`. | No upper percentage limit is documented. This case checks the percentage formula at a full-discount value. |
+
+The AI missed these cases mainly because the initial generation focused on representative partitions and boundaries that could be derived directly from the API specification. Some additional request representations, such as an unsupported content type and a completely empty body, were therefore not selected.
+
+The generated domain tests also covered the main documented coupon fixtures and representative boundaries, but did not systematically test every documented coupon at its own threshold or additional valid percentage values such as 1% and 100%.
+
+The security analysis tested JWT validity, SQL-like inputs, and per-user usage limits, but did not combine authentication identity with a manipulated `user_id` to check for usage-limit bypass. This gap requires a human security assumption because the exact JWT-to-body-user binding rule is not documented.
+
+These gaps show that specification-based AI generation can provide broad coverage, but human review is still useful for finding robustness cases, additional boundary combinations, and security interactions between otherwise separate input conditions.
 
 ### B.8. Newman Execution Analysis
 

@@ -2070,3 +2070,48 @@ All CR/DP/DB/SS traceability remains complete. No remaining same-category semant
   - The agent also found and merged two extra usage-limit overlaps.
   - Test IDs and category counts were regenerated consistently.
 - **Student Fixes:** None
+
+### Artifact 22
+
+- **User:** Vương Ngũ Tín Thành
+- **Date and Time:** 2026-08-22 16:16:52 GMT+7
+- **Model Used:** GPT-5.6 Sol
+- **Skill Used:** `ai-audit`
+- **Prompt:**
+
+````markdown
+I've reviewed [pool-b](review/pool-b/). Base on them, write B2 to B6 in [Main_Report.md](Main_Report.md) 
+````
+
+- **AI Output:**
+
+````markdown
+I’ll inspect the existing B-section structure in `Main_Report.md` and the reviewed Pool B reports/status, then write B.2–B.6 to match the report’s established style and preserve the reviewed conclusions.
+
+I’ve matched Pool A’s narrative style and extracted the final reviewed Pool B facts: 12 contract rules, 37 domain partitions, 7 boundary models, STATE not applicable, 8 security scenarios, and 67 final cases after semantic deduplication. I’m writing B.2–B.6 now.
+
+The write is complete, and verification found an older placeholder B.6 block still present immediately afterward. I’m removing that duplicate placeholder so Pool B has one authoritative B.6 section before B.7.
+
+Completed Sections B.2–B.6 in [Main_Report.md](D:\GitHub\SoftwareTesting-HW06\Main_Report.md:281).
+
+Added:
+
+- Contract, domain, state-applicability, and security analyses
+- Reviewed constraints, partitions, and boundaries
+- Links to all Pool B analysis reports
+- Final 67-case category breakdown and traceability
+- Human-review corrections and deduplication summary
+- Explicit note that tests have not been executed
+
+The obsolete duplicate B.6 placeholder was also removed.
+````
+
+- **File Modifications:**
+  - `File:` `Main_Report.md`.
+    - `Action:` edited and deleted content.
+    - `Deleted:` The obsolete duplicate Pool B B.6 placeholder block containing a second test-case link, the incorrect statement that Pool B cases came from Sections A.2–A.5, and an empty category-count table.
+    - `Replaced With:` Completed Sections B.2–B.6 in the established Pool A narrative style. B.2 documents CR-001–CR-012, inputs, response formulas, and contract gaps; B.3 documents DP-001–DP-037, DB-001–DB-007, baseline, partitions, corrected inclusive boundaries, and domain assumptions; B.4 records STATE `NOT_APPLICABLE`; B.5 evaluates SEC-01–SEC-07 and summarizes SS-001–SS-008; B.6 records the final 67-case breakdown, sequential IDs, complete traceability, human-review corrections, fourteen-case semantic deduplication, validation, and non-execution status.
+    - `Appended:` Links to the reviewed Pool B contract, domain, state, security, orchestration-status, and final CSV artifacts within Sections B.2–B.6.
+- **Verdict:** VALID
+- **Reasoning:** The AI correctly summarized the test cases analysis into Main Report.
+- **Student Fixes:** None
