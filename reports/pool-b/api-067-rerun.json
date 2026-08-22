@@ -1,0 +1,601 @@
+{
+  "collection": {
+    "_": {
+      "postman_id": "7a1179fc-0e38-565b-9453-9ce0adc2d055"
+    },
+    "item": [
+      {
+        "id": "73d6f6a2-a3e9-46e0-ac79-3124a16129bd",
+        "name": "API-067 - Verify that a controlled inert SQL/metacharacter string in client-controlled user_id remains literal data and cannot broaden or bypass the per-user usage lookup (SS-008; SEC-05).",
+        "request": {
+          "description": {
+            "content": "Test ID: API-067\nCategory: SECURITY\nObjective: Verify that a controlled inert SQL/metacharacter string in client-controlled user_id remains literal data and cannot broaden or bypass the per-user usage lookup (SS-008; SEC-05).\n\nPreconditions / Setup:\nA valid non-production test JWT is present; coupon and per-user usage records are isolated controlled fixtures; no user is identified by the supplied literal user_id value; baseline database snapshots are available.\n\nReviewed request input:\nHeader: Authorization: Bearer <valid test JWT>. JSON body: {\"code\":\"SAVE10\",\"total_amount\":500000,\"user_id\":\"1' OR '1'='1\"}.\n\nReviewed expected result:\nThe complete user_id value remains data and does not alter query semantics, broaden or bypass per-user usage scope, select another user's usage record, change database state, or obtain a discounted calculation through an injection effect.\n\nSpecification basis:\nSS-008; SEC-05, system requirements line 282: database queries must use parameterized queries rather than string concatenation; FR-09 C5, line 120: prior use by the user must be below max_uses_per_user.\n\nAssumptions / Notes:\nThe documented example represents user_id as a JSON number, but type validation and coercion are unspecified; this string is a controlled inert security input, not a claimed valid domain value. No HTTP status, error schema, exact message, or response form is prescribed. JWT-subject/body-user_id binding is unspecified. A black-box pass cannot conclusively prove parameterized-query use. Provisional specialist ID: SECURITY-P008.",
+            "type": "text/plain"
+          },
+          "url": {
+            "path": [
+              "api",
+              "apply-coupon"
+            ],
+            "host": [
+              "{{baseUrl}}"
+            ],
+            "query": [],
+            "variable": []
+          },
+          "header": [
+            {
+              "key": "Authorization",
+              "value": "Bearer {{authToken}}"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "method": "POST",
+          "body": {
+            "mode": "raw",
+            "raw": "{\"code\":\"SAVE10\",\"total_amount\":500000,\"user_id\":\"1' OR '1'='1\"}",
+            "options": {
+              "raw": {
+                "language": "json"
+              }
+            }
+          }
+        },
+        "response": [],
+        "event": [
+          {
+            "listen": "test",
+            "script": {
+              "id": "ab04e44a-651f-4bfd-841b-90a31fc40e5a",
+              "type": "text/javascript",
+              "exec": [
+                "console.log('[Pool B evidence] API-067','status='+pm.response.code);",
+                "pm.test('API-067 - response exposes no database query diagnostics',function(){",
+                "  var text=pm.response.text();",
+                "  var diagnostics=/(?:SQLITE_|SQLSTATE|no such (?:table|column)|near .{0,80} syntax error|SELECT \\* FROM|coupon_usage)/i;",
+                "  pm.expect(text).not.to.match(diagnostics);",
+                "});"
+              ],
+              "_lastExecutionId": "917b156e-4961-4022-a8b1-ff5e6b4674ab"
+            }
+          }
+        ]
+      }
+    ],
+    "event": [
+      {
+        "listen": "prerequest",
+        "script": {
+          "id": "86d42332-6f69-456e-a91f-4674d726368b",
+          "type": "text/javascript",
+          "exec": [
+            "var sid=pm.variables.replaceIn('{{studentId}}');",
+            "pm.request.headers.upsert({key:'X-Student-Id',value:sid});",
+            "console.log('[Pool B targeted evidence] API-067','studentId='+sid);"
+          ],
+          "_lastExecutionId": "2e907ee6-4206-4d0a-9b89-dd2d79392f10"
+        }
+      }
+    ],
+    "variable": [
+      {
+        "type": "string",
+        "value": "http://localhost:3000",
+        "key": "baseUrl"
+      },
+      {
+        "type": "string",
+        "value": "23127261",
+        "key": "studentId"
+      },
+      {
+        "type": "string",
+        "value": "",
+        "key": "authToken"
+      },
+      {
+        "type": "string",
+        "value": "",
+        "key": "invalidToken"
+      },
+      {
+        "type": "string",
+        "value": "",
+        "key": "invalidSignatureToken"
+      },
+      {
+        "type": "string",
+        "value": "",
+        "key": "expiredToken"
+      },
+      {
+        "type": "string",
+        "value": "",
+        "key": "limitReachedAuthToken"
+      },
+      {
+        "type": "string",
+        "value": "",
+        "key": "fixtureControlUrl"
+      },
+      {
+        "type": "string",
+        "value": "",
+        "key": "fixtureControlKey"
+      }
+    ],
+    "info": {
+      "_postman_id": "7a1179fc-0e38-565b-9453-9ce0adc2d055",
+      "name": "Pool B - Discount Coupon Reviewed Tests",
+      "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+      "description": {
+        "content": "Exactly one request for each final reviewed Pool B test case. Run through postman/run_pool_b_with_fixtures.py so the collection-level pre-request hook can apply deterministic per-case SQLite state and runtime JWT variables.",
+        "type": "text/plain"
+      }
+    }
+  },
+  "environment": {
+    "id": "cf29831b-75f7-4f85-99c0-d1755e2f04f9",
+    "values": [
+      {
+        "type": "any",
+        "value": "http://127.0.0.1:3000",
+        "key": "baseUrl"
+      },
+      {
+        "type": "any",
+        "value": "23127261",
+        "key": "studentId"
+      },
+      {
+        "type": "any",
+        "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjQxMDI0NDQ4MDAsImZpeHR1cmUiOiJwb29sLWItdmFsaWQiLCJpZCI6MSwicm9sZSI6InVzZXIifQ.58zLcBRO4X4_roOHlQ--uXxTcamEP9ifI0wCs4q_b9g",
+        "key": "authToken"
+      },
+      {
+        "type": "any",
+        "value": "not-a-jwt",
+        "key": "invalidToken"
+      },
+      {
+        "type": "any",
+        "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjQxMDI0NDQ4MDAsImZpeHR1cmUiOiJwb29sLWItaW52YWxpZC1zaWduYXR1cmUiLCJpZCI6MSwicm9sZSI6InVzZXIifQ.K4_41VWdYkYPKvVkWdQrWVZ_GMavcfBCc3w5XjBvfgA",
+        "key": "invalidSignatureToken"
+      },
+      {
+        "type": "any",
+        "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjEsImZpeHR1cmUiOiJwb29sLWItZXhwaXJlZCIsImlkIjoxLCJyb2xlIjoidXNlciJ9.3KB2vg8wkpM08Uqwsv45cgsrL9QMMfJj5FfGyH3MQv4",
+        "key": "expiredToken"
+      },
+      {
+        "type": "any",
+        "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjQxMDI0NDQ4MDAsImZpeHR1cmUiOiJwb29sLWItbGltaXQtcmVhY2hlZCIsImlkIjoxLCJyb2xlIjoidXNlciJ9.FTNYNyT-kYo2hoLE6V7vDcowfd0ljqf5yQVMy6m4U18",
+        "key": "limitReachedAuthToken"
+      }
+    ]
+  },
+  "globals": {
+    "id": "c6e5ab47-c780-4304-b171-03273583c163",
+    "values": []
+  },
+  "run": {
+    "stats": {
+      "iterations": {
+        "total": 1,
+        "pending": 0,
+        "failed": 0
+      },
+      "items": {
+        "total": 1,
+        "pending": 0,
+        "failed": 0
+      },
+      "scripts": {
+        "total": 2,
+        "pending": 0,
+        "failed": 0
+      },
+      "prerequests": {
+        "total": 1,
+        "pending": 0,
+        "failed": 0
+      },
+      "requests": {
+        "total": 1,
+        "pending": 0,
+        "failed": 0
+      },
+      "tests": {
+        "total": 1,
+        "pending": 0,
+        "failed": 0
+      },
+      "assertions": {
+        "total": 1,
+        "pending": 0,
+        "failed": 0
+      },
+      "testScripts": {
+        "total": 1,
+        "pending": 0,
+        "failed": 0
+      },
+      "prerequestScripts": {
+        "total": 1,
+        "pending": 0,
+        "failed": 0
+      }
+    },
+    "timings": {
+      "responseAverage": 35,
+      "responseMin": 35,
+      "responseMax": 35,
+      "responseSd": 0,
+      "dnsAverage": 0,
+      "dnsMin": 0,
+      "dnsMax": 0,
+      "dnsSd": 0,
+      "firstByteAverage": 0,
+      "firstByteMin": 0,
+      "firstByteMax": 0,
+      "firstByteSd": 0,
+      "started": 1787398923357,
+      "completed": 1787398923465
+    },
+    "executions": [
+      {
+        "cursor": {
+          "position": 0,
+          "iteration": 0,
+          "length": 1,
+          "cycles": 1,
+          "empty": false,
+          "eof": false,
+          "bof": true,
+          "cr": false,
+          "ref": "0999b3a3-394c-48b7-9bf2-2bb26c0698c2",
+          "httpRequestId": "67efe0d7-5924-4774-9b25-942954500bee"
+        },
+        "item": {
+          "id": "73d6f6a2-a3e9-46e0-ac79-3124a16129bd",
+          "name": "API-067 - Verify that a controlled inert SQL/metacharacter string in client-controlled user_id remains literal data and cannot broaden or bypass the per-user usage lookup (SS-008; SEC-05).",
+          "request": {
+            "description": {
+              "content": "Test ID: API-067\nCategory: SECURITY\nObjective: Verify that a controlled inert SQL/metacharacter string in client-controlled user_id remains literal data and cannot broaden or bypass the per-user usage lookup (SS-008; SEC-05).\n\nPreconditions / Setup:\nA valid non-production test JWT is present; coupon and per-user usage records are isolated controlled fixtures; no user is identified by the supplied literal user_id value; baseline database snapshots are available.\n\nReviewed request input:\nHeader: Authorization: Bearer <valid test JWT>. JSON body: {\"code\":\"SAVE10\",\"total_amount\":500000,\"user_id\":\"1' OR '1'='1\"}.\n\nReviewed expected result:\nThe complete user_id value remains data and does not alter query semantics, broaden or bypass per-user usage scope, select another user's usage record, change database state, or obtain a discounted calculation through an injection effect.\n\nSpecification basis:\nSS-008; SEC-05, system requirements line 282: database queries must use parameterized queries rather than string concatenation; FR-09 C5, line 120: prior use by the user must be below max_uses_per_user.\n\nAssumptions / Notes:\nThe documented example represents user_id as a JSON number, but type validation and coercion are unspecified; this string is a controlled inert security input, not a claimed valid domain value. No HTTP status, error schema, exact message, or response form is prescribed. JWT-subject/body-user_id binding is unspecified. A black-box pass cannot conclusively prove parameterized-query use. Provisional specialist ID: SECURITY-P008.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "api",
+                "apply-coupon"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"code\":\"SAVE10\",\"total_amount\":500000,\"user_id\":\"1' OR '1'='1\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "id": "ab04e44a-651f-4bfd-841b-90a31fc40e5a",
+                "type": "text/javascript",
+                "exec": [
+                  "console.log('[Pool B evidence] API-067','status='+pm.response.code);",
+                  "pm.test('API-067 - response exposes no database query diagnostics',function(){",
+                  "  var text=pm.response.text();",
+                  "  var diagnostics=/(?:SQLITE_|SQLSTATE|no such (?:table|column)|near .{0,80} syntax error|SELECT \\* FROM|coupon_usage)/i;",
+                  "  pm.expect(text).not.to.match(diagnostics);",
+                  "});"
+                ],
+                "_lastExecutionId": "917b156e-4961-4022-a8b1-ff5e6b4674ab"
+              }
+            }
+          ]
+        },
+        "request": {
+          "description": {
+            "content": "Test ID: API-067\nCategory: SECURITY\nObjective: Verify that a controlled inert SQL/metacharacter string in client-controlled user_id remains literal data and cannot broaden or bypass the per-user usage lookup (SS-008; SEC-05).\n\nPreconditions / Setup:\nA valid non-production test JWT is present; coupon and per-user usage records are isolated controlled fixtures; no user is identified by the supplied literal user_id value; baseline database snapshots are available.\n\nReviewed request input:\nHeader: Authorization: Bearer <valid test JWT>. JSON body: {\"code\":\"SAVE10\",\"total_amount\":500000,\"user_id\":\"1' OR '1'='1\"}.\n\nReviewed expected result:\nThe complete user_id value remains data and does not alter query semantics, broaden or bypass per-user usage scope, select another user's usage record, change database state, or obtain a discounted calculation through an injection effect.\n\nSpecification basis:\nSS-008; SEC-05, system requirements line 282: database queries must use parameterized queries rather than string concatenation; FR-09 C5, line 120: prior use by the user must be below max_uses_per_user.\n\nAssumptions / Notes:\nThe documented example represents user_id as a JSON number, but type validation and coercion are unspecified; this string is a controlled inert security input, not a claimed valid domain value. No HTTP status, error schema, exact message, or response form is prescribed. JWT-subject/body-user_id binding is unspecified. A black-box pass cannot conclusively prove parameterized-query use. Provisional specialist ID: SECURITY-P008.",
+            "type": "text/plain"
+          },
+          "url": {
+            "protocol": "http",
+            "port": "3000",
+            "path": [
+              "api",
+              "apply-coupon"
+            ],
+            "host": [
+              "127",
+              "0",
+              "0",
+              "1"
+            ],
+            "query": [],
+            "variable": []
+          },
+          "header": [
+            {
+              "key": "Authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjQxMDI0NDQ4MDAsImZpeHR1cmUiOiJwb29sLWItdmFsaWQiLCJpZCI6MSwicm9sZSI6InVzZXIifQ.58zLcBRO4X4_roOHlQ--uXxTcamEP9ifI0wCs4q_b9g"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "X-Student-Id",
+              "value": "23127261"
+            },
+            {
+              "key": "User-Agent",
+              "value": "PostmanRuntime/7.39.1",
+              "system": true
+            },
+            {
+              "key": "Accept",
+              "value": "*/*",
+              "system": true
+            },
+            {
+              "key": "Cache-Control",
+              "value": "no-cache",
+              "system": true
+            },
+            {
+              "key": "Postman-Token",
+              "value": "c4a7ee9b-4217-4c31-8962-6a4ceb07641c",
+              "system": true
+            },
+            {
+              "key": "Host",
+              "value": "127.0.0.1:3000",
+              "system": true
+            },
+            {
+              "key": "Accept-Encoding",
+              "value": "gzip, deflate, br",
+              "system": true
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive",
+              "system": true
+            },
+            {
+              "key": "Content-Length",
+              "value": "64",
+              "system": true
+            }
+          ],
+          "method": "POST",
+          "body": {
+            "mode": "raw",
+            "raw": "{\"code\":\"SAVE10\",\"total_amount\":500000,\"user_id\":\"1' OR '1'='1\"}",
+            "options": {
+              "raw": {
+                "language": "json"
+              }
+            }
+          }
+        },
+        "response": {
+          "id": "915b4114-75bc-4777-961f-4a7fb9593d45",
+          "status": "OK",
+          "code": 200,
+          "header": [
+            {
+              "key": "X-Powered-By",
+              "value": "Express"
+            },
+            {
+              "key": "Access-Control-Allow-Origin",
+              "value": "*"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json; charset=utf-8"
+            },
+            {
+              "key": "Content-Length",
+              "value": "131"
+            },
+            {
+              "key": "ETag",
+              "value": "W/\"83-DZ9yKstnd0ij/i34GV2s6rGuEOQ\""
+            },
+            {
+              "key": "Date",
+              "value": "Sat, 22 Aug 2026 11:42:03 GMT"
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive"
+            },
+            {
+              "key": "Keep-Alive",
+              "value": "timeout=5"
+            }
+          ],
+          "stream": {
+            "type": "Buffer",
+            "data": [
+              123,
+              34,
+              115,
+              117,
+              99,
+              99,
+              101,
+              115,
+              115,
+              34,
+              58,
+              116,
+              114,
+              117,
+              101,
+              44,
+              34,
+              99,
+              111,
+              117,
+              112,
+              111,
+              110,
+              95,
+              105,
+              100,
+              34,
+              58,
+              49,
+              48,
+              48,
+              49,
+              44,
+              34,
+              100,
+              105,
+              115,
+              99,
+              111,
+              117,
+              110,
+              116,
+              95,
+              97,
+              109,
+              111,
+              117,
+              110,
+              116,
+              34,
+              58,
+              45,
+              52,
+              53,
+              48,
+              48,
+              48,
+              48,
+              48,
+              44,
+              34,
+              102,
+              105,
+              110,
+              97,
+              108,
+              95,
+              97,
+              109,
+              111,
+              117,
+              110,
+              116,
+              34,
+              58,
+              53,
+              48,
+              48,
+              48,
+              48,
+              48,
+              48,
+              44,
+              34,
+              109,
+              101,
+              115,
+              115,
+              97,
+              103,
+              101,
+              34,
+              58,
+              34,
+              195,
+              129,
+              112,
+              32,
+              100,
+              225,
+              187,
+              165,
+              110,
+              103,
+              32,
+              116,
+              104,
+              195,
+              160,
+              110,
+              104,
+              32,
+              99,
+              195,
+              180,
+              110,
+              103,
+              33,
+              32,
+              71,
+              105,
+              225,
+              186,
+              163,
+              109,
+              32,
+              49,
+              48,
+              37,
+              34,
+              125
+            ]
+          },
+          "cookie": [],
+          "responseTime": 35,
+          "responseSize": 131
+        },
+        "id": "73d6f6a2-a3e9-46e0-ac79-3124a16129bd",
+        "assertions": [
+          {
+            "assertion": "API-067 - response exposes no database query diagnostics",
+            "skipped": false
+          }
+        ]
+      }
+    ],
+    "transfers": {
+      "responseTotal": 131
+    },
+    "failures": [],
+    "error": null
+  }
+}

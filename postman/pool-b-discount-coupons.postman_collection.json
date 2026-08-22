@@ -3658,10 +3658,10 @@
                 "type": "text/javascript",
                 "exec": [
                   "console.log('[Pool B evidence] API-067','status='+pm.response.code);",
-                  "pm.test('API-067 - no successful discounted calculation is returned',function(){",
-                  "  var data=null; try{data=pm.response.json();}catch(e){}",
-                  "  var successful=data&&Object.prototype.hasOwnProperty.call(data,'discount_amount')&&Object.prototype.hasOwnProperty.call(data,'final_amount');",
-                  "  pm.expect(Boolean(successful)).to.eql(false);",
+                  "pm.test('API-067 - response exposes no database query diagnostics',function(){",
+                  "  var text=pm.response.text();",
+                  "  var diagnostics=/(?:SQLITE_|SQLSTATE|no such (?:table|column)|near .{0,80} syntax error|SELECT \\* FROM|coupon_usage)/i;",
+                  "  pm.expect(text).not.to.match(diagnostics);",
                   "});"
                 ]
               }
@@ -3704,7 +3704,7 @@
           }
         },
         {
-          "name": "API-072 - Verify that changing client-supplied user_id cannot let an authenticated user bypass that user's SAVE10 usage limit.",
+          "name": "API-072 - Observe how per-user coupon usage eligibility is scoped when the valid JWT identifies user 1 but the body supplies user_id 0.",
           "event": [
             {
               "listen": "test",
@@ -3712,11 +3712,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "console.log('[Pool B evidence] API-072','status='+pm.response.code);",
-                  "pm.test('API-072 - no successful discounted calculation is returned',function(){",
-                  "  var data=null; try{data=pm.response.json();}catch(e){}",
-                  "  var successful=data&&Object.prototype.hasOwnProperty.call(data,'discount_amount')&&Object.prototype.hasOwnProperty.call(data,'final_amount');",
-                  "  pm.expect(Boolean(successful)).to.eql(false);",
-                  "});"
+                  "console.log('[Pool B manual observation] API-072','JWT/body identity binding is unspecified; no automated outcome oracle');"
                 ]
               }
             }
@@ -3754,7 +3750,7 @@
                 "apply-coupon"
               ]
             },
-            "description": "Test ID: API-072\nCategory: SECURITY\nObjective: Verify that changing client-supplied user_id cannot let an authenticated user bypass that user's SAVE10 usage limit.\n\nPreconditions / Setup:\nA valid JWT authenticates a controlled user who has already reached SAVE10's max_uses_per_user value 1. SAVE10 is active and unexpired and total_amount 500000 meets its minimum. The manipulated body value user_id 0 must not be treated as a different eligible user for bypass.\n\nReviewed request input:\nHeader: Authorization: Bearer <valid JWT for the limit-reached user>. JSON body: {\"code\":\"SAVE10\",\"total_amount\":500000,\"user_id\":0}.\n\nReviewed expected result:\nThe coupon is not applied. Changing the client-supplied user_id does not allow the authenticated user to bypass the per-user usage limit or obtain a successful discounted calculation.\n\nSpecification basis:\nFR-09 C4 line 119 requires a valid JWT; FR-09 C5 line 120 limits prior use by the user; SEC-02 line 279 requires a valid JWT for security-sensitive APIs.\n\nAssumptions / Notes:\nHUMAN-ADDED SECURITY EXPECTATION. JWT-to-body-user identity binding is not explicitly defined by the specification, so this is an external authorization oracle. No exact HTTP status, message, or error schema is asserted."
+            "description": "Test ID: API-072\nCategory: SECURITY\nObjective: Observe how per-user coupon usage eligibility is scoped when the valid JWT identifies user 1 but the body supplies user_id 0.\n\nPreconditions / Setup:\nA valid JWT authenticates controlled user 1, who has already reached SAVE10's max_uses_per_user value 1. SAVE10 is active and unexpired and total_amount 500000 meets its minimum. The body deliberately supplies user_id 0, which differs from the JWT identity and has no controlled user record.\n\nReviewed request input:\nHeader: Authorization: Bearer <valid JWT for the limit-reached user>. JSON body: {\"code\":\"SAVE10\",\"total_amount\":500000,\"user_id\":0}.\n\nReviewed expected result:\nRecord whether the coupon is applied or rejected. Neither outcome establishes an FR-09 conformance failure for identity binding because the specification does not define whether usage is keyed to the JWT subject or the body user_id. No fixed response oracle is asserted.\n\nSpecification basis:\nFR-09 C4 line 119 requires a valid JWT; FR-09 C5 line 120 limits prior use by the user; SEC-02 line 279 requires a valid JWT for security-sensitive APIs; API specification §5.1 lines 156-162 explicitly includes body user_id.\n\nAssumptions / Notes:\nHUMAN-ADDED EXPLORATORY CASE. JWT-to-body-user identity binding is not defined by the specification or approved reviewed context. The original rejection expectation was unsupported and must not be used as an SUT-bug oracle. No HTTP status, message, error schema, or identity-binding outcome is asserted."
           }
         }
       ]

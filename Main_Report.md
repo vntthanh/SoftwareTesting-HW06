@@ -372,7 +372,7 @@ Final validation confirmed 74 sequential unique IDs, the exact nine-column final
 | **API-069** | CONTRACT | Send `Content-Type: application/json` with a completely **empty HTTP body**. | The request does not apply a coupon and does not return a successful calculation. It is handled safely without a `5xx` server error. | Previous AI cases tested missing fields and malformed JSON, but not a completely missing body. |
 | **API-070** | DOMAIN | Send an empty coupon code `""` while all other request conditions are valid. | The coupon is not applied because the submitted code does not identify an existing active coupon. | The AI tested unusual, null, numeric, and modified coupon-code values, but did not use the empty string as a separate representative. |
 | **API-071** | DOMAIN | Apply `VIP100` with `total_amount = 300000`, exactly equal to its documented minimum, with zero prior uses. | The coupon qualifies. `discount_amount = 100000` and `final_amount = 200000`. | The generated boundary cases covered SAVE10 and BIGBUY minimum amounts, but did not test the exact minimum of VIP100. |
-| **API-072** | SECURITY | An authenticated user has already reached the SAVE10 usage limit. Send another request with the same valid JWT but body `user_id = 0`. | The coupon must not be applied. Changing the client-supplied `user_id` must not allow the authenticated user to bypass the per-user usage limit. | JWT-to-body-user binding is not explicitly defined by the specification. This is a human-added security expectation based on FR-09 C4 and C5. |
+| **API-072** | SECURITY | With a valid JWT for user 1 and body `user_id = 0`, observe whether usage eligibility is scoped to the JWT identity or the body value. | Record whether the coupon is applied or rejected; neither outcome is an FR-09 identity-binding failure because no JWT/body binding rule is specified. | The original rejection expectation was withdrawn as an unsupported human assumption. The case is now exploratory and has no automated outcome oracle. |
 | **API-073** | DOMAIN | Arrange an active percent coupon with `discount_value = 1`, `min_order_amount = 0`, and remaining usage. Apply it to `total_amount = 500000`. | `discount_amount = 5000` and `final_amount = 495000`. | The AI tested the documented percentage coupon but did not test the lower positive percentage boundary allowed by the documented coupon rules. |
 | **API-074** | DOMAIN | Arrange an active percent coupon with `discount_value = 100`, `min_order_amount = 0`, and remaining usage. Apply it to `total_amount = 500000`. | `discount_amount = 500000` and `final_amount = 0`. | No upper percentage limit is documented. This case checks the percentage formula at a full-discount value. |
 
@@ -390,7 +390,7 @@ The seven human-authored cases above are merged into the final CSV as `API-068`�
 
 #### Scope and evidence
 
-This analysis uses the real Newman JSON artifact [`reports/pool-b/pool-b-run.json`](reports/pool-b/pool-b-run.json), the 74 reviewed cases in [`test-cases/b-discount-coupons.csv`](test-cases/b-discount-coupons.csv), the generated collection in [`postman/pool-b-discount-coupons.postman_collection.json`](postman/pool-b-discount-coupons.postman_collection.json), and [`reference/api_specification.md`](reference/api_specification.md). Pool A Section A.8 supplies the presentation format. The test cases and collection were not modified.
+This analysis uses the real Newman JSON artifact [`reports/pool-b/pool-b-run.json`](reports/pool-b/pool-b-run.json), the 74 reviewed cases in [`test-cases/b-discount-coupons.csv`](test-cases/b-discount-coupons.csv), the generated collection in [`postman/pool-b-discount-coupons.postman_collection.json`](postman/pool-b-discount-coupons.postman_collection.json), and [`reference/api_specification.md`](reference/api_specification.md). Pool A Section A.8 supplies the presentation format. The original full-run evidence remains unchanged; the later triage resolution corrected only the faulty `API-067` assertion and the unsupported `API-072` human oracle.
 
 Execution status and defect triage are deliberately separate. `FAIL_ASSERTION` means that a reviewed automated oracle failed; it does not by itself prove an SUT defect. Likewise, `PASS` with `NO_AUTOMATED_ASSERTIONS` confirms only that the request completed, while its explicit manual oracle remains pending.
 
@@ -408,8 +408,8 @@ Execution status and defect triage are deliberately separate. `FAIL_ASSERTION` m
 | Request, pre-request-script, and test-script errors | 0 / 0 / 0 |
 | Logical execution statuses | `PASS`: 54; `FAIL_ASSERTION`: 20; `REQUEST_ERROR`: 0; `RUNTIME_ERROR`: 0; `NOT_EXECUTED`: 0 |
 | PASS detail | 7 cases passed assertions; 47 cases completed with `NO_AUTOMATED_ASSERTIONS` |
-| Explicit manual-oracle requirements | 50 cases: 47 manual/exploratory-only cases plus `API-065`–`API-067`, whose black-box assertions do not prove all required database/query effects |
-| Failed-case triage | `SUT_BUG`: 18; `TEST_DEFECT`: 1; `NEEDS_MANUAL_REVIEW`: 1; `SETUP_DEFECT`: 0 |
+| Explicit manual-oracle requirements after final review | 50 cases: 48 manual/exploratory-only cases (including corrected `API-072`) plus `API-065` and `API-066`, whose black-box assertions do not prove all required database/query effects; `API-067` is complete through implementation and database-state evidence |
+| Failed-case triage after final review | `SUT_BUG`: 18; `TEST_DEFECT`: 2 (`API-067`, resolved; `API-072`, unsupported assumption); `NEEDS_MANUAL_REVIEW`: 0; `SETUP_DEFECT`: 0 |
 | Additional suspicious manual-only executions | 6 `SUT_BUG` candidates (`API-013`, `API-014`, `API-020`, `API-021`, `API-035`, `API-047`) |
 | Total SUT bug-candidate case observations | 24 (18 failed assertions plus 6 suspicious manual-only executions; this is a case count, not a count of unique root causes) |
 
@@ -491,8 +491,8 @@ Every row below is the single `POST /api/apply-coupon` step unless the reviewed 
 | API-064 | `FAIL_ASSERTION` | 200 OK | FAIL — successful calculation returned for expired JWT | NO |
 | API-065 | `PASS` | 404 Not Found | PASS — no successful calculation returned | YES — query structure/diagnostics/state require external inspection |
 | API-066 | `PASS` | 404 Not Found | PASS — no successful calculation returned | YES — parameterization and persistent state require external inspection |
-| API-067 | `FAIL_ASSERTION` | 200 OK | FAIL — assertion expected no successful calculation | YES — black-box result cannot prove query semantics or state effects |
-| API-072 | `FAIL_ASSERTION` | 200 OK | FAIL — manipulated `user_id` obtained a successful calculation | NO — automated response oracle ran; requirement intent still needs triage review |
+| API-067 | `PASS` — targeted rerun | 200 OK | PASS — response exposes no database query diagnostics | NO — bound-query implementation and unchanged before/after database snapshot complete the non-black-box checks |
+| API-072 | `FAIL_ASSERTION` — historical full-run result; oracle withdrawn | 200 OK | Historical FAIL — the old assertion required rejection. Current exploratory case has `NO_AUTOMATED_ASSERTIONS` and was not rerun. | YES — record the unspecified JWT/body identity behavior without a conformance verdict |
 
 #### Failed and suspicious-case triage
 
@@ -518,8 +518,8 @@ The following table classifies every failed assertion individually. Causes descr
 | API-062 | `SUT_BUG` | The operation returned a successful calculation for a malformed JWT. |
 | API-063 | `SUT_BUG` | The operation returned a successful calculation for a JWT with an invalid signature. |
 | API-064 | `SUT_BUG` | The operation returned a successful calculation for an expired JWT. |
-| API-067 | `TEST_DEFECT` | The assertion treats any successful response as proof of SQL/query bypass, but the reviewed case says `user_id` type validation and JWT/body binding are unspecified and requires external proof of query/state effects. The response alone cannot establish the claimed injection effect. |
-| API-072 | `NEEDS_MANUAL_REVIEW` | The failure is real under the human-added identity-binding expectation, but the reviewed case explicitly states that JWT-to-body `user_id` binding is not specified. Confirm the intended authorization rule before filing it as an SUT bug. |
+| API-067 | `TEST_DEFECT` — **resolved** | The old assertion incorrectly treated any successful calculation as SQL/query bypass. Black-box execution can verify only observable effects such as database diagnostics; source inspection confirms bound parameters for both coupon and usage queries, the endpoint contains no write statement, the targeted rerun passed, and controlled database state was byte-for-byte unchanged before/after. This is not an SUT bug candidate. |
+| API-072 | `TEST_DEFECT` — **unsupported requirement assumption** | API specification §5.1 explicitly supplies body `user_id`; FR-09 C4 requires a valid JWT and C5 limits uses by “the user,” but neither defines JWT-subject/body binding. The reviewed context explicitly prohibits asserting that relationship. The SUT reads body `user_id` and does not derive it from the JWT for this route. Therefore the observed 200 response is valid under the documented body-driven behavior for this particular question, while the separate failure to enforce JWT remains covered by `API-061`–`API-064`. The human case was corrected to exploratory and removed from bug candidacy. |
 
 Six cases had no automated assertion but produced evidence that conflicts with an explicit reviewed requirement or mathematical formula:
 
@@ -532,7 +532,7 @@ Six cases had no automated assertion but produced evidence that conflicts with a
 | API-035 | `SUT_BUG` | The manually observed percent result was `-4500005` / `5000005.5`, not the documented 10% / final-amount formulas. |
 | API-047 | `SUT_BUG` | The manually observed percent result was `-2700009` / `3000010`, not the documented formulas; precision policy cannot explain the magnitude or sign. |
 
-All other explicit manual-oracle cases remain `NEEDS_MANUAL_REVIEW`: `API-004`–`API-012`, `API-015`, `API-017`–`API-019`, `API-023`–`API-030`, `API-032`, `API-034`, `API-036`–`API-046`, `API-048`, `API-050`, `API-053`, `API-055`, `API-056`, `API-058`, `API-059`, `API-065`, and `API-066`. `API-067` also retains a manual database/query oracle despite its primary `TEST_DEFECT` triage. `API-072` needs specification-owner review of its external authorization assumption, but its automated response oracle did run. Thus 50 explicit manual checks remain open in total.
+All other explicit manual-oracle cases remain `NEEDS_MANUAL_REVIEW`: `API-004`–`API-012`, `API-015`, `API-017`–`API-019`, `API-023`–`API-030`, `API-032`, `API-034`, `API-036`–`API-046`, `API-048`, `API-050`, `API-053`, `API-055`, `API-056`, `API-058`, `API-059`, `API-065`, `API-066`, and the now-exploratory `API-072`. `API-067` no longer retains a pending manual oracle because implementation inspection and the targeted before/after database comparison supplied the required evidence. The total remains 50: `API-067` was completed while `API-072` became an explicit manual observation.
 
 No case is classified as `SETUP_DEFECT`: all 74 fixture states were reset and verified by the authenticated local controller, every intended ID ran, and Newman recorded no request, pre-request-script, or test-script errors.
 
@@ -543,9 +543,24 @@ No case is classified as `SETUP_DEFECT`: all 74 fixture states were reset and ve
 - Correct and retest inclusive minimum eligibility with `API-002`, `API-003`, `API-022`, `API-031`, `API-033`, and `API-071`.
 - Enforce JWT validation before coupon evaluation, then rerun `API-013`, `API-014`, `API-020`, `API-021`, and `API-061`–`API-064`.
 - Return a controlled 4xx response for unsupported body media types and rerun `API-068`; retain `API-069` as the zero-byte-body robustness check.
-- Review `API-067`'s oracle before changing either the test or SUT: use database snapshots/instrumentation or implementation inspection to test query parameterization and state effects. Do not infer SQL injection solely from the 200 response.
-- Decide and document whether coupon usage is keyed to the authenticated JWT subject or the client-supplied `user_id`; only then resolve `API-072` and the related exploratory identity cases.
-- Complete the remaining 50 explicit manual checks. No test-case or collection changes were made during this analysis.
+- `API-067` is resolved: retain the corrected diagnostic assertion and the implementation/database evidence; do not report the historical failed assertion as an SUT bug.
+- `API-072` is resolved as an unsupported requirement assumption: do not file a bug from its historical failure. The reviewed row and collection now preserve it only as an exploratory identity-scoping observation. A future binding requirement would need an authoritative specification change before becoming an automated oracle.
+- Complete the remaining 50 explicit manual checks. Apart from the two resolved triage corrections, no Pool B case was redesigned or expanded.
+
+#### Targeted `API-067` rerun and implementation evidence
+
+| Metric | Result |
+| --- | --- |
+| Artifact | [`reports/pool-b/api-067-rerun.json`](reports/pool-b/api-067-rerun.json) |
+| Execution window | 2026-08-22 18:42:03.357 to 18:42:03.465 (GMT+7) |
+| Scope | Exactly one request: `API-067` |
+| Requests / tests / assertions | 1 / 1 / 1 |
+| Outcome | `PASS`; 200 OK; 1 assertion passed, 0 failed; no request or script errors |
+| Corrected black-box oracle | Response exposes no recognizable database query diagnostics; it does not require rejection or prohibit an ordinary calculation solely because `user_id` is a string |
+| Implementation evidence | The coupon lookup and `coupon_usage` count lookup use `?` placeholders with separate bound parameter arrays. No client input is concatenated into either SQL statement. The apply-coupon route performs only reads. |
+| State evidence | Controlled coupons, coupon usage, controlled users, and SQLite sequence snapshot were unchanged after the request; the pre-run SUT database snapshot was restored afterward |
+
+The original `API-067` 200 response could not prove or disprove parameterization by itself. The corrected automated check plus implementation and database-state evidence establish that the literal value did not alter query structure or state. Only this affected case was rerun.
 
 #### Coverage and reconciliation notes
 
@@ -553,6 +568,7 @@ No case is classified as `SETUP_DEFECT`: all 74 fixture states were reset and ve
 - Newman `run.stats` reports 148 requests because the runtime performs one fixture-reset helper request for each of the 74 SUT requests. The embedded collection still contains 74 reviewed leaf requests.
 - The detailed execution array repeats each SUT execution object twice with the same immutable item ID and `httpRequestId`. Correlating those duplicate representations yields 74 logical executions, 27 assertions, and 20 assertion failures, matching Newman statistics; no duplicate error was counted twice.
 - HTTP 4xx/5xx responses were not classified as failures merely because of status. `API-068` fails because its explicit assertion requires a status below 500; exploratory cases without a fixed HTTP oracle retain execution-only `PASS` plus a pending manual oracle.
+- The original full-run totals remain 27 assertions (7 passed, 20 failed). The isolated corrected `API-067` rerun contributes a separate 1 passed assertion and does not rewrite the historical artifact. `API-072` was not rerun; its historical assertion failure is retained as evidence of the withdrawn test oracle, not as a product failure.
 
 ## Pool C: Admin Order Management
 

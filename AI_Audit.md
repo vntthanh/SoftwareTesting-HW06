@@ -2605,3 +2605,91 @@ The report includes per-case outcomes, triage for every failed or suspicious cas
   - Remove the outdated execution statement from B.6.
   - State that the Postman collection was generated and Pool B was executed with Newman.
   - Refer readers to Section B.8 for execution results.
+
+### Artifact 28
+
+- **User:** Vương Ngũ Tín Thành
+- **Date and Time:** 2026-08-22 19:12:17 GMT+7
+- **Model Used:** GPT-5.6 Sol
+- **Skill Used:**
+  - `newman-result-analyzer`
+  - `ai-audit`
+- **Prompt:**
+
+````markdown
+Resolve the remaining Pool B triage cases before bug reporting.
+
+Focus only on:
+
+- `API-067` — currently `TEST_DEFECT`
+- `API-072` — currently `NEEDS_MANUAL_REVIEW`
+
+For `API-067`:
+
+- Review the test oracle against the reviewed security analysis and SUT behavior.
+- Determine what can actually be verified from black-box execution.
+- If needed, use database inspection or implementation evidence to verify query/state effects.
+- Correct only the faulty assertion/oracle if justified.
+- Re-run only the affected case after correction.
+
+For `API-072`:
+
+- Review the API specification and SUT implementation to determine whether coupon usage must be tied to the authenticated JWT user or the body `user_id`.
+- Decide whether the observed behavior is an SUT bug, valid behavior, or an unsupported requirement assumption.
+- Do not change the reviewed human test case unless its expectation is unsupported.
+
+Update Section B.8 with the final classifications and evidence.
+````
+
+- **AI Output:**
+
+````markdown
+Resolved both Pool B triage cases and updated [Main_Report.md](D:/GitHub/SoftwareTesting-HW06/Main_Report.md:521).
+
+- `API-067`: `TEST_DEFECT — resolved`
+  - Replaced the over-strong assertion with a database-diagnostics oracle.
+  - Implementation inspection confirmed parameterized queries and no write operations.
+  - Targeted rerun: 1 request, 1 passed assertion, 0 failures.
+  - Database state was unchanged and restored afterward.
+  - Evidence: [api-067-rerun.json](D:/GitHub/SoftwareTesting-HW06/reports/pool-b/api-067-rerun.json).
+
+- `API-072`: `TEST_DEFECT — unsupported requirement assumption`
+  - Neither the specification nor reviewed context binds body `user_id` to the JWT subject.
+  - The observed behavior is valid for the documented body-driven identity model.
+  - Converted the reviewed case to exploratory and removed its unsupported automated oracle.
+  - It is not an SUT bug candidate.
+
+Updated the [Postman collection](D:/GitHub/SoftwareTesting-HW06/postman/pool-b-discount-coupons.postman_collection.json) and [reviewed CSV](D:/GitHub/SoftwareTesting-HW06/test-cases/b-discount-coupons.csv:73) only as required for these two corrections. Collection schema validation passes, all 74 IDs remain intact, and only `API-067` was rerun.
+````
+
+- **File Modifications:**
+  - `File:` `Main_Report.md`.
+    - `Action:` edited.
+    - `Deleted:` The unresolved `API-067` test-defect and `API-072` manual-review conclusions, obsolete manual-oracle wording, and recommendations to investigate these two cases later.
+    - `Replaced With:` Final Section B.8 classifications, corrected manual-oracle accounting, targeted rerun statistics, implementation and database-state evidence, and final bug-reporting guidance. Section B.7's `API-072` row was synchronized with its exploratory disposition.
+    - `Appended:` A targeted `API-067` rerun and implementation-evidence subsection linking the new Newman artifact.
+  - `File:` `postman/pool-b-discount-coupons.postman_collection.json`.
+    - `Action:` edited.
+    - `Deleted:` `API-067`'s unsupported no-success assertion and `API-072`'s unsupported rejection assertion and identity-binding description.
+    - `Replaced With:` An `API-067` database-diagnostics assertion and an exploratory `API-072` name, description, and observation-only script with no fixed outcome oracle.
+    - `Appended:` None.
+  - `File:` `test-cases/b-discount-coupons.csv`.
+    - `Action:` edited.
+    - `Deleted:` `API-072`'s unsupported expectation that body `user_id` must be bound to the JWT identity and the coupon must be rejected.
+    - `Replaced With:` An exploratory `API-072` objective and expected result that record identity-scoping behavior without treating either outcome as an FR-09 conformance failure.
+    - `Appended:` None.
+  - `File:` `reports/pool-b/api-067-rerun.json`.
+    - `Action:` created.
+    - `Deleted:` None.
+    - `Replaced With:` None.
+    - `Appended:` Newman JSON evidence for exactly one `API-067` request, one passed assertion, zero failures, and no request or script errors.
+  - `File:` `tmp/run_api067_targeted.py`.
+    - `Action:` created and deleted file.
+    - `Deleted:` The temporary one-case Newman/database comparison runner after successful use.
+    - `Replaced With:` None.
+    - `Appended:` None.
+- **Verdict:** VALID
+- **Reasoning:**
+  - Resolved the `API-067` test defect.
+  - Resolved `API-072` as an unsupported requirement assumption.
+- **Student Fixes:** None
