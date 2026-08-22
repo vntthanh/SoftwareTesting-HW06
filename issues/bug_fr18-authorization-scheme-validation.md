@@ -22,7 +22,9 @@ The non-Bearer request does not satisfy the documented authorization prerequisit
 
 ### Actual Result
 
-The request is authenticated despite using the `Basic` scheme, and the target order changes from `pending` to `confirmed`. The Pool C Newman artifact contains the failed unchanged-state assertion: [`pool-c.json`](../reports/pool-c/pool-c.json).
+The request is authenticated despite using the `Basic` scheme, and the target order changes from `pending` to `confirmed`. The Pool C Newman artifact contains the failed unchanged-state assertion.
+
+![bug_fr18-authorization-scheme-validation.png](evidence/bug_fr18-authorization-scheme-validation.png)
 
 ### Environment
 

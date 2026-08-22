@@ -25,6 +25,8 @@ The coupon qualifies at the exact minimum and returns the documented fixed or pe
 
 The endpoint returns `400 Bad Request` with a below-minimum error at the exact boundary, and the expected calculation fields are absent. The Pool B Newman artifact records six affected boundary failures: [`pool-b-run.json`](../reports/pool-b/pool-b-run.json).
 
+![bug_fr09-inclusive-minimum-threshold](evidence/bug_fr09-inclusive-minimum-threshold.png)
+
 ### Environment
 
 - **Browser/OS:** Newman CLI on Windows (browser not applicable)

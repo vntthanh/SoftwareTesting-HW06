@@ -22,7 +22,9 @@ The transition is rejected and the order remains in the final `canceled` state.
 
 ### Actual Result
 
-The endpoint accepts the invalid transition and changes the target order from `canceled` to `delivered`. The Pool C Newman artifact contains the failed final-state assertion: [`pool-c.json`](../reports/pool-c/pool-c.json).
+The endpoint accepts the invalid transition and changes the target order from `canceled` to `delivered`. The Pool C Newman artifact contains the failed final-state assertion.
+
+![bug_fr18-canceled-final-state-transition.png](evidence/bug_fr18-canceled-final-state-transition.png)
 
 ### Environment
 

@@ -24,7 +24,7 @@ Every invalid `newPassword` request is rejected with `400 Bad Request`; the acco
 
 The endpoint returns `200 OK` for the tested invalid `newPassword` values instead of rejecting them. For API-080, the object-valued password receives `200 OK` and the subsequent valid retry receives `400 Bad Request`, demonstrating that the token was consumed by the invalid request.
 
-![bug_fr03-new-password-validation-bypass-a.png](evidence/bug_fr03-new-password-validation-bypass-b.png)
+![bug_fr03-new-password-validation-bypass-a.png](evidence/bug_fr03-new-password-validation-bypass-a.png)
 
 ![bug_fr03-new-password-validation-bypass-b.png](evidence/bug_fr03-new-password-validation-bypass-b.png)
 

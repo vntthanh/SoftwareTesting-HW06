@@ -23,7 +23,9 @@ The non-Admin request is denied and the target order remains `pending`; only the
 
 ### Actual Result
 
-The non-Admin request is accepted, returns `200 OK` in API-085, and changes the target order from `pending` to `confirmed`. Three independent single-request cases and the ordered two-step flow reproduce the unauthorized mutation in the Pool C Newman artifact: [`pool-c.json`](../reports/pool-c/pool-c.json).
+The non-Admin request is accepted, returns `200 OK` in API-085, and changes the target order from `pending` to `confirmed`. Three independent single-request cases and the ordered two-step flow reproduce the unauthorized mutation in the Pool C Newman artifact.
+
+![bug_fr18-admin-role-enforcement.png](evidence/bug_fr18-admin-role-enforcement.png)
 
 ### Environment
 

@@ -25,6 +25,8 @@ The apply-coupon endpoint calculates percentage discounts incorrectly. Qualifyin
 
 The endpoint returns invalid values such as `discount_amount=-4500000` and `final_amount=5000000` for SAVE10 on 500000, `discount_amount=0` for a 1% coupon on 500000, and `discount_amount=-49500000` for a 100% coupon. The Pool B Newman artifact records the affected assertion failures and manual observations: [`pool-b-run.json`](../reports/pool-b/pool-b-run.json).
 
+![bug_fr09-percent-discount-calculation](evidence/bug_fr09-percent-discount-calculation.png)
+
 ### Environment
 
 - **Browser/OS:** Newman CLI on Windows (browser not applicable)

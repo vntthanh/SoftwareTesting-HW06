@@ -23,7 +23,9 @@ Coupon application is denied unless the request contains a JWT that passes the S
 
 ### Actual Result
 
-Each missing or invalid credential variant reaches coupon calculation and returns `200 OK` with `discount_amount` and `final_amount`. The Pool B Newman artifact contains the failed automated security assertions and corroborating manual observations: [`pool-b-run.json`](../reports/pool-b/pool-b-run.json).
+Each missing or invalid credential variant reaches coupon calculation and returns `200 OK` with `discount_amount` and `final_amount`. The Pool B Newman artifact contains the failed automated security assertions and corroborating manual observations.
+
+![bug_fr09-jwt-validation-bypass.png](evidence/bug_fr09-jwt-validation-bypass.png)
 
 ### Environment
 
