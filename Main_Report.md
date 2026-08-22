@@ -578,25 +578,96 @@ Pool C covers **FR-18 – Admin Order Management**. This report selects `PUT /ap
 
 ### C.2. Contractual Testing Analysis
 
+The selected endpoint is documented as `PUT /api/admin/orders/:id/status`. It is part of the Admin API, requires a valid Bearer JWT whose token carries `role = 'admin'`, and accepts a JSON representation containing the requested order `status`:
+
+| Input | Documented representation | Reviewed constraint |
+| --- | --- | --- |
+| `id` | Path placeholder in `/api/admin/orders/:id/status` | Identifies the order being updated; its type, syntax, range, canonical form, and nonexistent-order behavior are not specified |
+| `Authorization` | `Bearer <token>` header | The JWT must be valid and contain `role = 'admin'`; token-validation details and failure responses are not specified |
+| `status` | JSON string in the request body | Supported vocabulary is `pending`, `confirmed`, `shipping`, `delivered`, and `canceled`; every change must follow FR-10 |
+
+The reviewed contract model contains rules `CR-001`–`CR-013`. These cover the method and route, structural presence of the path identifier, Bearer representation, JWT validity, Admin-role authorization, JSON body representation, string-valued `status`, the five-value vocabulary, lifecycle constraints, final-state guards, additional or duplicate body members, semantic success, and the limited invalid-transition error contract.
+
+FR-10's diagram is treated as authoritative and exhaustive for non-self transitions. The five diagrammed transitions may succeed, while every omitted non-self transition is invalid. In particular, `shipping → canceled` is invalid: FR-10 line 161 does not authorize that edge, and FR-18 requires Admin changes to follow FR-10. Same-state requests remain unspecified and are not assigned a success or rejection oracle.
+
+The endpoint has no documented success status, error status, response media type, response headers, response body schema, or exact message. FR-10 requires an invalid transition to return an error with an appropriate message, but does not define its wire format or wording. The sources also do not formally define body/field requiredness, nullability, coercion, malformed-body handling, additional properties, duplicate keys, or exact `Content-Type` behavior. Contract cases for those gaps are therefore exploratory or semantic-only and do not invent HTTP codes or schemas. The complete analysis is stored in [`review/pool-c/reports/contract-report.md`](review/pool-c/reports/contract-report.md).
+
 ### C.3. Domain Testing Analysis
+
+Domain analysis uses an existing order in `pending`, a valid Admin JWT, and `status = "confirmed"` as the valid baseline. The concrete order ID and token are controlled fixtures rather than specification constants. `Content-Type: application/json` is used as a representation assumption because the specification labels the body as JSON, but strict media-type behavior is not inferred.
+
+The reviewed model defines 28 equivalence partitions (`DP-001`–`DP-028`) across the path identifier, authorization header, `status` value, and JSON body:
+
+- `id` partitions cover an existing compatible order, an existing order whose source state makes the transition invalid, a nonexistent identifier, an omitted path segment, alternate lexical forms, and the literal path text `null`;
+- authorization partitions cover a valid Admin JWT, an omitted or empty header, a wrong scheme or malformed representation, an invalid JWT, and a valid non-Admin JWT;
+- `status` partitions cover all five documented values, an unknown value, an empty string, case or whitespace variants, `null`, non-string JSON types, and an omitted property;
+- body partitions cover an empty or absent body, malformed JSON, a non-object top-level value, additional properties, and duplicate `status` properties.
+
+The semantic result of a destination value depends on the current state of the order. The source-state fixture must therefore be controlled whenever a partition exercises transition validity. The five supported non-self transitions are `pending → confirmed`, `confirmed → shipping`, `shipping → delivered`, `pending → canceled`, and `confirmed → canceled`. The seven reviewed omitted transitions are invalid, and both `delivered` and `canceled` are final states. Same-state behavior remains outside the approved oracle.
+
+No supported boundary-value IDs exist. The specification supplies no numeric, length, count, time, or other ordered limit for `id`, the Authorization header, `status`, or the JSON body. The five status strings form an enumeration, while lifecycle ordering belongs to state-transition testing; neither supports invented `DB-*` boundary cases.
+
+The model preserves unresolved behavior for identifier syntax and existence, case/whitespace normalization, strict type enforcement, requiredness, nullability, coercion, duplicate/additional properties, malformed or non-object JSON, media types, exact response details, and JWT mechanics. `DP-004` is explicitly retained as an operation-level routing limitation because omitting the `id` path segment normally addresses a different route rather than supplying an empty value to this operation. The complete analysis is stored in [`review/pool-c/reports/domain-report.md`](review/pool-c/reports/domain-report.md).
 
 ### C.4. State Transition Testing Analysis
 
+State-transition testing is **applicable** because this endpoint mutates the order lifecycle. The reviewed state model contains five states:
+
+| State | Role in the lifecycle |
+| --- | --- |
+| `pending` | Initial state; may move to `confirmed` or `canceled` |
+| `confirmed` | Intermediate state; may move to `shipping` or `canceled` |
+| `shipping` | Intermediate state; may move only to `delivered` |
+| `delivered` | Final state; cannot move to another state |
+| `canceled` | Final state; cannot move to another state |
+
+The model defines five valid transitions (`TR-001`–`TR-005`): `pending → confirmed`, `confirmed → shipping`, `shipping → delivered`, `pending → canceled`, and `confirmed → canceled`. It also defines eight explicit final-state violations (`TR-006`–`TR-013`), covering each non-self request from `delivered` and `canceled` to one of the other four states.
+
+Human review preserved `PR-001`–`PR-007` and classified every omitted non-self edge from a non-final source as invalid: `pending → shipping`, `pending → delivered`, `confirmed → pending`, `confirmed → delivered`, `shipping → pending`, `shipping → confirmed`, and `shipping → canceled`. For all invalid transitions, the supported oracle is an error with an appropriate message; the status, response schema, wording, and post-error persistence details remain unspecified.
+
+Each transition case requires an existing order in the named source state and a valid Admin JWT. Authentication and authorization are endpoint guards rather than lifecycle states, and order creation or fixture preparation is outside this single-endpoint model. Same-state requests, idempotency, concurrent-update ordering, version checks, atomicity, rollback behavior, and nonexistent-order behavior remain unspecified. No same-state STATE candidates were generated. The complete analysis is stored in [`review/pool-c/reports/state-report.md`](review/pool-c/reports/state-report.md).
+
 ### C.5. Security Testing Analysis
+
+All supplied requirements `SEC-01`–`SEC-07` were evaluated for this endpoint:
+
+| Requirement | Applicability and treatment |
+| --- | --- |
+| `SEC-01` | Not applicable: the endpoint has no password input or documented password-storage effect. |
+| `SEC-02` | Applicable: this privileged mutation requires a valid JWT. Coverage includes a valid control, a missing header, and malformed, forged, expired, or otherwise invalid JWT fixture classes. |
+| `SEC-03` | Applicable: an Admin API must verify `role = 'admin'`; a valid non-Admin token must not authorize the mutation. |
+| `SEC-04` | Not applicable at endpoint level: no response-reflection or UI-rendering behavior is specified for `id` or `status`. |
+| `SEC-05` | Applicable: database lookup and mutation use client-controlled `id` and `status`; inert query-shaped values must remain data and must not broaden or redirect updates. |
+| `SEC-06` | Not applicable: this is not a profile-update API and `role` is not a documented body field. |
+| `SEC-07` | Not applicable: the endpoint does not handle password-reset OTPs. |
+
+The reviewed security model contains seven scenarios (`SS-001`–`SS-007`). `SS-001` is the valid JWT/Admin-role control. `SS-002` checks a missing Authorization header, `SS-003` covers environment-classified invalid JWT fixtures, and `SS-004` verifies that a valid non-Admin JWT cannot mutate the order. These negative cases assert denial and absence of mutation without inventing an HTTP status, response body, or validation precedence.
+
+`SS-005` and `SS-006` use inert SQL-control-shaped values in path `id` and body `status`. The values must be treated as data: they must not execute query instructions, broaden the affected row set, bypass lifecycle constraints, or modify targeted or unrelated orders unexpectedly. `SS-007` is the ordinary valid-update control and verifies that only the identified order changes.
+
+Black-box behavior can expose unsafe effects but cannot conclusively prove implementation-level query parameterization; source inspection or database instrumentation may still be required. The requirements do not define JWT algorithms, issuer, audience, expiry mechanics, claim encoding, authentication/validation precedence, TLS, rate limits, throttling, replay controls, lockout, or audit logging for this endpoint. The complete analysis is stored in [`review/pool-c/reports/security-report.md`](review/pool-c/reports/security-report.md).
 
 ### C.6. AI-Generated Test Cases
 
-The final reviewed test cases for this pool are stored in [`test-cases/c-order-management.csv`](test-cases/c-order-management.csv).
+The final reviewed test cases for this pool are stored in [`test-cases/c-order-management.csv`](test-cases/c-order-management.csv). The audited AI-generated subset is stored in [`review/pool-c/candidate-api-tests.csv`](review/pool-c/candidate-api-tests.csv).
 
-The test cases were derived from the reviewed analyses in Sections A.2–A.5.
+The AI-generated cases were derived from the reviewed analyses in Sections C.2–C.5. After semantic deduplication, the 79 retained AI cases were combined with the six human-authored cases in Section C.7:
 
-| Testing Type | Number of Test Cases |
-| --- | ---: |
-| Contractual Testing | |
-| Domain Testing | |
-| State Transition Testing | |
-| Security Testing | |
-| **Total** | |
+| Testing Type | AI-generated | Human-added | Final total |
+| --- | ---: | ---: | ---: |
+| Contractual Testing | 23 | 1 | 24 |
+| Domain Testing | 26 | 2 | 28 |
+| State Transition Testing | 20 | 2 | 22 |
+| Security Testing | 10 | 1 | 11 |
+| **Total** | **79** | **6** | **85** |
+
+The AI subset uses sequential IDs `API-001`–`API-079`; the final suite appends human-authored `API-080`–`API-085` and remains sequential through `API-085`. Every case targets `PUT /api/admin/orders/:id/status`. The final CSV uses the established nine traceability fields. The audited candidate CSV preserves those same fields for the AI subset and adds `Audit Result` and `Audit Reason`; every retained AI case is marked `VALID` with case-level reasoning.
+
+AI traceability is complete for `CR-001`–`CR-013`, `DP-001`–`DP-028`, `TR-001`–`TR-013`, `PR-001`–`PR-007`, and `SS-001`–`SS-007`, including applicable `SEC-02`, `SEC-03`, and `SEC-05`. No `DB-*` items exist because the reviewed domain model found no supported ordered boundaries, and no same-state STATE case was generated.
+
+Same-category semantic deduplication removed two DOMAIN records by merging former `API-024`, `API-030`, and `API-036` into retained `API-024`. All three used the same valid pending-to-confirmed request and semantic outcome. The retained case preserves `DP-001`, `DP-007`, and `DP-013` plus provisional specialist IDs `DOMAIN-P001`, `DOMAIN-P007`, and `DOMAIN-P013`.
+
+Final validation confirmed 85 sequential unique IDs, the exact nine-column final schema, endpoint/category consistency, non-empty required content, unchanged AI-generated rows `API-001`–`API-079`, and clear ordered steps for the six human workflows. Unspecified behavior remains unresolved: no AI case invents numeric HTTP statuses, response schemas, exact messages, identifier rules, same-state semantics, or unsupported JWT mechanics. Pool C Postman generation and Newman execution have not yet been performed; execution analysis belongs in Section C.8 after those artifacts exist.
 
 ### C.7. Human Cases
 

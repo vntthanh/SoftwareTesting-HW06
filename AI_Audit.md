@@ -2903,10 +2903,16 @@ Artifacts 31-31 successfully appended to D:\GitHub\SoftwareTesting-HW06\AI_Audit
 
 ### Artifact 32
 
-- **User:** TODO: Unknown
+- **User:** Vương Ngũ Tín Thành
 - **Date and Time:** 2026-08-22 20:43:50 GMT+7
-- **Model Used:** GPT-5 (primary Codex agent and four specialist subagents)
-- **Skill Used:** api-test-generator, contract-test-generator, domain-test-generator, state-transition-test-generator, security-test-generator, ai-audit
+- **Model Used:** GPT-5.6 Sol
+- **Skill Used:**
+  - `api-test-generator`
+  - `contract-test-generator`
+  - `domain-test-generator`
+  - `state-transition-test-generator`
+  - `security-test-generator`
+  - `ai-audit`
 - **Prompt:**
 
 ````markdown
@@ -2987,9 +2993,9 @@ Artifacts 32-32 successfully appended to D:\GitHub\SoftwareTesting-HW06\AI_Audit
 
 ### Artifact 33
 
-- **User:** TODO: Unknown
+- **User:** Vương Ngũ Tín Thành
 - **Date and Time:** 2026-08-22 22:01:09 GMT+7
-- **Model Used:** GPT-5 (primary Codex agent)
+- **Model Used:** GPT-5.6 Sol (primary Codex agent)
 - **Skill Used:** api-test-generator, ai-audit
 - **Prompt:**
 
@@ -3049,4 +3055,95 @@ Validation confirmed 79 matching rows, no remaining same-category request/outcom
   - DP-001, DP-007, and DP-013 traceability is preserved.
   - All three provisional specialist IDs are preserved.
   - IDs are regenerated sequentially from API-001 to API-079.
+- **Student Fixes:** None
+
+### Artifact 34
+
+- **User:** Vương Ngũ Tín Thành
+- **Date and Time:** 2026-08-22 22:29:45 GMT+7
+- **Model Used:** GPT-5.6 Sol (primary Codex agent)
+- **Skill Used:** `ai-audit`
+- **Prompt:**
+
+````markdown
+Add the reviewed Pool C human cases API-080 to API-085 in [Main\_Report.md](Main_Report.md).
+
+- Append them to [c-order-management.csv](test-cases/c-order-management.csv) after API-079.
+- Keep the existing 79 AI-generated cases unchanged.
+- Mark API-080 to API-085 as human-authored cases.
+- Preserve the exact case IDs, categories, objectives, expected results, and notes.
+- Keep multi-step cases represented clearly so they can later be converted into ordered Postman requests.
+````
+
+- **AI Output:**
+
+````markdown
+Appended human-authored `API-080` through `API-085` to [c-order-management.csv](D:/GitHub/SoftwareTesting-HW06/test-cases/c-order-management.csv:81).
+
+Verified:
+
+- Existing 79 AI-generated cases are unchanged.
+- IDs, categories, objectives, expected results, and notes exactly match `Main_Report.md`.
+- Ordered workflows contain explicit step numbering: five two-step cases and one four-step case.
+- CSV parses successfully with 85 sequential cases.
+````
+
+- **File Modifications:**
+  - `File:` `test-cases/c-order-management.csv`.
+    - `Action:` appended.
+    - `Deleted:` None.
+    - `Replaced With:` None.
+    - `Appended:` Human-authored cases `API-080` through `API-085` from `Main_Report.md` Section C.7, preserving their exact IDs, categories, objectives, expected results, and notes. Each case has explicit ordered request steps: five two-step workflows and one four-step lifecycle workflow. The existing `API-001` through `API-079` rows were unchanged.
+  - `File:` `AI_Audit.md`.
+    - `Action:` appended.
+    - `Deleted:` None.
+    - `Replaced With:` None.
+    - `Appended:` Artifact 34 containing the exact previous prompt, AI output, and file-modification record.
+- **Verdict:** VALID
+- **Reasoning:** The agent added the test cases base on provided list correctly.
+- **Student Fixes:** None
+
+### Artifact 35
+
+- **User:** Vương Ngũ Tín Thành
+- **Date and Time:** 2026-08-22 22:41:57 GMT+7
+- **Model Used:** GPT-5 (primary Codex agent)
+- **Skill Used:** ai-audit
+- **Prompt:**
+
+````markdown
+Complete Pool C Sections C.2–C.6 in [Main\_Report.md](Main_Report.md) using [pool-c](review/pool-c/) as the source of truth.
+````
+
+- **AI Output:**
+
+````markdown
+Completed Sections C.2–C.6 in [Main_Report.md](D:/GitHub/SoftwareTesting-HW06/Main_Report.md:579).
+
+Added:
+
+- CONTRACT, DOMAIN, STATE, and SECURITY analysis from the approved Pool C reports.
+- Complete CR/DP/TR/PR/SS traceability and documented limitations.
+- AI/human/final counts: 79 / 6 / 85.
+- Deduplication history and retained `API-024` traceability.
+- Validation and pending Postman/Newman status.
+
+Verified all counts against the CSVs, sequential `API-001`–`API-085`, and that the original 79 AI-generated rows remain unchanged. No Pool C source reports were modified.
+````
+
+- **File Modifications:**
+  - `File:` `Main_Report.md`.
+    - `Action:` edited and replaced content.
+    - `Deleted:` Empty Pool C Sections C.2–C.5 and the incomplete C.6 text, including the incorrect Sections A.2–A.5 reference and blank testing-type counts.
+    - `Replaced With:` Completed Pool C CONTRACT, DOMAIN, STATE, and SECURITY analyses based on `review/pool-c/`; CR/DP/TR/PR/SS coverage and documented gaps; the 79 AI-generated plus 6 human-authored case breakdown; the `API-024` deduplication record; sequential `API-001`–`API-085` validation; and the pending Postman/Newman status.
+    - `Appended:` None.
+  - `File:` `AI_Audit.md`.
+    - `Action:` appended.
+    - `Deleted:` None.
+    - `Replaced With:` None.
+    - `Appended:` Artifact 35 containing the exact previous prompt, AI output, and file-modification record.
+- **Verdict:** VALID
+- **Reasoning:**
+  - C.2–C.6 are now completed from the reviewed Pool C analyses.
+  - C.7 remains unchanged.
 - **Student Fixes:** None
