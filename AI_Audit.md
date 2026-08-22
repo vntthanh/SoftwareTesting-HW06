@@ -2540,3 +2540,68 @@ Artifacts 26-26 successfully appended to `D:\GitHub\SoftwareTesting-HW06\AI_Audi
 - **Verdict:** VALID
 - **Reasoning:** The precondition prepared correctly.
 - **Student Fixes:** None
+
+### Artifact 27
+
+- **User:** TODO: Unknown
+- **Date and Time:** 2026-08-22 18:28:56 GMT+7
+- **Model Used:** GPT-5
+- **Skill Used:** newman-result-analyzer
+- **Prompt:**
+
+````markdown
+Use [$newman-result-analyzer](D:\GitHub\SoftwareTesting-HW06\\.agents\skills\newman-result-analyzer\SKILL.md) to analyze the real Pool B Newman execution result in [pool-b-run.json](reports/pool-b/pool-b-run.json)&#x20;
+
+Use the Pool B reviewed test cases, Postman collection, and API specification as supporting context.
+
+For every failed or suspicious case:
+
+- identify the Test ID
+- classify it as TEST\_DEFECT, SETUP\_DEFECT, SUT\_BUG, or NEEDS\_MANUAL\_REVIEW
+- explain the cause briefly
+- do not modify the test cases or Postman collection
+
+Summarize:
+
+- total requests/tests/assertions
+- passed and failed cases
+- bug candidates
+- manual-review cases
+- recommended next actions
+
+The report should be written in [Main\_Report.md](Main_Report.md).
+````
+
+- **AI Output:**
+
+````markdown
+Updated [Main_Report.md](D:/GitHub/SoftwareTesting-HW06/Main_Report.md:389) with the Pool B Newman analysis.
+
+Key results:
+
+- 148 requests: 74 SUT requests plus 74 fixture-reset calls
+- 74 logical test cases executed
+- 27 assertions: 7 passed, 20 failed
+- Logical cases: 54 `PASS`, 20 `FAIL_ASSERTION`
+- 24 SUT bug-candidate case observations
+- 1 `TEST_DEFECT`: `API-067`
+- 1 failed case needing requirement review: `API-072`
+- 0 setup defects
+- 50 explicit manual checks remain
+
+The report includes per-case outcomes, triage for every failed or suspicious case, reconciliation of duplicated Newman execution records, bug candidates, and recommended actions. Test cases and the Postman collection were not modified.
+````
+
+- **File Modifications:**
+  - `File:` `Main_Report.md`.
+    - `Action:` appended.
+    - `Deleted:` None.
+    - `Replaced With:` None.
+    - `Appended:` Section `B.8. Newman Execution Analysis`, including the evidence scope, normalized run totals, all 74 logical test-case outcomes, individual classification and causes for every failed assertion, six additional suspicious manual-only observations, the 50-case manual-oracle summary, bug candidates, recommended actions, and Newman coverage/reconciliation notes.
+- **Verdict:** INCOMPLETE
+- **Reasoning:** B.6 still incorrectly says Postman was not generated and tests were not executed.
+
+- **Student Fixes:**
+  - Remove the outdated execution statement from B.6.
+  - State that the Postman collection was generated and Pool B was executed with Newman.
+  - Refer readers to Section B.8 for execution results.

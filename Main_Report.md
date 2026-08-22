@@ -362,7 +362,7 @@ The final suite uses sequential IDs `API-001`–`API-074` and exactly nine trace
 
 Human review corrected inclusive minimum-threshold labels, the mathematical oracle for `SAVE10` with `total_amount = 300001`, and the fixture preconditions for `BIGBUY`, `EXPIRED`, and nonexistent coupon codes. Same-category semantic deduplication removed 14 redundant DOMAIN records while preserving every partition/boundary basis and provisional specialist ID on retained cases. The final merged coverage includes `DP-021 + DB-001` just-below, `DP-013 + DB-004` equal-to-expiry, and `DP-030/DP-031 + DB-006` at/above the usage limit.
 
-Final validation confirmed 74 sequential unique IDs, the exact nine-column final schema, endpoint/category consistency, non-empty required content, complete reviewed AI traceability, no duplicate IDs or rows, no remaining same-category semantic duplicate groups in the AI subset, and report/CSV count consistency. Undocumented statuses, error representations, coercion, identity binding, rounding/precision, and endpoint-driven state mutation remain explicit gaps rather than invented behavior. These are candidate test cases only; no Postman collection has been generated and the API tests have not yet been executed. Generation and validation details are recorded in [`review/pool-b/orchestration-status.md`](review/pool-b/orchestration-status.md).
+Final validation confirmed 74 sequential unique IDs, the exact nine-column final schema, endpoint/category consistency, non-empty required content, complete reviewed AI traceability, and no duplicate IDs or rows. The final Postman collection was generated and executed with Newman; execution results and defect triage are reported in Section B.8.
 
 ### B.7. Human Cases
 
@@ -387,6 +387,172 @@ These gaps show that specification-based AI generation can provide broad coverag
 The seven human-authored cases above are merged into the final CSV as `API-068`–`API-074`.
 
 ### B.8. Newman Execution Analysis
+
+#### Scope and evidence
+
+This analysis uses the real Newman JSON artifact [`reports/pool-b/pool-b-run.json`](reports/pool-b/pool-b-run.json), the 74 reviewed cases in [`test-cases/b-discount-coupons.csv`](test-cases/b-discount-coupons.csv), the generated collection in [`postman/pool-b-discount-coupons.postman_collection.json`](postman/pool-b-discount-coupons.postman_collection.json), and [`reference/api_specification.md`](reference/api_specification.md). Pool A Section A.8 supplies the presentation format. The test cases and collection were not modified.
+
+Execution status and defect triage are deliberately separate. `FAIL_ASSERTION` means that a reviewed automated oracle failed; it does not by itself prove an SUT defect. Likewise, `PASS` with `NO_AUTOMATED_ASSERTIONS` confirms only that the request completed, while its explicit manual oracle remains pending.
+
+#### Run summary
+
+| Metric | Normalized result |
+| --- | --- |
+| Collection | `Pool B - Discount Coupon Reviewed Tests` |
+| Execution window | 2026-08-22 18:04:32.417 to 18:04:38.117 (GMT+7) |
+| Duration | 5.700 seconds |
+| Reviewed collection requests / logical cases | 74 / 74; every reviewed ID executed |
+| Total requests | 148 in Newman `run.stats`: 74 reviewed SUT requests plus 74 fixture-reset helper calls |
+| Newman tests / scripts | 74 tests; 74 test scripts; 74 pre-request scripts; 148 total script executions |
+| Assertions | 27 total: 7 passed, 20 failed, 0 pending/skipped |
+| Request, pre-request-script, and test-script errors | 0 / 0 / 0 |
+| Logical execution statuses | `PASS`: 54; `FAIL_ASSERTION`: 20; `REQUEST_ERROR`: 0; `RUNTIME_ERROR`: 0; `NOT_EXECUTED`: 0 |
+| PASS detail | 7 cases passed assertions; 47 cases completed with `NO_AUTOMATED_ASSERTIONS` |
+| Explicit manual-oracle requirements | 50 cases: 47 manual/exploratory-only cases plus `API-065`–`API-067`, whose black-box assertions do not prove all required database/query effects |
+| Failed-case triage | `SUT_BUG`: 18; `TEST_DEFECT`: 1; `NEEDS_MANUAL_REVIEW`: 1; `SETUP_DEFECT`: 0 |
+| Additional suspicious manual-only executions | 6 `SUT_BUG` candidates (`API-013`, `API-014`, `API-020`, `API-021`, `API-035`, `API-047`) |
+| Total SUT bug-candidate case observations | 24 (18 failed assertions plus 6 suspicious manual-only executions; this is a case count, not a count of unique root causes) |
+
+#### Logical test-case outcomes
+
+Every row below is the single `POST /api/apply-coupon` step unless the reviewed case deliberately changes the method or representation. All items matched by immutable collection item/request identity and executed once. The JSON reporter contains two identical detailed representations per SUT request with the same `httpRequestId`; these duplicates were correlated and were not counted twice.
+
+| Test ID | Execution Status | HTTP Status | Assertion Result | Manual Oracle Required |
+| --- | --- | --- | --- | --- |
+| API-001 | `FAIL_ASSERTION` | 200 OK | FAIL — expected `discount_amount=50000`; got `-4500000` | NO |
+| API-002 | `FAIL_ASSERTION` | 400 Bad Request | FAIL — expected fixed-coupon calculation; response had no calculation fields | NO |
+| API-003 | `FAIL_ASSERTION` | 400 Bad Request | FAIL — expected `discount_amount=30000`; response had no calculation fields | NO |
+| API-004 | `PASS` | 404 Not Found | `NO_AUTOMATED_ASSERTIONS` | YES — exploratory method handling |
+| API-005 | `PASS` | 400 Bad Request | `NO_AUTOMATED_ASSERTIONS` | YES — malformed JSON handling |
+| API-006 | `PASS` | 400 Bad Request | `NO_AUTOMATED_ASSERTIONS` | YES — non-object JSON handling |
+| API-007 | `PASS` | 400 Bad Request | `NO_AUTOMATED_ASSERTIONS` | YES — omitted `code` handling |
+| API-008 | `PASS` | 404 Not Found | `NO_AUTOMATED_ASSERTIONS` | YES — non-string `code` handling |
+| API-009 | `PASS` | 400 Bad Request | `NO_AUTOMATED_ASSERTIONS` | YES — omitted `total_amount` handling |
+| API-010 | `PASS` | 200 OK | `NO_AUTOMATED_ASSERTIONS` | YES — numeric-string coercion |
+| API-011 | `PASS` | 200 OK | `NO_AUTOMATED_ASSERTIONS` | YES — omitted `user_id` behavior |
+| API-012 | `PASS` | 200 OK | `NO_AUTOMATED_ASSERTIONS` | YES — string `user_id` coercion |
+| API-013 | `PASS` | 200 OK | `NO_AUTOMATED_ASSERTIONS` | YES — missing-JWT rejection semantics |
+| API-014 | `PASS` | 200 OK | `NO_AUTOMATED_ASSERTIONS` | YES — invalid-JWT rejection semantics |
+| API-015 | `PASS` | 200 OK | `NO_AUTOMATED_ASSERTIONS` | YES — additional-property handling |
+| API-068 | `FAIL_ASSERTION` | 500 Internal Server Error | FAIL — expected status below 500 | NO |
+| API-069 | `PASS` | 400 Bad Request | PASS — status below 500 | NO |
+| API-016 | `FAIL_ASSERTION` | 200 OK | FAIL — expected `discount_amount=50000`; got `-4500000` | NO |
+| API-017 | `PASS` | 400 Bad Request | `NO_AUTOMATED_ASSERTIONS` | YES — array-body handling |
+| API-018 | `PASS` | 400 Bad Request | `NO_AUTOMATED_ASSERTIONS` | YES — malformed JSON handling |
+| API-019 | `PASS` | 200 OK | `NO_AUTOMATED_ASSERTIONS` | YES — extra-member handling |
+| API-020 | `PASS` | 200 OK | `NO_AUTOMATED_ASSERTIONS` | YES — missing-JWT behavior |
+| API-021 | `PASS` | 200 OK | `NO_AUTOMATED_ASSERTIONS` | YES — invalid-JWT behavior |
+| API-022 | `FAIL_ASSERTION` | 400 Bad Request | FAIL — expected fixed-coupon calculation; response had no calculation fields | NO |
+| API-023 | `PASS` | 404 Not Found | `NO_AUTOMATED_ASSERTIONS` | YES — nonexistent coupon response |
+| API-024 | `PASS` | 404 Not Found | `NO_AUTOMATED_ASSERTIONS` | YES — inactive coupon response |
+| API-025 | `PASS` | 400 Bad Request | `NO_AUTOMATED_ASSERTIONS` | YES — expiry-date equality behavior |
+| API-026 | `PASS` | 400 Bad Request | `NO_AUTOMATED_ASSERTIONS` | YES — expired coupon response |
+| API-027 | `PASS` | 404 Not Found | `NO_AUTOMATED_ASSERTIONS` | YES — unusual code handling |
+| API-028 | `PASS` | 404 Not Found | `NO_AUTOMATED_ASSERTIONS` | YES — whitespace/case handling |
+| API-029 | `PASS` | 400 Bad Request | `NO_AUTOMATED_ASSERTIONS` | YES — null code handling |
+| API-030 | `PASS` | 404 Not Found | `NO_AUTOMATED_ASSERTIONS` | YES — numeric code handling |
+| API-031 | `FAIL_ASSERTION` | 400 Bad Request | FAIL — expected `discount_amount=30000`; response had no calculation fields | NO |
+| API-032 | `PASS` | 400 Bad Request | `NO_AUTOMATED_ASSERTIONS` | YES — below-minimum response |
+| API-033 | `FAIL_ASSERTION` | 400 Bad Request | FAIL — expected zero calculation at minimum 0; response had no calculation fields | NO |
+| API-034 | `PASS` | 400 Bad Request | `NO_AUTOMATED_ASSERTIONS` | YES — negative-total handling |
+| API-035 | `PASS` | 200 OK | `NO_AUTOMATED_ASSERTIONS` | YES — numeric precision/formula observation |
+| API-036 | `PASS` | 200 OK | `NO_AUTOMATED_ASSERTIONS` | YES — numeric-string coercion |
+| API-037 | `PASS` | 400 Bad Request | `NO_AUTOMATED_ASSERTIONS` | YES — null-total handling |
+| API-038 | `PASS` | 400 Bad Request | `NO_AUTOMATED_ASSERTIONS` | YES — boolean-total handling |
+| API-039 | `PASS` | 400 Bad Request | `NO_AUTOMATED_ASSERTIONS` | YES — non-JSON numeric token handling |
+| API-040 | `PASS` | 400 Bad Request | `NO_AUTOMATED_ASSERTIONS` | YES — usage-limit boundary response |
+| API-041 | `PASS` | 400 Bad Request | `NO_AUTOMATED_ASSERTIONS` | YES — above-limit response |
+| API-042 | `PASS` | 200 OK | `NO_AUTOMATED_ASSERTIONS` | YES — JWT/body-user mismatch semantics |
+| API-043 | `PASS` | 200 OK | `NO_AUTOMATED_ASSERTIONS` | YES — nonexistent-user behavior |
+| API-044 | `PASS` | 200 OK | `NO_AUTOMATED_ASSERTIONS` | YES — fractional `user_id` handling |
+| API-045 | `PASS` | 200 OK | `NO_AUTOMATED_ASSERTIONS` | YES — null `user_id` handling |
+| API-046 | `PASS` | 200 OK | `NO_AUTOMATED_ASSERTIONS` | YES — string `user_id` handling |
+| API-047 | `PASS` | 200 OK | `NO_AUTOMATED_ASSERTIONS` | YES — numeric precision/formula observation |
+| API-048 | `PASS` | 400 Bad Request | `NO_AUTOMATED_ASSERTIONS` | YES — below-minimum response |
+| API-049 | `PASS` | 200 OK | PASS — `discount_amount=50000`, `final_amount=450001` | NO |
+| API-050 | `PASS` | 400 Bad Request | `NO_AUTOMATED_ASSERTIONS` | YES — below-zero-minimum response |
+| API-051 | `FAIL_ASSERTION` | 200 OK | FAIL — expected `discount_amount=0.1`; got `-9` | NO |
+| API-052 | `FAIL_ASSERTION` | 200 OK | FAIL — expected `discount_amount=50000`; got `-4500000` | NO |
+| API-053 | `PASS` | 400 Bad Request | `NO_AUTOMATED_ASSERTIONS` | YES — after-expiry response |
+| API-054 | `PASS` | 200 OK | PASS — `discount_amount=50000`, `final_amount=450000` | NO |
+| API-055 | `PASS` | 400 Bad Request | `NO_AUTOMATED_ASSERTIONS` | YES — at-limit response |
+| API-056 | `PASS` | 400 Bad Request | `NO_AUTOMATED_ASSERTIONS` | YES — above-limit response |
+| API-057 | `PASS` | 200 OK | PASS — `discount_amount=100000`, `final_amount=400000` | NO |
+| API-058 | `PASS` | 400 Bad Request | `NO_AUTOMATED_ASSERTIONS` | YES — at-limit response |
+| API-059 | `PASS` | 400 Bad Request | `NO_AUTOMATED_ASSERTIONS` | YES — above-limit response |
+| API-070 | `PASS` | 400 Bad Request | PASS — no successful calculation returned | NO |
+| API-071 | `FAIL_ASSERTION` | 400 Bad Request | FAIL — expected `discount_amount=100000`; response had no calculation fields | NO |
+| API-073 | `FAIL_ASSERTION` | 200 OK | FAIL — expected `discount_amount=5000`; got `0` | NO |
+| API-074 | `FAIL_ASSERTION` | 200 OK | FAIL — expected `discount_amount=500000`; got `-49500000` | NO |
+| API-060 | `FAIL_ASSERTION` | 200 OK | FAIL — expected `discount_amount=50000`; got `-4500000` | NO |
+| API-061 | `FAIL_ASSERTION` | 200 OK | FAIL — successful calculation returned without JWT | NO |
+| API-062 | `FAIL_ASSERTION` | 200 OK | FAIL — successful calculation returned for malformed JWT | NO |
+| API-063 | `FAIL_ASSERTION` | 200 OK | FAIL — successful calculation returned for invalid-signature JWT | NO |
+| API-064 | `FAIL_ASSERTION` | 200 OK | FAIL — successful calculation returned for expired JWT | NO |
+| API-065 | `PASS` | 404 Not Found | PASS — no successful calculation returned | YES — query structure/diagnostics/state require external inspection |
+| API-066 | `PASS` | 404 Not Found | PASS — no successful calculation returned | YES — parameterization and persistent state require external inspection |
+| API-067 | `FAIL_ASSERTION` | 200 OK | FAIL — assertion expected no successful calculation | YES — black-box result cannot prove query semantics or state effects |
+| API-072 | `FAIL_ASSERTION` | 200 OK | FAIL — manipulated `user_id` obtained a successful calculation | NO — automated response oracle ran; requirement intent still needs triage review |
+
+#### Failed and suspicious-case triage
+
+The following table classifies every failed assertion individually. Causes describe the evidence-level mismatch, not an inferred implementation root cause.
+
+| Test ID | Classification | Brief cause |
+| --- | --- | --- |
+| API-001 | `SUT_BUG` | A valid SAVE10 request returned `discount_amount=-4500000` and `final_amount=5000000`, contradicting the reviewed 10% formula. |
+| API-002 | `SUT_BUG` | BIGBUY was rejected when `total_amount` exactly equaled its allowed minimum of 500000; FR-09 defines the threshold as inclusive. |
+| API-003 | `SUT_BUG` | A total exactly equal to SAVE10's minimum was rejected instead of producing the specified calculation. |
+| API-068 | `SUT_BUG` | A `text/plain` body caused an unhandled destructuring error and HTTP 500 instead of a safe client-error response. |
+| API-016 | `SUT_BUG` | The valid reviewed SAVE10 baseline returned the same invalid negative percent discount. |
+| API-022 | `SUT_BUG` | BIGBUY at its exact minimum was rejected, violating the inclusive boundary. |
+| API-031 | `SUT_BUG` | SAVE10 at its exact minimum was rejected, violating the inclusive boundary. |
+| API-033 | `SUT_BUG` | A zero total was rejected for a coupon whose minimum is zero, violating the inclusive boundary. |
+| API-051 | `SUT_BUG` | The 10% calculation for total 1 returned `-9` rather than `0.1`. |
+| API-052 | `SUT_BUG` | An eligible 10% coupon returned the same invalid negative percent discount. |
+| API-071 | `SUT_BUG` | VIP100 at its exact minimum was rejected, violating the inclusive boundary. |
+| API-073 | `SUT_BUG` | A 1% coupon returned a zero discount for total 500000 instead of 5000. |
+| API-074 | `SUT_BUG` | A 100% coupon returned `-49500000` instead of 500000 and increased the final amount instead of reducing it to zero. |
+| API-060 | `SUT_BUG` | The authenticated valid baseline returned the invalid negative 10% calculation. |
+| API-061 | `SUT_BUG` | The operation returned a successful calculation with no JWT, contrary to FR-09 C4 and SEC-02. |
+| API-062 | `SUT_BUG` | The operation returned a successful calculation for a malformed JWT. |
+| API-063 | `SUT_BUG` | The operation returned a successful calculation for a JWT with an invalid signature. |
+| API-064 | `SUT_BUG` | The operation returned a successful calculation for an expired JWT. |
+| API-067 | `TEST_DEFECT` | The assertion treats any successful response as proof of SQL/query bypass, but the reviewed case says `user_id` type validation and JWT/body binding are unspecified and requires external proof of query/state effects. The response alone cannot establish the claimed injection effect. |
+| API-072 | `NEEDS_MANUAL_REVIEW` | The failure is real under the human-added identity-binding expectation, but the reviewed case explicitly states that JWT-to-body `user_id` binding is not specified. Confirm the intended authorization rule before filing it as an SUT bug. |
+
+Six cases had no automated assertion but produced evidence that conflicts with an explicit reviewed requirement or mathematical formula:
+
+| Test ID | Classification | Brief cause |
+| --- | --- | --- |
+| API-013 | `SUT_BUG` | A request without an Authorization header received a successful discounted calculation despite the valid-JWT requirement. |
+| API-014 | `SUT_BUG` | A request with a known-invalid JWT received a successful discounted calculation. |
+| API-020 | `SUT_BUG` | The domain variant without a JWT was accepted and discounted. |
+| API-021 | `SUT_BUG` | The domain variant with an invalid JWT was accepted and discounted. |
+| API-035 | `SUT_BUG` | The manually observed percent result was `-4500005` / `5000005.5`, not the documented 10% / final-amount formulas. |
+| API-047 | `SUT_BUG` | The manually observed percent result was `-2700009` / `3000010`, not the documented formulas; precision policy cannot explain the magnitude or sign. |
+
+All other explicit manual-oracle cases remain `NEEDS_MANUAL_REVIEW`: `API-004`–`API-012`, `API-015`, `API-017`–`API-019`, `API-023`–`API-030`, `API-032`, `API-034`, `API-036`–`API-046`, `API-048`, `API-050`, `API-053`, `API-055`, `API-056`, `API-058`, `API-059`, `API-065`, and `API-066`. `API-067` also retains a manual database/query oracle despite its primary `TEST_DEFECT` triage. `API-072` needs specification-owner review of its external authorization assumption, but its automated response oracle did run. Thus 50 explicit manual checks remain open in total.
+
+No case is classified as `SETUP_DEFECT`: all 74 fixture states were reset and verified by the authenticated local controller, every intended ID ran, and Newman recorded no request, pre-request-script, or test-script errors.
+
+#### Bug candidates and recommended next actions
+
+- Treat the 24 `SUT_BUG` case observations above as bug candidates, not 24 proven unique bugs. Preserve the individual Test IDs when creating defects so each failing or suspicious observation remains traceable.
+- Correct and retest percent calculation against `API-001`, `API-016`, `API-051`, `API-073`, and `API-074` first; these span ordinary, small-value, 1%, and 100% inputs.
+- Correct and retest inclusive minimum eligibility with `API-002`, `API-003`, `API-022`, `API-031`, `API-033`, and `API-071`.
+- Enforce JWT validation before coupon evaluation, then rerun `API-013`, `API-014`, `API-020`, `API-021`, and `API-061`–`API-064`.
+- Return a controlled 4xx response for unsupported body media types and rerun `API-068`; retain `API-069` as the zero-byte-body robustness check.
+- Review `API-067`'s oracle before changing either the test or SUT: use database snapshots/instrumentation or implementation inspection to test query parameterization and state effects. Do not infer SQL injection solely from the 200 response.
+- Decide and document whether coupon usage is keyed to the authenticated JWT subject or the client-supplied `user_id`; only then resolve `API-072` and the related exploratory identity cases.
+- Complete the remaining 50 explicit manual checks. No test-case or collection changes were made during this analysis.
+
+#### Coverage and reconciliation notes
+
+- All 74 intended collection leaf requests were observed; there are no blocked, skipped, filtered, or not-executed cases.
+- Newman `run.stats` reports 148 requests because the runtime performs one fixture-reset helper request for each of the 74 SUT requests. The embedded collection still contains 74 reviewed leaf requests.
+- The detailed execution array repeats each SUT execution object twice with the same immutable item ID and `httpRequestId`. Correlating those duplicate representations yields 74 logical executions, 27 assertions, and 20 assertion failures, matching Newman statistics; no duplicate error was counted twice.
+- HTTP 4xx/5xx responses were not classified as failures merely because of status. `API-068` fails because its explicit assertion requires a status below 500; exploratory cases without a fixed HTTP oracle retain execution-only `PASS` plus a pending manual oracle.
 
 ## Pool C: Admin Order Management
 
