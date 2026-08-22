@@ -2197,3 +2197,210 @@ Validation results:
 - **Verdict:** VALID
 - **Reasoning:** The agent merged human cases and human review into single csv file correctly.
 - **Student Fixes:** None
+
+### Artifact 24
+
+- **User:** Vương Ngũ Tín Thành
+- **Date and Time:** 2026-08-22 16:51:40 GMT+7
+- **Model Used:** TODO: Unknown
+- **Skill Used:**
+  - `postman-test-generator`
+  - `ai-audit`
+- **Prompt:**
+
+````markdown
+Use [$postman-test-generator](D:\GitHub\SoftwareTesting-HW06\\.agents\skills\postman-test-generator\SKILL.md) to generate the Postman artifacts for Pool B from the final reviewed test cases in [b-discount-coupons.csv](test-cases/b-discount-coupons.csv).
+
+
+
+Use the repository [api\_specification.md](reference/api_specification.md) and existing Pool B review artifacts [pool-b](review/pool-b/) as supporting context. Do not redesign or add test cases.
+
+
+
+After generation, validate the produced artifacts and summarize:
+
+- files created or changed
+- number of Postman requests generated
+- validation results
+- any unresolved issues
+
+
+
+Finally, log the artifact using [$ai-audit](D:\GitHub\SoftwareTesting-HW06\\.agents\skills\ai-audit\SKILL.md)&#x20;
+````
+
+- **AI Output:**
+
+````markdown
+I’ll use `postman-test-generator` first to convert the reviewed Pool B CSV without altering test design, validate its outputs, then use `ai-audit` to record the completed artifact and file changes. I’m reading both skill workflows before touching repository files.
+
+The generator requires full Postman v2.1 schema validation—not just JSON parsing—and a separate traceability report. I’m now loading that validation procedure plus the audit’s exact templates, then I’ll inspect the Pool B inputs and existing conventions.
+
+Pool B contains 74 final rows (`API-001`–`API-074`), with exactly one request intended per row and no STATE cases. Many reviewed outcomes deliberately omit HTTP-status oracles, so the generated scripts will assert only explicit machine-checkable calculations/safety properties and will preserve exploratory/manual observations in descriptions and the report.
+
+The reviewed CSV supplies no success status codes and no fixture-management API. I’ll therefore keep all 74 requests runnable with variables (`baseUrl`, `studentId`, and token variants), preserve every database/date/usage prerequisite as setup text, and explicitly flag those fixture actions as unresolved runtime setup rather than inventing seed flows.
+
+The repository’s `python` alias is inaccessible in this Windows environment, so generation did not run and no output was produced. I’m switching to the installed Python interpreter already used by this repository, then I’ll run the same schema gate.
+
+Generation and the full official-schema gate both pass. Next I’m independently checking one-to-one traceability, category counts, headers, descriptions, bodies, and assertion coverage, then running all 74 requests through Newman against a local deterministic compatibility mock (not the SUT).
+
+The validation inspection caught three token/header mapping defects before finalization: API-004 lacked its reviewed valid Authorization header, while API-014 and API-063 were normalized back to the generic valid-token variable. I’m correcting those mappings and rerunning every validation gate.
+
+All corrected gates now pass: 74/74 traceability, category totals 17/48/0/9, complete descriptions and `X-Student-Id` injection, correct token variants, full v2.1 schema validation, and Newman execution of 74 requests/27 assertions with zero failures. I’m recording these results in the conversion report, then removing only the two temporary validation helpers.
+
+The final collection and report remain valid after cleanup: schema PASS, 74 traceability rows, zero pending markers, and `git diff --check` PASS. The `ai-audit` workflow now requires appending the exact prompt/output pair as Artifact 24; I’m recording the final handoff and its file modifications verbatim.
+
+The audit block was inserted after Artifact 2 because the patch anchor was not unique. I caught this in the sequence check; I’m moving the unchanged block to the document end so Artifact 24 is truly appended after Artifact 23, as the audit skill requires.
+
+Audit validation now passes with Artifacts 1–24 in exact order and the required TODO fields preserved. A temporary untracked `diff.patch` containing only this task’s generated diff also appeared during patching; I identified it by timestamp/content and am removing that non-deliverable before the final status check.
+
+Generated and validated the Pool B Postman artifacts without changing or adding test cases.
+
+Files created or changed:
+
+- [pool-b-discount-coupons.postman_collection.json](D:/GitHub/SoftwareTesting-HW06/postman/pool-b-discount-coupons.postman_collection.json) — created; 74 requests.
+- [pool-b-conversion-report.md](D:/GitHub/SoftwareTesting-HW06/postman/pool-b-conversion-report.md) — created; complete row-to-request traceability, assertions, setup notes, and unresolved items.
+- [AI_Audit.md](D:/GitHub/SoftwareTesting-HW06/AI_Audit.md) — appended Artifact 24.
+
+Validation results:
+
+- PASS — 74 CSV rows map to 74 unique requests (`API-001`–`API-074`); categories are CONTRACT 17, DOMAIN 48, STATE 0, SECURITY 9.
+- PASS — every request preserves reviewed context and sends `X-Student-Id: {{studentId}}`.
+- PASS — full official Postman Collection v2.1 schema validation.
+- PASS — Newman 6.2.2 compatibility smoke run: 74 requests, 74 test scripts, 27 assertions, zero failures.
+- PASS — conversion report has 74 traceability rows, no pending markers; `git diff --check` passes.
+
+Unresolved issues: runtime coupon fixtures, usage counts, date boundaries, and token variants must be supplied externally because no fixture-management API is specified. Cases with undocumented statuses, exploratory outcomes, rounding behavior, or database/security side effects retain manual oracles. Full SUT conformance execution was not performed.
+
+Artifacts 24-24 successfully appended to `D:\GitHub\SoftwareTesting-HW06\AI_Audit.md`.
+````
+
+- **File Modifications:**
+  - `File:` `postman/pool-b-discount-coupons.postman_collection.json`.
+    - `Action:` created.
+    - `Deleted:` None.
+    - `Replaced With:` None.
+    - `Appended:` A Postman Collection v2.1 containing exactly 74 reviewed Pool B requests, organized as CONTRACT 17, DOMAIN 48, and SECURITY 9, with runtime variables, preserved setup descriptions, and 27 machine-checkable assertions.
+  - `File:` `postman/pool-b-conversion-report.md`.
+    - `Action:` created.
+    - `Deleted:` None.
+    - `Replaced With:` None.
+    - `Appended:` A 74-row conversion traceability report documenting setup notes, generated assertions, manual or unresolved oracles, schema validation, Newman compatibility, and remaining runtime setup requirements.
+  - `File:` `AI_Audit.md`.
+    - `Action:` appended.
+    - `Deleted:` None.
+    - `Replaced With:` None.
+    - `Appended:` Artifact 24 containing this exact user prompt, AI output, and file-modification record.
+  - `File:` `tmp/generate_pool_b_postman.py`.
+    - `Action:` created and deleted file.
+    - `Deleted:` The temporary mechanical CSV-to-Postman generation helper after successful generation and validation.
+    - `Replaced With:` None.
+    - `Appended:` None.
+  - `File:` `tmp/pool_b_mock_server.js`.
+    - `Action:` created and deleted file.
+    - `Deleted:` The temporary deterministic local Newman compatibility mock after the smoke run passed.
+    - `Replaced With:` None.
+    - `Appended:` None.
+  - `File:` `tmp/move_audit_artifact.py`.
+    - `Action:` created and deleted file.
+    - `Deleted:` The temporary helper used to move the unchanged Artifact 24 block to the audit document end.
+    - `Replaced With:` None.
+    - `Appended:` None.
+  - `File:` `diff.patch`.
+    - `Action:` created and deleted file.
+    - `Deleted:` A temporary untracked patch containing only this task's generated repository diff.
+    - `Replaced With:` None.
+    - `Appended:` None.
+- **Verdict:** INCOMPLETE
+- **Reasoning:**
+  - `X-Student-Id` is added directly to each request.
+  - The required collection-level pre-request script is missing.
+- **Student Fixes:**
+  - Move `X-Student-Id: {{studentId}}` injection to a collection-level pre-request script.
+  - Remove duplicated `X-Student-Id` headers from individual requests.
+
+### Artifact 25
+
+- **User:** Vương Ngũ Tín Thành
+- **Date and Time:** 2026-08-22 17:01:09 GMT+7
+- **Model Used:** TODO: Unknown
+- **Skill Used:**
+  - `postman-test-generator`
+  - `ai-audit`
+- **Prompt:**
+
+````markdown
+Fix the Pool B Postman artifacts:
+
+- Inject `X-Student-Id: {{studentId}}` through a collection-level pre-request script instead of duplicating it in each request.
+- Add a console log suitable for the required execution evidence.
+- Keep all 74 test cases unchanged.
+- Re-run Postman v2.1 schema and Newman compatibility validation.
+- Update the conversion report.
+
+Do not run the real SUT yet.
+````
+
+- **AI Output:**
+
+````markdown
+I’ll update only the collection-level header injection/evidence behavior and the conversion report, preserving all 74 request definitions and test intent. I’m reapplying the Postman generator validation workflow, then the repository’s AI-audit workflow because these are AI-produced file edits.
+
+The current collection has 74 duplicated request headers and no collection-level event. I’ll replace only that duplication with one `prerequest` event that upserts the header and logs request name/Test ID, method, URL, and resolved student ID; all folders, names, methods, URLs, bodies, descriptions, auth headers, and test scripts will be invariant-checked.
+
+The combined validation command was rejected by Windows process creation before it ran, so the collection has not yet been modified. I’m splitting mutation/static validation from the background Newman mock to avoid that launcher limitation.
+
+The revised collection passes the schema gate and structural invariants: 74 unchanged IDs/requests, zero request-level student headers, one collection-level pre-request event, and the evidence log is present. Newman also passed with all 74 injected headers observed by the mock and 74 evidence-log entries; no real SUT was contacted.
+
+The finalized artifacts now pass schema and structural checks after temporary helpers were removed: 74 unique cases, no duplicated student headers, one collection-level injection/evidence script, 74 report trace rows, and no pending markers. I’m appending this completed edit as AI Audit Artifact 25.
+
+Updated the Pool B Postman artifacts while preserving all 74 test cases.
+
+Files changed:
+
+- [pool-b-discount-coupons.postman_collection.json](D:/GitHub/SoftwareTesting-HW06/postman/pool-b-discount-coupons.postman_collection.json) — removed 74 request-level `X-Student-Id` headers; added one collection-level pre-request script that upserts the header and logs request/Test ID, method, URL, and resolved student ID.
+- [pool-b-conversion-report.md](D:/GitHub/SoftwareTesting-HW06/postman/pool-b-conversion-report.md) — updated injection, evidence, validation, timestamp, and SHA-256 details.
+- [AI_Audit.md](D:/GitHub/SoftwareTesting-HW06/AI_Audit.md) — appended Artifact 25.
+
+Validation results:
+
+- PASS — all 74 unique requests and reviewed Test IDs remain unchanged.
+- PASS — zero request-level student headers; one collection-level pre-request injection/evidence event.
+- PASS — full Postman Collection v2.1 schema validation.
+- PASS — Newman 6.2.2 compatibility: 74 requests, 74 injected headers observed, 74 evidence logs, 74 test scripts, 27 assertions, zero failures.
+- PASS — 74 conversion-report traceability rows, zero pending markers, and `git diff --check`.
+
+The Newman run used only a local deterministic compatibility mock. The real SUT was not started or contacted. Existing runtime fixture/token requirements and manual oracles remain unresolved and unchanged.
+
+Artifacts 25-25 successfully appended to `D:\GitHub\SoftwareTesting-HW06\AI_Audit.md`.
+````
+
+- **File Modifications:**
+  - `File:` `postman/pool-b-discount-coupons.postman_collection.json`.
+    - `Action:` edited.
+    - `Deleted:` The duplicated `X-Student-Id: {{studentId}}` header entry from each of the 74 request definitions.
+    - `Replaced With:` One schema-supported collection-level pre-request event that resolves `studentId`, upserts `X-Student-Id`, and logs execution evidence containing request name/Test ID, method, URL, and resolved student ID.
+    - `Appended:` None.
+  - `File:` `postman/pool-b-conversion-report.md`.
+    - `Action:` edited.
+    - `Deleted:` Statements describing `X-Student-Id` as a request-level header and the previous validation timestamp, collection SHA-256, and Newman result.
+    - `Replaced With:` Collection-level injection/evidence documentation plus validation results dated 2026-08-22 17:00:21 GMT+7 and SHA-256 `2323D04DF15152C14FB2FCA92813D93BA2E46F9F6EA799CD509689F29A2B75A7`.
+    - `Appended:` A traceability check for the execution-evidence console log.
+  - `File:` `AI_Audit.md`.
+    - `Action:` appended.
+    - `Deleted:` None.
+    - `Replaced With:` None.
+    - `Appended:` Artifact 25 containing this exact prompt, AI output, and file-modification record.
+  - `File:` `tmp/update_pool_b_collection.py`.
+    - `Action:` created and deleted file.
+    - `Deleted:` The temporary invariant-checked collection mutation helper after use.
+    - `Replaced With:` None.
+    - `Appended:` None.
+  - `File:` `tmp/pool_b_compat_mock.js`.
+    - `Action:` created and deleted file.
+    - `Deleted:` The temporary local Newman compatibility mock after validation.
+    - `Replaced With:` None.
+    - `Appended:` None.
+- **Verdict:** VALID
+- **Reasoning:** The agent correctly fixed all found defects.
+- **Student Fixes:** None
