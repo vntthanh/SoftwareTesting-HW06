@@ -1,0 +1,4 @@
+interface:
+  display_name: "Newman Result Analyzer"
+  short_description: "Normalize Newman execution outcomes"
+  default_prompt: "Use $newman-result-analyzer to analyze a Newman JSON result and write a normalized execution report."
