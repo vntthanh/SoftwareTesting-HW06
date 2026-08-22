@@ -1,0 +1,112 @@
+[
+  {
+    "Test ID": "SECURITY-P001",
+    "Endpoint": "PUT /api/admin/orders/:id/status",
+    "Category": "SECURITY",
+    "Test Objective": "Verify the SS-001 valid security control: a valid JWT carrying role = 'admin' is authenticated and authorized for a documented order transition.",
+    "Preconditions": "A controlled existing order is in pending; a valid Admin JWT fixture is available; record the target order state before the request.",
+    "Request Input": "Path id: <existing-pending-order-id>; Authorization: Bearer <valid-admin-JWT>; JSON body: {\"status\":\"confirmed\"}.",
+    "Expected Result": "Authentication and Admin authorization permit the request to reach the documented pending to confirmed transition behavior. The target order is allowed to change to confirmed. No exact HTTP status, response body, headers, or message is asserted.",
+    "Specification Basis": "SS-001; SEC-02; SEC-03; API specification lines 173 and 181-182; FR-10 lines 146-149; FR-12 lines 174-179; SEC-02 and SEC-03 at system requirements lines 279-280.",
+    "Assumptions / Notes": "The order ID and token are controlled fixture values, not specification constants. The JWT claim encoding and all response details are unspecified. Use an inert fixture only; do not expose the token in results."
+  },
+  {
+    "Test ID": "SECURITY-P002",
+    "Endpoint": "PUT /api/admin/orders/:id/status",
+    "Category": "SECURITY",
+    "Test Objective": "Verify SS-002 and SEC-02 by denying the security-sensitive Admin mutation when the Authorization header is absent.",
+    "Preconditions": "A controlled existing order is in pending; record its state before the request.",
+    "Request Input": "Path id: <existing-pending-order-id>; Authorization header: absent; JSON body: {\"status\":\"confirmed\"}.",
+    "Expected Result": "The operation is not authorized and the target order remains pending. No exact HTTP status, response body, message, or authentication-versus-validation precedence is asserted.",
+    "Specification Basis": "SS-002; SEC-02; API specification line 173; FR-12 lines 177-179; SEC-02 at system requirements line 279.",
+    "Assumptions / Notes": "The exact denial response and processing precedence are unspecified. The before/after order-state check supplies the no-mutation oracle."
+  },
+  {
+    "Test ID": "SECURITY-P003",
+    "Endpoint": "PUT /api/admin/orders/:id/status",
+    "Category": "SECURITY",
+    "Test Objective": "Verify the malformed-token fixture class reviewed in SS-003 is not accepted as a valid JWT under SEC-02.",
+    "Preconditions": "A controlled existing order is in pending; the test environment supplies an inert bearer value classified as a malformed JWT; record the order state before the request.",
+    "Request Input": "Path id: <existing-pending-order-id>; Authorization: Bearer <malformed-JWT-fixture>; JSON body: {\"status\":\"confirmed\"}.",
+    "Expected Result": "The malformed JWT does not authenticate the caller and the target order remains pending. No exact HTTP status, response schema, message, or validation precedence is asserted.",
+    "Specification Basis": "SS-003 (malformed invalid-token fixture class); SEC-02; FR-12 lines 177-179; SEC-02 at system requirements line 279.",
+    "Assumptions / Notes": "The specification does not define JWT syntax, library behavior, or the failure response. The environment must classify this fixture as malformed without making its concrete form a normative requirement."
+  },
+  {
+    "Test ID": "SECURITY-P004",
+    "Endpoint": "PUT /api/admin/orders/:id/status",
+    "Category": "SECURITY",
+    "Test Objective": "Verify the forged-token fixture class reviewed in SS-003 is not accepted as a valid JWT under SEC-02.",
+    "Preconditions": "A controlled existing order is in pending; the test environment supplies an inert JWT fixture classified as forged and invalid; record the order state before the request.",
+    "Request Input": "Path id: <existing-pending-order-id>; Authorization: Bearer <forged-invalid-JWT-fixture>; JSON body: {\"status\":\"confirmed\"}.",
+    "Expected Result": "The forged invalid JWT does not authenticate the caller and the target order remains pending. No exact HTTP status, response schema, message, or validation precedence is asserted.",
+    "Specification Basis": "SS-003 (forged invalid-token fixture class); SEC-02; FR-12 lines 177-179; SEC-02 at system requirements line 279.",
+    "Assumptions / Notes": "No signature algorithm, key, issuer, audience, or other JWT mechanics are specified. Fixture construction is environment-defined and is not promoted to a product requirement."
+  },
+  {
+    "Test ID": "SECURITY-P005",
+    "Endpoint": "PUT /api/admin/orders/:id/status",
+    "Category": "SECURITY",
+    "Test Objective": "Verify the expired-token fixture class reviewed in SS-003 is not accepted as a valid JWT under SEC-02.",
+    "Preconditions": "A controlled existing order is in pending; the test environment supplies an inert JWT fixture it classifies as expired and invalid; record the order state before the request.",
+    "Request Input": "Path id: <existing-pending-order-id>; Authorization: Bearer <expired-invalid-JWT-fixture>; JSON body: {\"status\":\"confirmed\"}.",
+    "Expected Result": "The expired invalid JWT does not authenticate the caller and the target order remains pending. No exact HTTP status, response schema, message, or validation precedence is asserted.",
+    "Specification Basis": "SS-003 (expired invalid-token fixture class); SEC-02; FR-12 lines 177-179; SEC-02 at system requirements line 279.",
+    "Assumptions / Notes": "Although SS-003 reviews an expired fixture class, the specification does not define expiry claim syntax, clock skew, or failure details. The environment owns fixture classification."
+  },
+  {
+    "Test ID": "SECURITY-P006",
+    "Endpoint": "PUT /api/admin/orders/:id/status",
+    "Category": "SECURITY",
+    "Test Objective": "Verify the otherwise-invalid token fixture class reviewed in SS-003 is not accepted as a valid JWT under SEC-02.",
+    "Preconditions": "A controlled existing order is in pending; the test environment supplies an inert bearer JWT fixture known to be invalid for an environment-defined reason other than the separately tested malformed, forged, and expired classes; record the order state before the request.",
+    "Request Input": "Path id: <existing-pending-order-id>; Authorization: Bearer <environment-classified-invalid-JWT-fixture>; JSON body: {\"status\":\"confirmed\"}.",
+    "Expected Result": "The environment-classified invalid JWT does not authenticate the caller and the target order remains pending. No exact HTTP status, response schema, message, or validation precedence is asserted.",
+    "Specification Basis": "SS-003 (otherwise invalid-token fixture class); SEC-02; FR-12 lines 177-179; SEC-02 at system requirements line 279.",
+    "Assumptions / Notes": "The invalidity reason is test-environment metadata, not an invented normative JWT rule. Algorithms, claims, and exact failure behavior remain unresolved."
+  },
+  {
+    "Test ID": "SECURITY-P007",
+    "Endpoint": "PUT /api/admin/orders/:id/status",
+    "Category": "SECURITY",
+    "Test Objective": "Verify SS-004 and SEC-03: token validity alone is insufficient and a valid non-Admin JWT cannot perform the Admin mutation.",
+    "Preconditions": "A controlled existing order is in pending; a valid JWT fixture lacking role = 'admin' is available; record the order state before the request.",
+    "Request Input": "Path id: <existing-pending-order-id>; Authorization: Bearer <valid-non-admin-JWT>; JSON body: {\"status\":\"confirmed\"}.",
+    "Expected Result": "The Admin-role check denies the mutation and the target order remains pending. No exact denial status, body, message, or processing precedence is asserted.",
+    "Specification Basis": "SS-004; SEC-03; API specification line 173; FR-12 lines 174-179; SEC-03 at system requirements line 280.",
+    "Assumptions / Notes": "The non-Admin role name and role-claim encoding are unspecified. The fixture must be a valid JWT except that it lacks role = 'admin'."
+  },
+  {
+    "Test ID": "SECURITY-P008",
+    "Endpoint": "PUT /api/admin/orders/:id/status",
+    "Category": "SECURITY",
+    "Test Objective": "Verify the SS-005 SEC-05 behavioral oracle: an injection-shaped path id is handled as data and cannot broaden or redirect the database update.",
+    "Preconditions": "A valid Admin JWT fixture is available; controlled fixtures allow before/after inspection of all potentially affected orders, including unrelated orders.",
+    "Request Input": "Path id: <URL-encoded inert fixture equivalent of ' OR '1'='1>; Authorization: Bearer <valid-admin-JWT>; JSON body: {\"status\":\"confirmed\"}.",
+    "Expected Result": "The inert id value does not execute query instructions, select or update unintended orders, or broaden the affected row set. No exact validation, rejection, not-found status, body, or message is asserted.",
+    "Specification Basis": "SS-005; SEC-05 at system requirements line 282; endpoint path at API specification line 181; FR-18 lines 218-221.",
+    "Assumptions / Notes": "The example is an inert test string only. ID syntax and response behavior are unspecified. Black-box absence of unintended effects is behavioral evidence but does not conclusively prove source-level parameterization."
+  },
+  {
+    "Test ID": "SECURITY-P009",
+    "Endpoint": "PUT /api/admin/orders/:id/status",
+    "Category": "SECURITY",
+    "Test Objective": "Verify the SS-006 SEC-05 behavioral oracle: an injection-shaped status value is handled as data and cannot execute query instructions or bypass lifecycle constraints.",
+    "Preconditions": "A valid Admin JWT fixture is available; a controlled legitimate target order and unrelated orders can be inspected before and after the request.",
+    "Request Input": "Path id: <legitimate-existing-order-id>; Authorization: Bearer <valid-admin-JWT>; JSON body: {\"status\":\"<inert SQL-control-shaped string outside the five documented status values>\"}.",
+    "Expected Result": "The inert status value does not execute query instructions, place the target in an unintended state, bypass lifecycle constraints, or modify unrelated orders. No exact invalid-value status, body, schema, or message is asserted.",
+    "Specification Basis": "SS-006; SEC-05 at system requirements line 282; API specification line 182; FR-10 lines 141-162.",
+    "Assumptions / Notes": "The concrete string is inert test data. The documented five-state vocabulary establishes that it is unsupported, but exact invalid-value response behavior is unspecified. Behavioral observation cannot conclusively prove source-level parameterization."
+  },
+  {
+    "Test ID": "SECURITY-P010",
+    "Endpoint": "PUT /api/admin/orders/:id/status",
+    "Category": "SECURITY",
+    "Test Objective": "Verify the SS-007 valid SEC-05 control: an ordinary valid update affects only the order identified by id.",
+    "Preconditions": "A controlled target order is in pending; at least one unrelated controlled order exists; a valid Admin JWT fixture is available; record all controlled order states before the request.",
+    "Request Input": "Path id: <target-pending-order-id>; Authorization: Bearer <valid-admin-JWT>; JSON body: {\"status\":\"confirmed\"}.",
+    "Expected Result": "Only the identified target order performs the documented pending to confirmed transition; unrelated orders remain unchanged. No exact success status, response body, headers, or implementation-level query construction is asserted.",
+    "Specification Basis": "SS-007; SEC-05 at system requirements line 282; API specification lines 181-182; FR-10 lines 146-149; FR-18 lines 218-221.",
+    "Assumptions / Notes": "Fixture IDs and JWTs are not specification constants. Before/after inspection supplies the affected-order oracle. This behavioral result does not by itself prove source-level query parameterization."
+  }
+]

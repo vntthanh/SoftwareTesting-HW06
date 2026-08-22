@@ -2120,7 +2120,7 @@ The obsolete duplicate B.6 placeholder was also removed.
 
 - **User:** Vương Ngũ Tín Thành
 - **Date and Time:** 2026-08-22 16:38:22 GMT+7
-- **Model Used:** TODO: Unknown
+- **Model Used:** GPT-5.6 Sol
 - **Skill Used:**
   - `api-test-generator`
   - `ai-audit`
@@ -2202,7 +2202,7 @@ Validation results:
 
 - **User:** Vương Ngũ Tín Thành
 - **Date and Time:** 2026-08-22 16:51:40 GMT+7
-- **Model Used:** TODO: Unknown
+- **Model Used:** GPT-5.6 Sol
 - **Skill Used:**
   - `postman-test-generator`
   - `ai-audit`
@@ -2323,7 +2323,7 @@ Artifacts 24-24 successfully appended to `D:\GitHub\SoftwareTesting-HW06\AI_Audi
 
 - **User:** Vương Ngũ Tín Thành
 - **Date and Time:** 2026-08-22 17:01:09 GMT+7
-- **Model Used:** TODO: Unknown
+- **Model Used:** GPT-5.6 Sol
 - **Skill Used:**
   - `postman-test-generator`
   - `ai-audit`
@@ -2409,7 +2409,7 @@ Artifacts 25-25 successfully appended to `D:\GitHub\SoftwareTesting-HW06\AI_Audi
 
 - **User:** Vương Ngũ Tín Thành
 - **Date and Time:** 2026-08-22 17:20:17 GMT+7
-- **Model Used:** GPT-5.6 So
+- **Model Used:** GPT-5.6 Sol
 - **Skill Used:**
   - `postman-test-generator`
   - `ai-audit`
@@ -2543,9 +2543,9 @@ Artifacts 26-26 successfully appended to `D:\GitHub\SoftwareTesting-HW06\AI_Audi
 
 ### Artifact 27
 
-- **User:** TODO: Unknown
+- **User:** Vương Ngũ Tín Thành
 - **Date and Time:** 2026-08-22 18:28:56 GMT+7
-- **Model Used:** GPT-5
+- **Model Used:** GPT-5.6 Sol
 - **Skill Used:** newman-result-analyzer
 - **Prompt:**
 
@@ -2696,10 +2696,10 @@ Updated the [Postman collection](D:/GitHub/SoftwareTesting-HW06/postman/pool-b-d
 
 ### Artifact 29
 
-- **User:** TODO: Unknown
+- **User:** Vương Ngũ Tín Thành
 - **Date and Time:** 2026-08-22 19:30:30 GMT+7
-- **Model Used:** GPT-5
-- **Skill Used:** ai-audit
+- **Model Used:** GPT-5.6 Sol
+- **Skill Used:** `ai-audit`
 - **Prompt:**
 
 ````markdown
@@ -2720,4 +2720,267 @@ Artifacts 28-28 successfully appended to `D:\GitHub\SoftwareTesting-HW06\AI_Audi
     - `Appended:` Artifact 28 containing the exact preceding Pool B triage-resolution prompt, AI output, and file-modification record.
 - **Verdict:** VALID
 - **Reasoning:** The agent grouped and extracted issues correctly.
+- **Student Fixes:** None
+
+### Artifact 30
+
+- **User:** Vương Ngũ Tín Thành
+- **Date and Time:** 2026-08-22 20:07:27 GMT+7
+- **Model Used:** GPT-5.6 Sol
+- **Skill Used:**
+  - `api-test-generator`
+  - `contract-test-generator`
+  - `domain-test-generator`
+  - `state-transition-test-generator`
+  - `security-test-generator`
+  - `ai-audit`
+- **Prompt:**
+
+````markdown
+Use [$api-test-generator](D:\GitHub\SoftwareTesting-HW06\\.agents\skills\api-test-generator\SKILL.md) for Pool C — Admin Order Management.
+
+Inputs:
+
+- [api\_specification.md](reference/api_specification.md)&#x20;
+- [system\_requirements.md](reference/system_requirements.md)&#x20;
+- endpoint: PUT /api/admin/orders/:id/status
+
+
+Log with [$ai-audit](D:\GitHub\SoftwareTesting-HW06\\.agents\skills\ai-audit\SKILL.md)
+````
+
+- **AI Output:**
+
+````markdown
+Phase 1 for Pool C is complete and paused at the required human-review gate. No candidate tests were generated.
+
+Reports:
+
+- [Contract](D:/GitHub/SoftwareTesting-HW06/review/pool-c/reports/contract-report.md)
+- [Domain](D:/GitHub/SoftwareTesting-HW06/review/pool-c/reports/domain-report.md)
+- [State](D:/GitHub/SoftwareTesting-HW06/review/pool-c/reports/state-report.md)
+- [Security](D:/GitHub/SoftwareTesting-HW06/review/pool-c/reports/security-report.md)
+- [Orchestration status](D:/GitHub/SoftwareTesting-HW06/review/pool-c/orchestration-status.md)
+
+The main review decisions are `shipping → canceled`, whether the FR-10 diagram is exhaustive, same-state/idempotent updates, strict `status` schema behavior, the `id` domain, and unspecified response contracts.
+
+Artifacts 30-30 successfully appended to D:\GitHub\SoftwareTesting-HW06\AI_Audit.md.
+
+Approve these exact report versions—or revise their review blocks—when you want Phase 2 to generate `candidate-api-tests.csv`.
+````
+
+- **File Modifications:**
+  - `File:` `review/pool-c/shared-api-context.md`.
+    - `Action:` created.
+    - `Deleted:` None.
+    - `Replaced With:` None.
+    - `Appended:` Complete normalized endpoint context for `PUT /api/admin/orders/:id/status`, including source hashes, request and response inventories, authentication/authorization, SEC-01–SEC-07 extraction, FR-10 state model, gaps, and assumptions.
+  - `File:` `review/pool-c/orchestration-status.md`.
+    - `Action:` created.
+    - `Deleted:` None.
+    - `Replaced With:` None.
+    - `Appended:` Phase 1 status, exact report hashes, validation result, review focus, and closed human-review gate record.
+  - `File:` `review/pool-c/reports/contract-report.md`.
+    - `Action:` created.
+    - `Deleted:` None.
+    - `Replaced With:` None.
+    - `Appended:` CONTRACT Phase 1 analysis with CR-001–CR-013 and `Review Status: PENDING`.
+  - `File:` `review/pool-c/reports/domain-report.md`.
+    - `Action:` created.
+    - `Deleted:` None.
+    - `Replaced With:` None.
+    - `Appended:` DOMAIN Phase 1 analysis with parameter inventory, equivalence partitions, explicit boundary analysis, and `Review Status: PENDING`.
+  - `File:` `review/pool-c/reports/state-report.md`.
+    - `Action:` created.
+    - `Deleted:` None.
+    - `Replaced With:` None.
+    - `Appended:` STATE Phase 1 analysis with five states, supported transitions TR-001–TR-013, reviewer-resolution items PR-001–PR-007, and `Review Status: PENDING`.
+  - `File:` `review/pool-c/reports/security-report.md`.
+    - `Action:` created.
+    - `Deleted:` None.
+    - `Replaced With:` None.
+    - `Appended:` SECURITY Phase 1 analysis with the SEC-01–SEC-07 applicability matrix, SS-001–SS-007, and `Review Status: PENDING`.
+  - `File:` `AI_Audit.md`.
+    - `Action:` appended.
+    - `Deleted:` None.
+    - `Replaced With:` None.
+    - `Appended:` Artifact 30 containing this exact prompt, AI output, and file-modification record.
+- **Verdict:** INCOMPLETE
+- **Reasoning:**
+  - CONTRACT, DOMAIN, and SECURITY are mostly correct.
+  - STATE leaves some FR-10 transitions unresolved.
+  - FR-10 defines the valid state machine, and FR-18 requires Admin updates to follow it.
+  - PR-001 to PR-007 should be invalid.
+- **Student Fixes:**
+  - Manually approve CONTRACT, DOMAIN, and SECURITY.
+  - Ask AI to mark PR-001 to PR-007 as INVALID.
+  - Ask AI to remove the shipping → canceled ambiguity.
+  - Ask AI to update all Phase 1 reports consistently.
+
+### Artifact 31
+
+- **User:** Vương Ngũ Tín Thành
+- **Date and Time:** 2026-08-22 20:21:54 GMT+7
+- **Model Used:** GPT-5.6 Sol
+- **Skill Used:**
+  - `api-test-generator`
+  - `contract-test-generator`
+  - `domain-test-generator`
+  - `state-transition-test-generator`
+  - `security-test-generator`
+  - `ai-audit`
+- **Prompt:**
+
+````markdown
+Revise Pool C Phase 1 from my human review:
+
+- FR-10's diagram is the authoritative state machine.
+- Classify PR-001 through PR-007 as INVALID, including shipping → canceled.
+- FR-10 line 161 does not authorize shipping → canceled; FR-18 requires Admin changes to follow FR-10.
+- Keep same-state updates UNSPECIFIED.
+- Propagate this decision consistently across shared context, CONTRACT, DOMAIN, STATE, and orchestration status.
+- Preserve all other analysis.
+- Do not generate Phase 2 yet.
+- Log with [$ai-audit](D:\GitHub\SoftwareTesting-HW06\\.agents\skills\ai-audit\SKILL.md)
+````
+
+- **AI Output:**
+
+````markdown
+Pool C Phase 1 has been revised consistently. Phase 2 remains blocked and no candidate tests were generated.
+
+Updated files:
+
+- [Shared context](D:/GitHub/SoftwareTesting-HW06/review/pool-c/shared-api-context.md)
+- [Contract v2](D:/GitHub/SoftwareTesting-HW06/review/pool-c/reports/contract-report.md)
+- [Domain v2](D:/GitHub/SoftwareTesting-HW06/review/pool-c/reports/domain-report.md)
+- [State v2](D:/GitHub/SoftwareTesting-HW06/review/pool-c/reports/state-report.md)
+- [Orchestration status](D:/GitHub/SoftwareTesting-HW06/review/pool-c/orchestration-status.md)
+
+PR-001 through PR-007 are now `INVALID`, including `shipping → canceled`. FR-10 line 161 is explicitly recorded as not authorizing that edge, while same-state updates remain `UNSPECIFIED`. The SECURITY report was verified consistent and left byte-for-byte unchanged. All reports remain `PENDING`.
+
+Artifacts 31-31 successfully appended to D:\GitHub\SoftwareTesting-HW06\AI_Audit.md.
+````
+
+- **File Modifications:**
+  - `File:` `review/pool-c/shared-api-context.md`.
+    - `Action:` edited.
+    - `Deleted:` The prior unresolved interpretation of omitted FR-10 edges, including the `shipping` → `canceled` ambiguity and the corresponding gap entry.
+    - `Replaced With:` A human-review authority overlay making the FR-10 diagram exhaustive for non-self transitions, classifying the seven omitted edges as invalid, recording the line-161/FR-18 rationale, and preserving same-state behavior as unspecified.
+    - `Appended:` None.
+  - `File:` `review/pool-c/reports/contract-report.md`.
+    - `Action:` edited.
+    - `Deleted:` The prior `shipping` → `canceled` ambiguity and unresolved review prompt.
+    - `Replaced With:` `CONTRACT-PHASE1-v2`, including revised CR-009, explicit PR-001–PR-007 `INVALID` classifications, preserved same-state uncertainty, and a pending review record.
+    - `Appended:` None.
+  - `File:` `review/pool-c/reports/domain-report.md`.
+    - `Action:` edited.
+    - `Deleted:` The prior ambiguous classification of Admin cancellation from `shipping` and unresolved non-self transitions.
+    - `Replaced With:` `DOMAIN-P1-v2`, consistently applying all seven invalid classifications while preserving all unrelated partitions, boundaries, gaps, and pending review status.
+    - `Appended:` None.
+  - `File:` `review/pool-c/reports/state-report.md`.
+    - `Action:` edited.
+    - `Deleted:` The PR-001–PR-007 proposed/ambiguous classifications and their resolved review questions.
+    - `Replaced With:` `STATE-PHASE1-v2`, preserving PR IDs and classifying every PR edge as `INVALID`, with same-state updates still `UNSPECIFIED` and review status `PENDING`.
+    - `Appended:` None.
+  - `File:` `review/pool-c/orchestration-status.md`.
+    - `Action:` edited.
+    - `Deleted:` Superseded report hashes and the pending questions about diagram exhaustiveness and `shipping` → `canceled`.
+    - `Replaced With:` Revised v2 report hashes, resolved decision records, preserved gaps, validation results, and an explicitly closed Phase 2 gate.
+    - `Appended:` None.
+  - `File:` `AI_Audit.md`.
+    - `Action:` appended.
+    - `Deleted:` None.
+    - `Replaced With:` None.
+    - `Appended:` Artifact 31 containing this exact prompt, AI output, and file-modification record.
+- **Verdict:** VALID
+- **Reasoning:**
+  - The FR-10 state machine is now applied correctly
+  - PR-001 to PR-007 are consistently marked INVALID
+  - `shipping` to `canceled` is correctly rejected under FR-10 and FR-18.The FR-10 state machine is now applied correctly.
+  - PR-001 to PR-007 are consistently marked INVALID.
+- **Student Fixes:** None
+
+### Artifact 32
+
+- **User:** TODO: Unknown
+- **Date and Time:** 2026-08-22 20:43:50 GMT+7
+- **Model Used:** GPT-5 (primary Codex agent and four specialist subagents)
+- **Skill Used:** api-test-generator, contract-test-generator, domain-test-generator, state-transition-test-generator, security-test-generator, ai-audit
+- **Prompt:**
+
+````markdown
+I have reviewed and approved Pool C Phase 1.
+
+Continue with [$api-test-generator](D:\GitHub\SoftwareTesting-HW06\\.agents\skills\api-test-generator\SKILL.md) Phase 2.
+
+- Generate candidate tests for `PUT /api/admin/orders/:id/status`.
+- Use only the approved CONTRACT, DOMAIN, STATE, and SECURITY reports.
+- Target at least 35 test cases.
+- Preserve CR/DP/TR/SS traceability.
+- Keep unspecified behavior unresolved; do not invent HTTP status codes or schemas.
+- Write the final candidate suite to `review/pool-c/candidate-api-tests.csv`.
+- Log with [$ai-audit](D:\GitHub\SoftwareTesting-HW06\\.agents\skills\ai-audit\SKILL.md).
+````
+
+- **AI Output:**
+
+````markdown
+Phase 2 is complete. Generated [candidate-api-tests.csv](D:/GitHub/SoftwareTesting-HW06/review/pool-c/candidate-api-tests.csv) with 81 validated cases:
+
+- CONTRACT: 23
+- DOMAIN: 28
+- STATE: 20
+- SECURITY: 10
+
+Coverage includes `CR-001–CR-013`, `DP-001–DP-028`, `TR-001–TR-013`, `PR-001–PR-007`, `SS-001–SS-007`, and applicable `SEC-02/03/05`. IDs are sequential from `API-001` to `API-081`; unspecified behavior remains unresolved, and no numeric HTTP status codes or response schemas were invented. No tests were executed.
+
+Full validation and hashes are recorded in [orchestration-status.md](D:/GitHub/SoftwareTesting-HW06/review/pool-c/orchestration-status.md).
+
+Artifacts 32-32 successfully appended to D:\GitHub\SoftwareTesting-HW06\AI_Audit.md.
+````
+
+- **File Modifications:**
+  - `File:` `review/pool-c/shared-api-context.md`.
+    - `Action:` edited.
+    - `Deleted:` None.
+    - `Replaced With:` None.
+    - `Appended:` Phase 2 approval authority with the exact approved report hashes, target, traceability requirement, and unresolved-behavior guardrails.
+  - `File:` `review/pool-c/candidates/contract-tests.json`.
+    - `Action:` created.
+    - `Deleted:` None.
+    - `Replaced With:` None.
+    - `Appended:` 23 CONTRACT candidates covering CR-001–CR-013.
+  - `File:` `review/pool-c/candidates/domain-tests.json`.
+    - `Action:` created.
+    - `Deleted:` None.
+    - `Replaced With:` None.
+    - `Appended:` 28 DOMAIN candidates covering DP-001–DP-028; no DB cases because the approved report defines no supported boundaries.
+  - `File:` `review/pool-c/candidates/state-tests.json`.
+    - `Action:` created.
+    - `Deleted:` None.
+    - `Replaced With:` None.
+    - `Appended:` 20 STATE candidates covering TR-001–TR-013 and PR-001–PR-007, with no same-state cases.
+  - `File:` `review/pool-c/candidates/security-tests.json`.
+    - `Action:` created.
+    - `Deleted:` None.
+    - `Replaced With:` None.
+    - `Appended:` 10 SECURITY candidates covering SS-001–SS-007 and applicable SEC-02, SEC-03, and SEC-05.
+  - `File:` `review/pool-c/candidate-api-tests.csv`.
+    - `Action:` created.
+    - `Deleted:` None.
+    - `Replaced With:` None.
+    - `Appended:` Aggregated 81-row candidate suite with exact nine-field schema, stable API-001–API-081 IDs, compact JSON request cells, preserved provisional IDs, and complete approved traceability.
+  - `File:` `review/pool-c/orchestration-status.md`.
+    - `Action:` edited.
+    - `Deleted:` The Phase 1-only gate state and absent-candidate markers.
+    - `Replaced With:` Phase 2 approval record, specialist fragment hashes/counts, parent validation, final CSV hash, complete traceability, and preserved gaps/limitations.
+    - `Appended:` None.
+  - `File:` `AI_Audit.md`.
+    - `Action:` appended.
+    - `Deleted:` None.
+    - `Replaced With:` None.
+    - `Appended:` Artifact 32 containing this exact prompt, AI output, and file-modification record.
+- **Verdict:** VALID
+- **Reasoning:** Base on the analysis, the agent correctly generated test cases.
 - **Student Fixes:** None

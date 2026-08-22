@@ -1,0 +1,222 @@
+[
+  {
+    "Test ID": "STATE-P001",
+    "Endpoint": "PUT /api/admin/orders/:id/status",
+    "Category": "STATE",
+    "Test Objective": "Verify the reviewed valid transition from pending to confirmed.",
+    "Preconditions": "A fixture order exists in pending state with a known ID; a valid Bearer JWT whose role is admin is available.",
+    "Request Input": "PUT /api/admin/orders/<pending-order-id>/status with Authorization: Bearer <valid-admin-JWT> and JSON body {\"status\":\"confirmed\"}.",
+    "Expected Result": "The status change is accepted and the order reaches confirmed. The exact HTTP status, response headers, and response body are unspecified.",
+    "Specification Basis": "TR-001; ST-01 to ST-02; FR-10 lines 146-149; FR-18 line 221.",
+    "Assumptions / Notes": "The concrete order ID and admin JWT are fixture values. This candidate asserts only the reviewed semantic outcome and does not prescribe a response schema or side effects beyond the state change."
+  },
+  {
+    "Test ID": "STATE-P002",
+    "Endpoint": "PUT /api/admin/orders/:id/status",
+    "Category": "STATE",
+    "Test Objective": "Verify the reviewed valid transition from confirmed to shipping.",
+    "Preconditions": "A fixture order exists in confirmed state with a known ID; a valid Bearer JWT whose role is admin is available.",
+    "Request Input": "PUT /api/admin/orders/<confirmed-order-id>/status with Authorization: Bearer <valid-admin-JWT> and JSON body {\"status\":\"shipping\"}.",
+    "Expected Result": "The status change is accepted and the order reaches shipping. The exact HTTP status, response headers, and response body are unspecified.",
+    "Specification Basis": "TR-002; ST-02 to ST-03; FR-10 lines 146-149; FR-18 line 221.",
+    "Assumptions / Notes": "The concrete order ID and admin JWT are fixture values. This candidate asserts only the reviewed semantic outcome and does not prescribe a response schema or side effects beyond the state change."
+  },
+  {
+    "Test ID": "STATE-P003",
+    "Endpoint": "PUT /api/admin/orders/:id/status",
+    "Category": "STATE",
+    "Test Objective": "Verify the reviewed valid transition from shipping to delivered.",
+    "Preconditions": "A fixture order exists in shipping state with a known ID; a valid Bearer JWT whose role is admin is available.",
+    "Request Input": "PUT /api/admin/orders/<shipping-order-id>/status with Authorization: Bearer <valid-admin-JWT> and JSON body {\"status\":\"delivered\"}.",
+    "Expected Result": "The status change is accepted and the order reaches delivered. The exact HTTP status, response headers, and response body are unspecified.",
+    "Specification Basis": "TR-003; ST-03 to ST-04; FR-10 lines 146-149; FR-18 line 221.",
+    "Assumptions / Notes": "The concrete order ID and admin JWT are fixture values. This candidate asserts only the reviewed semantic outcome and does not prescribe a response schema or side effects beyond the state change."
+  },
+  {
+    "Test ID": "STATE-P004",
+    "Endpoint": "PUT /api/admin/orders/:id/status",
+    "Category": "STATE",
+    "Test Objective": "Verify the reviewed valid transition from pending to canceled.",
+    "Preconditions": "A fixture order exists in pending state with a known ID; a valid Bearer JWT whose role is admin is available.",
+    "Request Input": "PUT /api/admin/orders/<pending-order-id>/status with Authorization: Bearer <valid-admin-JWT> and JSON body {\"status\":\"canceled\"}.",
+    "Expected Result": "The status change is accepted and the order reaches canceled. The exact HTTP status, response headers, and response body are unspecified.",
+    "Specification Basis": "TR-004; ST-01 to ST-05; FR-10 lines 150-155; FR-18 line 221.",
+    "Assumptions / Notes": "The concrete order ID and admin JWT are fixture values. This candidate asserts only the reviewed semantic outcome and does not prescribe a response schema or side effects beyond the state change."
+  },
+  {
+    "Test ID": "STATE-P005",
+    "Endpoint": "PUT /api/admin/orders/:id/status",
+    "Category": "STATE",
+    "Test Objective": "Verify the reviewed valid transition from confirmed to canceled.",
+    "Preconditions": "A fixture order exists in confirmed state with a known ID; a valid Bearer JWT whose role is admin is available.",
+    "Request Input": "PUT /api/admin/orders/<confirmed-order-id>/status with Authorization: Bearer <valid-admin-JWT> and JSON body {\"status\":\"canceled\"}.",
+    "Expected Result": "The status change is accepted and the order reaches canceled. The exact HTTP status, response headers, and response body are unspecified.",
+    "Specification Basis": "TR-005; ST-02 to ST-05; FR-10 lines 150-155; FR-18 line 221.",
+    "Assumptions / Notes": "The concrete order ID and admin JWT are fixture values. This candidate asserts only the reviewed semantic outcome and does not prescribe a response schema or side effects beyond the state change."
+  },
+  {
+    "Test ID": "STATE-P006",
+    "Endpoint": "PUT /api/admin/orders/:id/status",
+    "Category": "STATE",
+    "Test Objective": "Verify that a delivered order cannot transition to pending.",
+    "Preconditions": "A fixture order exists in final state delivered with a known ID; a valid Bearer JWT whose role is admin is available.",
+    "Request Input": "PUT /api/admin/orders/<delivered-order-id>/status with Authorization: Bearer <valid-admin-JWT> and JSON body {\"status\":\"pending\"}.",
+    "Expected Result": "The transition is rejected with an error and an appropriate message. The exact HTTP status, response schema, wording, and post-error persistence behavior are unspecified.",
+    "Specification Basis": "TR-006; ST-04 to pending; FR-10 lines 158-162.",
+    "Assumptions / Notes": "The concrete order ID and admin JWT are fixture values. No exact error code, schema, message text, or state-preservation side effect is asserted."
+  },
+  {
+    "Test ID": "STATE-P007",
+    "Endpoint": "PUT /api/admin/orders/:id/status",
+    "Category": "STATE",
+    "Test Objective": "Verify that a delivered order cannot transition to confirmed.",
+    "Preconditions": "A fixture order exists in final state delivered with a known ID; a valid Bearer JWT whose role is admin is available.",
+    "Request Input": "PUT /api/admin/orders/<delivered-order-id>/status with Authorization: Bearer <valid-admin-JWT> and JSON body {\"status\":\"confirmed\"}.",
+    "Expected Result": "The transition is rejected with an error and an appropriate message. The exact HTTP status, response schema, wording, and post-error persistence behavior are unspecified.",
+    "Specification Basis": "TR-007; ST-04 to confirmed; FR-10 lines 158-162.",
+    "Assumptions / Notes": "The concrete order ID and admin JWT are fixture values. No exact error code, schema, message text, or state-preservation side effect is asserted."
+  },
+  {
+    "Test ID": "STATE-P008",
+    "Endpoint": "PUT /api/admin/orders/:id/status",
+    "Category": "STATE",
+    "Test Objective": "Verify that a delivered order cannot transition to shipping.",
+    "Preconditions": "A fixture order exists in final state delivered with a known ID; a valid Bearer JWT whose role is admin is available.",
+    "Request Input": "PUT /api/admin/orders/<delivered-order-id>/status with Authorization: Bearer <valid-admin-JWT> and JSON body {\"status\":\"shipping\"}.",
+    "Expected Result": "The transition is rejected with an error and an appropriate message. The exact HTTP status, response schema, wording, and post-error persistence behavior are unspecified.",
+    "Specification Basis": "TR-008; ST-04 to shipping; FR-10 lines 158-162.",
+    "Assumptions / Notes": "The concrete order ID and admin JWT are fixture values. No exact error code, schema, message text, or state-preservation side effect is asserted."
+  },
+  {
+    "Test ID": "STATE-P009",
+    "Endpoint": "PUT /api/admin/orders/:id/status",
+    "Category": "STATE",
+    "Test Objective": "Verify that a delivered order cannot transition to canceled.",
+    "Preconditions": "A fixture order exists in final state delivered with a known ID; a valid Bearer JWT whose role is admin is available.",
+    "Request Input": "PUT /api/admin/orders/<delivered-order-id>/status with Authorization: Bearer <valid-admin-JWT> and JSON body {\"status\":\"canceled\"}.",
+    "Expected Result": "The transition is rejected with an error and an appropriate message. The exact HTTP status, response schema, wording, and post-error persistence behavior are unspecified.",
+    "Specification Basis": "TR-009; ST-04 to canceled; FR-10 lines 158-162.",
+    "Assumptions / Notes": "The concrete order ID and admin JWT are fixture values. No exact error code, schema, message text, or state-preservation side effect is asserted."
+  },
+  {
+    "Test ID": "STATE-P010",
+    "Endpoint": "PUT /api/admin/orders/:id/status",
+    "Category": "STATE",
+    "Test Objective": "Verify that a canceled order cannot transition to pending.",
+    "Preconditions": "A fixture order exists in final state canceled with a known ID; a valid Bearer JWT whose role is admin is available.",
+    "Request Input": "PUT /api/admin/orders/<canceled-order-id>/status with Authorization: Bearer <valid-admin-JWT> and JSON body {\"status\":\"pending\"}.",
+    "Expected Result": "The transition is rejected with an error and an appropriate message. The exact HTTP status, response schema, wording, and post-error persistence behavior are unspecified.",
+    "Specification Basis": "TR-010; ST-05 to pending; FR-10 lines 158-162.",
+    "Assumptions / Notes": "The concrete order ID and admin JWT are fixture values. No exact error code, schema, message text, or state-preservation side effect is asserted."
+  },
+  {
+    "Test ID": "STATE-P011",
+    "Endpoint": "PUT /api/admin/orders/:id/status",
+    "Category": "STATE",
+    "Test Objective": "Verify that a canceled order cannot transition to confirmed.",
+    "Preconditions": "A fixture order exists in final state canceled with a known ID; a valid Bearer JWT whose role is admin is available.",
+    "Request Input": "PUT /api/admin/orders/<canceled-order-id>/status with Authorization: Bearer <valid-admin-JWT> and JSON body {\"status\":\"confirmed\"}.",
+    "Expected Result": "The transition is rejected with an error and an appropriate message. The exact HTTP status, response schema, wording, and post-error persistence behavior are unspecified.",
+    "Specification Basis": "TR-011; ST-05 to confirmed; FR-10 lines 158-162.",
+    "Assumptions / Notes": "The concrete order ID and admin JWT are fixture values. No exact error code, schema, message text, or state-preservation side effect is asserted."
+  },
+  {
+    "Test ID": "STATE-P012",
+    "Endpoint": "PUT /api/admin/orders/:id/status",
+    "Category": "STATE",
+    "Test Objective": "Verify that a canceled order cannot transition to shipping.",
+    "Preconditions": "A fixture order exists in final state canceled with a known ID; a valid Bearer JWT whose role is admin is available.",
+    "Request Input": "PUT /api/admin/orders/<canceled-order-id>/status with Authorization: Bearer <valid-admin-JWT> and JSON body {\"status\":\"shipping\"}.",
+    "Expected Result": "The transition is rejected with an error and an appropriate message. The exact HTTP status, response schema, wording, and post-error persistence behavior are unspecified.",
+    "Specification Basis": "TR-012; ST-05 to shipping; FR-10 lines 158-162.",
+    "Assumptions / Notes": "The concrete order ID and admin JWT are fixture values. No exact error code, schema, message text, or state-preservation side effect is asserted."
+  },
+  {
+    "Test ID": "STATE-P013",
+    "Endpoint": "PUT /api/admin/orders/:id/status",
+    "Category": "STATE",
+    "Test Objective": "Verify that a canceled order cannot transition to delivered.",
+    "Preconditions": "A fixture order exists in final state canceled with a known ID; a valid Bearer JWT whose role is admin is available.",
+    "Request Input": "PUT /api/admin/orders/<canceled-order-id>/status with Authorization: Bearer <valid-admin-JWT> and JSON body {\"status\":\"delivered\"}.",
+    "Expected Result": "The transition is rejected with an error and an appropriate message. The exact HTTP status, response schema, wording, and post-error persistence behavior are unspecified.",
+    "Specification Basis": "TR-013; ST-05 to delivered; FR-10 lines 158-162.",
+    "Assumptions / Notes": "The concrete order ID and admin JWT are fixture values. No exact error code, schema, message text, or state-preservation side effect is asserted."
+  },
+  {
+    "Test ID": "STATE-P014",
+    "Endpoint": "PUT /api/admin/orders/:id/status",
+    "Category": "STATE",
+    "Test Objective": "Verify rejection of the reviewed invalid omitted transition from pending to shipping.",
+    "Preconditions": "A fixture order exists in pending state with a known ID; a valid Bearer JWT whose role is admin is available.",
+    "Request Input": "PUT /api/admin/orders/<pending-order-id>/status with Authorization: Bearer <valid-admin-JWT> and JSON body {\"status\":\"shipping\"}.",
+    "Expected Result": "The transition is rejected with an error and an appropriate message. The exact HTTP status, response schema, wording, and post-error persistence behavior are unspecified.",
+    "Specification Basis": "PR-001; ST-01 to shipping; FR-10 lines 146-162; FR-18 line 221; human review dated 2026-08-22.",
+    "Assumptions / Notes": "PR-001 is INVALID because the edge is omitted from the reviewed authoritative, exhaustive FR-10 diagram. No exact error code, schema, message text, or state-preservation side effect is asserted."
+  },
+  {
+    "Test ID": "STATE-P015",
+    "Endpoint": "PUT /api/admin/orders/:id/status",
+    "Category": "STATE",
+    "Test Objective": "Verify rejection of the reviewed invalid omitted transition from pending to delivered.",
+    "Preconditions": "A fixture order exists in pending state with a known ID; a valid Bearer JWT whose role is admin is available.",
+    "Request Input": "PUT /api/admin/orders/<pending-order-id>/status with Authorization: Bearer <valid-admin-JWT> and JSON body {\"status\":\"delivered\"}.",
+    "Expected Result": "The transition is rejected with an error and an appropriate message. The exact HTTP status, response schema, wording, and post-error persistence behavior are unspecified.",
+    "Specification Basis": "PR-002; ST-01 to delivered; FR-10 lines 146-162; FR-18 line 221; human review dated 2026-08-22.",
+    "Assumptions / Notes": "PR-002 is INVALID because the edge is omitted from the reviewed authoritative, exhaustive FR-10 diagram. No exact error code, schema, message text, or state-preservation side effect is asserted."
+  },
+  {
+    "Test ID": "STATE-P016",
+    "Endpoint": "PUT /api/admin/orders/:id/status",
+    "Category": "STATE",
+    "Test Objective": "Verify rejection of the reviewed invalid omitted transition from confirmed to pending.",
+    "Preconditions": "A fixture order exists in confirmed state with a known ID; a valid Bearer JWT whose role is admin is available.",
+    "Request Input": "PUT /api/admin/orders/<confirmed-order-id>/status with Authorization: Bearer <valid-admin-JWT> and JSON body {\"status\":\"pending\"}.",
+    "Expected Result": "The transition is rejected with an error and an appropriate message. The exact HTTP status, response schema, wording, and post-error persistence behavior are unspecified.",
+    "Specification Basis": "PR-003; ST-02 to pending; FR-10 lines 146-162; FR-18 line 221; human review dated 2026-08-22.",
+    "Assumptions / Notes": "PR-003 is INVALID because the edge is omitted from the reviewed authoritative, exhaustive FR-10 diagram. No exact error code, schema, message text, or state-preservation side effect is asserted."
+  },
+  {
+    "Test ID": "STATE-P017",
+    "Endpoint": "PUT /api/admin/orders/:id/status",
+    "Category": "STATE",
+    "Test Objective": "Verify rejection of the reviewed invalid omitted transition from confirmed to delivered.",
+    "Preconditions": "A fixture order exists in confirmed state with a known ID; a valid Bearer JWT whose role is admin is available.",
+    "Request Input": "PUT /api/admin/orders/<confirmed-order-id>/status with Authorization: Bearer <valid-admin-JWT> and JSON body {\"status\":\"delivered\"}.",
+    "Expected Result": "The transition is rejected with an error and an appropriate message. The exact HTTP status, response schema, wording, and post-error persistence behavior are unspecified.",
+    "Specification Basis": "PR-004; ST-02 to delivered; FR-10 lines 146-162; FR-18 line 221; human review dated 2026-08-22.",
+    "Assumptions / Notes": "PR-004 is INVALID because the edge is omitted from the reviewed authoritative, exhaustive FR-10 diagram. No exact error code, schema, message text, or state-preservation side effect is asserted."
+  },
+  {
+    "Test ID": "STATE-P018",
+    "Endpoint": "PUT /api/admin/orders/:id/status",
+    "Category": "STATE",
+    "Test Objective": "Verify rejection of the reviewed invalid omitted transition from shipping to pending.",
+    "Preconditions": "A fixture order exists in shipping state with a known ID; a valid Bearer JWT whose role is admin is available.",
+    "Request Input": "PUT /api/admin/orders/<shipping-order-id>/status with Authorization: Bearer <valid-admin-JWT> and JSON body {\"status\":\"pending\"}.",
+    "Expected Result": "The transition is rejected with an error and an appropriate message. The exact HTTP status, response schema, wording, and post-error persistence behavior are unspecified.",
+    "Specification Basis": "PR-005; ST-03 to pending; FR-10 lines 146-162; FR-18 line 221; human review dated 2026-08-22.",
+    "Assumptions / Notes": "PR-005 is INVALID because the edge is omitted from the reviewed authoritative, exhaustive FR-10 diagram. No exact error code, schema, message text, or state-preservation side effect is asserted."
+  },
+  {
+    "Test ID": "STATE-P019",
+    "Endpoint": "PUT /api/admin/orders/:id/status",
+    "Category": "STATE",
+    "Test Objective": "Verify rejection of the reviewed invalid omitted transition from shipping to confirmed.",
+    "Preconditions": "A fixture order exists in shipping state with a known ID; a valid Bearer JWT whose role is admin is available.",
+    "Request Input": "PUT /api/admin/orders/<shipping-order-id>/status with Authorization: Bearer <valid-admin-JWT> and JSON body {\"status\":\"confirmed\"}.",
+    "Expected Result": "The transition is rejected with an error and an appropriate message. The exact HTTP status, response schema, wording, and post-error persistence behavior are unspecified.",
+    "Specification Basis": "PR-006; ST-03 to confirmed; FR-10 lines 146-162; FR-18 line 221; human review dated 2026-08-22.",
+    "Assumptions / Notes": "PR-006 is INVALID because the edge is omitted from the reviewed authoritative, exhaustive FR-10 diagram. No exact error code, schema, message text, or state-preservation side effect is asserted."
+  },
+  {
+    "Test ID": "STATE-P020",
+    "Endpoint": "PUT /api/admin/orders/:id/status",
+    "Category": "STATE",
+    "Test Objective": "Verify rejection of the reviewed invalid omitted transition from shipping to canceled.",
+    "Preconditions": "A fixture order exists in shipping state with a known ID; a valid Bearer JWT whose role is admin is available.",
+    "Request Input": "PUT /api/admin/orders/<shipping-order-id>/status with Authorization: Bearer <valid-admin-JWT> and JSON body {\"status\":\"canceled\"}.",
+    "Expected Result": "The transition is rejected with an error and an appropriate message. The exact HTTP status, response schema, wording, and post-error persistence behavior are unspecified.",
+    "Specification Basis": "PR-007; ST-03 to canceled; FR-10 lines 146-162, with line 161 not authorizing this edge; FR-18 line 221; human review dated 2026-08-22.",
+    "Assumptions / Notes": "PR-007 is INVALID because shipping to canceled is omitted from the reviewed authoritative, exhaustive FR-10 diagram. No exact error code, schema, message text, or state-preservation side effect is asserted."
+  }
+]
