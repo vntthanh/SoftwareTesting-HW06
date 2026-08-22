@@ -3331,3 +3331,62 @@ Artifacts 37-37 successfully appended to `AI_Audit.md`.
   - The expected original states are mapped correctly across delivered, canceled, pending, confirmed, and shipping cases.
   - The existing response checks are preserved, while the new fixture-backed assertion prevents a successful mutation from being accepted.
 - **Student Fixes:** None
+
+### Artifact 38
+
+- **User:** Vương Ngũ Tín Thành
+- **Date and Time:** 2026-08-22 23:49:33 GMT+7
+- **Model Used:** GPT-5.6 Sol
+- **Skill Used:**
+  - `newman-result-analyzer`
+  - `ai-audit`
+- **Prompt:**
+
+````markdown
+Use [$newman-result-analyzer](D:\GitHub\SoftwareTesting-HW06\\.agents\skills\newman-result-analyzer\SKILL.md) to analyze the Pool C Newman run.
+
+Use:
+
+- [pool-c.json](reports/pool-c/pool-c.json)
+- [pool-c-order-management.postman\_collection.json](postman/pool-c-order-management.postman_collection.json)
+- [c-order-management.csv](test-cases/c-order-management.csv)
+
+Write the result into Section C.8 of [Main\_Report.md](Main_Report.md)
+
+Reconcile 93 Postman requests with 85 logical test cases, account for fixture/state helper requests, and classify each failed assertion as SUT\_BUG, TEST\_DEFECT, SETUP\_DEFECT, or manual-review case.
+
+Preserve failing evidence and group related bug candidates by root cause without losing Test ID traceability.
+
+Do not modify tests or rerun Newman.
+
+After all, log this artifact using [$ai-audit](D:\GitHub\SoftwareTesting-HW06\\.agents\skills\ai-audit\SKILL.md)
+````
+
+- **AI Output:**
+
+````markdown
+Completed the Pool C Newman analysis in [Main_Report.md](/D:/GitHub/SoftwareTesting-HW06/Main_Report.md:689).
+
+- Reconciled all 245 Newman requests as 93 SUT requests, 85 fixture resets, and 67 state-oracle helpers across 85 logical cases.
+- Normalized 78 `PASS` and 7 `FAIL_ASSERTION` logical outcomes, preserving all 8 failed assertion messages.
+- Classified all 8 failures as `SUT_BUG` evidence and consolidated them into 4 root-cause candidates with full Test ID traceability. `API-080` retains its human/external requirement-authority review note.
+- Recorded 26 execution-only characterization cases requiring manual review and the additional HTTP 500 observation from `API-011`.
+- Verified exactly 85 per-case rows and 8 failed-assertion triage rows. No tests were modified and Newman was not rerun.
+
+Artifacts 38-38 successfully appended to [AI_Audit.md](/D:/GitHub/SoftwareTesting-HW06/AI_Audit.md:3335).
+````
+
+- **File Modifications:**
+  - `File:` `D:\GitHub\SoftwareTesting-HW06\Main_Report.md`.
+    - `Action:` edited.
+    - `Deleted:` None.
+    - `Replaced With:` None.
+    - `Appended:` Section C.8 Newman execution analysis, including the normalized run summary, 85 per-logical-case outcome records, eight failed-assertion classifications, four traceable root-cause bug candidates, and reconciliation/manual-oracle notes.
+  - `File:` `D:\GitHub\SoftwareTesting-HW06\AI_Audit.md`.
+    - `Action:` appended.
+    - `Deleted:` None.
+    - `Replaced With:` None.
+    - `Appended:` Artifact 38 containing the exact Pool C analysis prompt, AI output, and file-modification record.
+- **Verdict:** VALID
+- **Reasoning:** The generated report contains no found problem.
+- **Student Fixes:** None

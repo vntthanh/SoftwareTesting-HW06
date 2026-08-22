@@ -687,3 +687,154 @@ The AI included representative cases for malformed JSON, missing fields, non-str
 The human cases therefore add cross-request verification. They use a second request to prove that invalid input or unauthorized access did not silently change the order, and they exercise the complete order lifecycle on one order. All six cases can be implemented as ordered Postman requests and executed automatically with Newman.
 
 ### C.8. Newman Execution Analysis
+
+#### Scope and evidence
+
+This analysis uses the unchanged Newman JSON artifact [`reports/pool-c/pool-c.json`](reports/pool-c/pool-c.json), the generated collection [`postman/pool-c-order-management.postman_collection.json`](postman/pool-c-order-management.postman_collection.json), and the 85 reviewed logical cases in [`test-cases/c-order-management.csv`](test-cases/c-order-management.csv). No test was modified and Newman was not rerun.
+
+Execution status and defect triage are separate. `FAIL_ASSERTION` records a failed reviewed automated oracle; the later triage table determines whether that evidence indicates an SUT, test, or setup defect. A `PASS` whose only assertion checks the required `X-Student-Id` header confirms execution only, not the exploratory behavior described by the reviewed case.
+
+#### Run summary
+
+| Metric | Normalized result |
+| --- | --- |
+| Collection | `Pool C — Admin Order Management — 85 Reviewed Cases` |
+| Execution window | 2026-08-22 23:26:00.279 to 23:26:08.331 (GMT+7) |
+| Duration | 8.052 seconds |
+| Reviewed requests / logical cases | 93 / 85; all 93 embedded leaf-item IDs executed and all `API-001`–`API-085` were observed |
+| Request reconciliation | 245 total = 93 reviewed SUT requests + 85 fixture-reset helpers + 67 post-response state-oracle helpers |
+| Why 93 requests map to 85 cases | `API-080`, `API-081`, `API-082`, `API-083`, and `API-085` contain 2 steps each; `API-084` contains 4 steps. Those six flows add 8 leaf requests to the 85 logical IDs. |
+| Newman tests / scripts | 93 tests; 93 test scripts; 93 pre-request scripts; 186 total script executions; no script failures |
+| Assertions | 298 total: 290 passed, 8 failed, 0 pending/skipped |
+| Request / pre-request-script / test-script errors | 0 / 0 / 0 |
+| Logical execution statuses | `PASS`: 78; `FAIL_ASSERTION`: 7; `REQUEST_ERROR`: 0; `RUNTIME_ERROR`: 0; `BLOCKED_NOT_EXECUTED`: 0; `NOT_EXECUTED`: 0 |
+| Logical cases with failed automated assertions | 7: `API-006`, `API-008`, `API-034`, `API-062`, `API-076`, `API-080`, `API-085` |
+| Failed-assertion triage | `SUT_BUG`: 8 assertions; `TEST_DEFECT`: 0; `SETUP_DEFECT`: 0; failed assertions requiring classification-only manual review: 0 |
+
+#### Per-logical-case outcomes
+
+For items with a state oracle, the JSON detailed-execution row retains the final `GET /state/<Test-ID>` response rather than a separate SUT response. Those rows therefore report the helper's HTTP 200 and mark the SUT status unavailable; failure messages that captured an SUT code (`API-080` and `API-085`) retain that original code. Correlating identical rows by embedded immutable item ID and `httpRequestId` avoids counting helper-induced duplicates as repeated logical executions.
+
+| Test ID | Execution Status | Request / Flow Step | HTTP Status | Assertion Result | Failure / Error Message | Manual Oracle Required | Execution Notes |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| API-001 | `PASS` | 1 reviewed request | SUT unavailable; state helper 200 | PASS — 3/3 | N/A | NO | Item-ID correlation; semantic state oracle passed. |
+| API-002 | `PASS` | 1 reviewed POST request | 404 Not Found | PASS — header/execution only | N/A | YES — exploratory alternate-method behavior | SUT response preserved. |
+| API-003 | `PASS` | 1 reviewed request | 404 Not Found | PASS — header/execution only | N/A | YES — exploratory altered-route behavior | SUT response preserved. |
+| API-004 | `PASS` | 1 reviewed request | 404 Not Found | PASS — header/execution only | N/A | YES — exploratory nonexistent-ID behavior | SUT response preserved. |
+| API-005 | `PASS` | 1 reviewed request | SUT unavailable; state helper 200 | PASS — 4/4 | N/A | NO | Denial and unchanged-state oracles passed. |
+| API-006 | `FAIL_ASSERTION` | 1 reviewed request | SUT unavailable; state helper 200 | FAIL — 1/4 | `target order state is pending`: expected `confirmed` to equal `pending` | NO | State helper found target `300006` changed to `confirmed`. |
+| API-007 | `PASS` | 1 reviewed request | SUT unavailable; state helper 200 | PASS — 4/4 | N/A | NO | Invalid-JWT denial and state oracles passed. |
+| API-008 | `FAIL_ASSERTION` | 1 reviewed request | SUT unavailable; state helper 200 | FAIL — 1/4 | `target order state is pending`: expected `confirmed` to equal `pending` | NO | Valid `role=user` token changed target `300008`. |
+| API-009 | `PASS` | 1 reviewed request | 400 Bad Request | PASS — header/execution only | N/A | YES — exploratory malformed-JSON behavior | SUT response preserved. |
+| API-010 | `PASS` | 1 reviewed request | 400 Bad Request | PASS — header/execution only | N/A | YES — exploratory non-object-body behavior | SUT response preserved. |
+| API-011 | `PASS` | 1 reviewed request | 500 Internal Server Error | PASS — header/execution only | N/A | YES — exploratory omitted-body behavior | Execution-only pass; retained as a manual-review robustness observation. |
+| API-012 | `PASS` | 1 reviewed request | 400 Bad Request | PASS — header/execution only | N/A | YES — exploratory omitted-status behavior | SUT response preserved. |
+| API-013 | `PASS` | 1 reviewed request | 400 Bad Request | PASS — header/execution only | N/A | YES — exploratory null-status behavior | SUT response preserved. |
+| API-014 | `PASS` | 1 reviewed request | 400 Bad Request | PASS — header/execution only | N/A | YES — exploratory non-string-status behavior | SUT response preserved. |
+| API-015 | `PASS` | 1 reviewed request | SUT unavailable; state helper 200 | PASS — 3/3 | N/A | NO | Unsupported-status behavior oracle passed. |
+| API-016 | `PASS` | 1 reviewed request | 200 OK | PASS — header/execution only | N/A | YES — exploratory additional-property behavior | SUT response preserved. |
+| API-017 | `PASS` | 1 reviewed request | 200 OK | PASS — header/execution only | N/A | YES — exploratory duplicate-key behavior | SUT response preserved. |
+| API-018 | `PASS` | 1 reviewed request | SUT unavailable; state helper 200 | PASS — 3/3 | N/A | NO | Permitted transition oracle passed. |
+| API-019 | `PASS` | 1 reviewed request | SUT unavailable; state helper 200 | PASS — 5/5 | N/A | NO | Invalid transition, message, and state oracles passed. |
+| API-020 | `PASS` | 1 reviewed request | SUT unavailable; state helper 200 | PASS — 5/5 | N/A | NO | Delivered final-state oracle passed. |
+| API-021 | `PASS` | 1 reviewed request | SUT unavailable; state helper 200 | PASS — 5/5 | N/A | NO | Canceled final-state representative passed. |
+| API-022 | `PASS` | 1 reviewed request | 400 Bad Request | PASS — header/execution only | N/A | YES — exploratory same-state behavior | SUT response preserved. |
+| API-023 | `PASS` | 1 reviewed request | 200 OK | PASS — header/execution only | N/A | YES — exploratory omitted-Content-Type behavior | SUT response preserved. |
+| API-024 | `PASS` | 1 reviewed request | SUT unavailable; state helper 200 | PASS — 3/3 | N/A | NO | Valid baseline state oracle passed. |
+| API-025 | `PASS` | 1 reviewed request | SUT unavailable; state helper 200 | PASS — 5/5 | N/A | NO | Invalid source-state oracle passed. |
+| API-026 | `PASS` | 1 reviewed request | 404 Not Found | PASS — header/execution only | N/A | YES — exploratory nonexistent-ID behavior | SUT response preserved. |
+| API-027 | `PASS` | 1 reviewed request | 404 Not Found | PASS — header/execution only | N/A | YES — operation-level omitted-ID routing | SUT response preserved. |
+| API-028 | `PASS` | 1 reviewed request | 404 Not Found | PASS — header/execution only | N/A | YES — exploratory text-ID behavior | SUT response preserved. |
+| API-029 | `PASS` | 1 reviewed request | 404 Not Found | PASS — header/execution only | N/A | YES — exploratory literal-`null` ID behavior | SUT response preserved. |
+| API-030 | `PASS` | 1 reviewed request | SUT unavailable; state helper 200 | PASS — 4/4 | N/A | NO | Missing-authorization denial and state oracles passed. |
+| API-031 | `PASS` | 1 reviewed request | SUT unavailable; state helper 200 | PASS — 4/4 | N/A | NO | Empty-Bearer denial and state oracles passed. |
+| API-032 | `PASS` | 1 reviewed request | SUT unavailable; state helper 200 | PASS — 4/4 | N/A | NO | Wrong-scheme denial and state oracles passed. |
+| API-033 | `PASS` | 1 reviewed request | SUT unavailable; state helper 200 | PASS — 4/4 | N/A | NO | Invalid-JWT denial and state oracles passed. |
+| API-034 | `FAIL_ASSERTION` | 1 reviewed request | SUT unavailable; state helper 200 | FAIL — 1/4 | `target order state is pending`: expected `confirmed` to equal `pending` | NO | Valid `role=user` token changed target `300034`. |
+| API-035 | `PASS` | 1 reviewed request | SUT unavailable; state helper 200 | PASS — 3/3 | N/A | NO | Confirmed-to-shipping oracle passed. |
+| API-036 | `PASS` | 1 reviewed request | SUT unavailable; state helper 200 | PASS — 3/3 | N/A | NO | Shipping-to-delivered oracle passed. |
+| API-037 | `PASS` | 1 reviewed request | SUT unavailable; state helper 200 | PASS — 3/3 | N/A | NO | Pending-to-canceled oracle passed. |
+| API-038 | `PASS` | 1 reviewed request | SUT unavailable; state helper 200 | PASS — 5/5 | N/A | NO | Confirmed-to-pending rejection passed. |
+| API-039 | `PASS` | 1 reviewed request | SUT unavailable; state helper 200 | PASS — 3/3 | N/A | NO | Unsupported vocabulary oracle passed. |
+| API-040 | `PASS` | 1 reviewed request | SUT unavailable; state helper 200 | PASS — 3/3 | N/A | NO | Empty-string status oracle passed. |
+| API-041 | `PASS` | 1 reviewed request | 400 Bad Request | PASS — header/execution only | N/A | YES — exploratory case-normalization behavior | SUT response preserved. |
+| API-042 | `PASS` | 1 reviewed request | 400 Bad Request | PASS — header/execution only | N/A | YES — exploratory nullability behavior | SUT response preserved. |
+| API-043 | `PASS` | 1 reviewed request | 400 Bad Request | PASS — header/execution only | N/A | YES — exploratory type/coercion behavior | SUT response preserved. |
+| API-044 | `PASS` | 1 reviewed request | 400 Bad Request | PASS — header/execution only | N/A | YES — exploratory omitted-property behavior | SUT response preserved. |
+| API-045 | `PASS` | 1 reviewed request | 400 Bad Request | PASS — header/execution only | N/A | YES — exploratory absent-body behavior | SUT response preserved. |
+| API-046 | `PASS` | 1 reviewed request | 400 Bad Request | PASS — header/execution only | N/A | YES — exploratory malformed-JSON behavior | SUT response preserved. |
+| API-047 | `PASS` | 1 reviewed request | 400 Bad Request | PASS — header/execution only | N/A | YES — exploratory non-object-body behavior | SUT response preserved. |
+| API-048 | `PASS` | 1 reviewed request | 200 OK | PASS — header/execution only | N/A | YES — exploratory additional-property behavior | SUT response preserved. |
+| API-049 | `PASS` | 1 reviewed request | 400 Bad Request | PASS — header/execution only | N/A | YES — exploratory duplicate-key behavior | SUT response preserved. |
+| API-050 | `PASS` | 1 reviewed request | SUT unavailable; state helper 200 | PASS — 3/3 | N/A | NO | Pending-to-confirmed oracle passed. |
+| API-051 | `PASS` | 1 reviewed request | SUT unavailable; state helper 200 | PASS — 3/3 | N/A | NO | Confirmed-to-shipping oracle passed. |
+| API-052 | `PASS` | 1 reviewed request | SUT unavailable; state helper 200 | PASS — 3/3 | N/A | NO | Shipping-to-delivered oracle passed. |
+| API-053 | `PASS` | 1 reviewed request | SUT unavailable; state helper 200 | PASS — 3/3 | N/A | NO | Pending-to-canceled oracle passed. |
+| API-054 | `PASS` | 1 reviewed request | SUT unavailable; state helper 200 | PASS — 3/3 | N/A | NO | Confirmed-to-canceled oracle passed. |
+| API-055 | `PASS` | 1 reviewed request | SUT unavailable; state helper 200 | PASS — 5/5 | N/A | NO | Delivered-to-pending rejection passed. |
+| API-056 | `PASS` | 1 reviewed request | SUT unavailable; state helper 200 | PASS — 5/5 | N/A | NO | Delivered-to-confirmed rejection passed. |
+| API-057 | `PASS` | 1 reviewed request | SUT unavailable; state helper 200 | PASS — 5/5 | N/A | NO | Delivered-to-shipping rejection passed. |
+| API-058 | `PASS` | 1 reviewed request | SUT unavailable; state helper 200 | PASS — 5/5 | N/A | NO | Delivered-to-canceled rejection passed. |
+| API-059 | `PASS` | 1 reviewed request | SUT unavailable; state helper 200 | PASS — 5/5 | N/A | NO | Canceled-to-pending rejection passed. |
+| API-060 | `PASS` | 1 reviewed request | SUT unavailable; state helper 200 | PASS — 5/5 | N/A | NO | Canceled-to-confirmed rejection passed. |
+| API-061 | `PASS` | 1 reviewed request | SUT unavailable; state helper 200 | PASS — 5/5 | N/A | NO | Canceled-to-shipping rejection passed. |
+| API-062 | `FAIL_ASSERTION` | 1 reviewed request | SUT unavailable; state helper 200 | FAIL — 1/5 | `target order state is canceled`: expected `delivered` to equal `canceled` | NO | State helper found target `300062` changed to `delivered`. |
+| API-063 | `PASS` | 1 reviewed request | SUT unavailable; state helper 200 | PASS — 5/5 | N/A | NO | Pending-to-shipping rejection passed. |
+| API-064 | `PASS` | 1 reviewed request | SUT unavailable; state helper 200 | PASS — 5/5 | N/A | NO | Pending-to-delivered rejection passed. |
+| API-065 | `PASS` | 1 reviewed request | SUT unavailable; state helper 200 | PASS — 5/5 | N/A | NO | Confirmed-to-pending rejection passed. |
+| API-066 | `PASS` | 1 reviewed request | SUT unavailable; state helper 200 | PASS — 5/5 | N/A | NO | Confirmed-to-delivered rejection passed. |
+| API-067 | `PASS` | 1 reviewed request | SUT unavailable; state helper 200 | PASS — 5/5 | N/A | NO | Shipping-to-pending rejection passed. |
+| API-068 | `PASS` | 1 reviewed request | SUT unavailable; state helper 200 | PASS — 5/5 | N/A | NO | Shipping-to-confirmed rejection passed. |
+| API-069 | `PASS` | 1 reviewed request | SUT unavailable; state helper 200 | PASS — 5/5 | N/A | NO | Shipping-to-canceled rejection passed. |
+| API-070 | `PASS` | 1 reviewed request | SUT unavailable; state helper 200 | PASS — 3/3 | N/A | NO | Valid Admin security control passed. |
+| API-071 | `PASS` | 1 reviewed request | SUT unavailable; state helper 200 | PASS — 4/4 | N/A | NO | Missing-JWT denial and state oracles passed. |
+| API-072 | `PASS` | 1 reviewed request | SUT unavailable; state helper 200 | PASS — 4/4 | N/A | NO | Malformed-JWT denial and state oracles passed. |
+| API-073 | `PASS` | 1 reviewed request | SUT unavailable; state helper 200 | PASS — 4/4 | N/A | NO | Forged-JWT denial and state oracles passed. |
+| API-074 | `PASS` | 1 reviewed request | SUT unavailable; state helper 200 | PASS — 4/4 | N/A | NO | Expired-JWT denial and state oracles passed. |
+| API-075 | `PASS` | 1 reviewed request | SUT unavailable; state helper 200 | PASS — 4/4 | N/A | NO | Not-yet-valid JWT denial and state oracles passed. |
+| API-076 | `FAIL_ASSERTION` | 1 reviewed request | SUT unavailable; state helper 200 | FAIL — 1/4 | `target order state is pending`: expected `confirmed` to equal `pending` | NO | Valid `role=user` token changed target `300076`. |
+| API-077 | `PASS` | 1 reviewed request | SUT unavailable; state helper 200 | PASS — 5/5 | N/A | NO — source inspection completed | Inert ID changed no controlled order; query uses a bound `?` parameter. |
+| API-078 | `PASS` | 1 reviewed request | SUT unavailable; state helper 200 | PASS — 5/5 | N/A | NO — source inspection completed | Inert status changed no order; read and update queries use bound parameters. |
+| API-079 | `PASS` | 1 reviewed request | SUT unavailable; state helper 200 | PASS — 5/5 | N/A | NO — source inspection completed | Only the identified target changed; update uses bound parameters. |
+| API-080 | `FAIL_ASSERTION` | Step 1 text/plain; Step 2 JSON retry | Step 1: 500 captured by assertion; Step 2: SUT unavailable, state helper 200 | FAIL — 1/7 | `reviewed response class is 4xx`: expected 500 to be within 400..499 | YES — confirm human/external 4xx robustness authority | Step 1 left state pending; Step 2 changed it to confirmed. |
+| API-081 | `PASS` | 2-step ordered flow | SUT unavailable; state helpers 200 | PASS — 7/7 | N/A | NO | Object value rejected without mutation; string retry succeeded. |
+| API-082 | `PASS` | 2-step ordered flow | SUT unavailable; state helpers 200 | PASS — 7/7 | N/A | NO | Whitespace value rejected without mutation; exact retry succeeded. |
+| API-083 | `PASS` | 2-step ordered flow | SUT unavailable; state helpers 200 | PASS — 7/7 | N/A | NO | Invalid shipping-to-canceled left state intact; delivered retry succeeded. |
+| API-084 | `PASS` | 4-step ordered flow | SUT unavailable; state helpers 200 | PASS — 13/13 | N/A | NO | Full lifecycle passed; final delivered-to-canceled attempt was rejected. |
+| API-085 | `FAIL_ASSERTION` | Step 1 non-Admin; Step 2 Admin retry | Step 1: 200 captured by assertion; Step 2: SUT unavailable, state helper 200 | FAIL — 2/11 | `reviewed response class is 4xx`: expected 200 within 400..499; `target order state is pending`: expected `confirmed` to equal `pending` | NO | Step 1 unauthorized mutation succeeded; Step 2 valid control also ended confirmed. |
+
+#### Failed-assertion triage
+
+The table below classifies each of the eight assertion events once; duplicated representations in `run.executions` and `run.failures` are correlated rather than recounted.
+
+| Test ID / assertion | Classification | Preserved evidence and rationale |
+| --- | --- | --- |
+| `API-006` — target remains pending | `SUT_BUG` | A `Basic <valid-admin-JWT>` header produced a mutation from pending to confirmed. The API contract requires `Bearer`; source inspection shows `authenticateToken` blindly takes the second whitespace-delimited token and never validates the scheme. |
+| `API-008` — target remains pending | `SUT_BUG` | A valid fixture JWT with `role=user` changed the target to confirmed, contrary to FR-12 and SEC-03. |
+| `API-034` — target remains pending | `SUT_BUG` | The independent DOMAIN case reproduced the same valid-non-Admin mutation with its own isolated target. |
+| `API-062` — target remains canceled | `SUT_BUG` | The fixture began in final state canceled, but the state oracle observed delivered. Source inspection confirms an explicit erroneous `canceled → delivered` branch. |
+| `API-076` — target remains pending | `SUT_BUG` | The SECURITY case independently reproduced the missing Admin-role enforcement. |
+| `API-080` — response class is 4xx | `SUT_BUG` candidate under the reviewed human robustness oracle | The SUT returned 500 and an unhandled `TypeError` when `bodyParser.json()` left `req.body` undefined for `text/plain`; state remained pending and the JSON retry succeeded. Because the 4xx rule is labeled a human/external expectation rather than a formal FR/API response contract, its requirement authority should be confirmed before filing. |
+| `API-085` step 1 — response class is 4xx | `SUT_BUG` | A valid non-Admin token received 200 instead of a denial class. This is direct HTTP evidence for the same missing role check. |
+| `API-085` step 1 — target remains pending | `SUT_BUG` | The state helper independently confirmed the same unauthorized request changed the target from pending to confirmed while the unrelated sentinel remained unchanged. |
+
+No failed assertion is a `TEST_DEFECT` or `SETUP_DEFECT`. The reviewed oracles align with FR-10, FR-12, FR-18, SEC-03, or the explicit human case; the fixture runner generated distinct valid Admin and `role=user` JWTs, verified every reset, isolated exactly two order rows, and recorded no request or script errors. `API-080` retains a manual requirement-authority check, but its recorded 500 and source-level unhandled exception are genuine execution evidence rather than a setup failure.
+
+#### Root-cause bug candidates
+
+| Candidate root cause | Test/assertion traceability | Evidence |
+| --- | --- | --- |
+| Authorization scheme is not validated | `API-006` | `authenticateToken` splits `Authorization` and verifies element 1 without requiring the `Bearer` scheme, so `Basic <JWT>` is accepted. |
+| Admin role is never enforced on `/api/admin/*` | `API-008`, `API-034`, `API-076`, `API-085` (both failed step-1 assertions) | The middleware verifies JWT validity but never checks `req.user.role`; the order-status route adds no role guard. Three independent single-request cases and one two-step flow reproduce it. |
+| Canceled is incorrectly allowed to transition to delivered | `API-062` | The route contains an explicit `if (currentStatus === "canceled" && status === "delivered") isValidTransition = true`, contradicting the FR-10 final-state rule. |
+| Undefined request body is destructured without a guard | `API-080`; related manual-review observation `API-011` | `const { status } = req.body` throws when the JSON parser does not populate `req.body`. `API-080` captures HTTP 500 for `text/plain`; exploratory `API-011` independently records HTTP 500 for an absent body. |
+
+These are four bug candidates, not eight separate defects. Any issue report should retain every listed Test ID and both `API-085` assertion messages so the consolidated root cause does not erase case-level evidence.
+
+#### Manual-oracle and coverage notes
+
+- Twenty-six execution-only cases still require review because their reviewed purpose is characterization rather than an automated conformance oracle: `API-002`–`API-004`, `API-009`–`API-014`, `API-016`, `API-017`, `API-022`, `API-023`, `API-026`–`API-029`, and `API-041`–`API-049`. Their only Newman assertion checks the required student header.
+- `API-080` additionally retains confirmation of the human/external 4xx robustness authority. Its failed assertion and unhandled-exception evidence remain preserved regardless of that review.
+- Source inspection completed the non-black-box parameterization question for `API-077`–`API-079`: the lookup and update statements use `?` placeholders with separate parameter arrays, consistent with their passing whole-table state oracles.
+- The detailed execution array contains 34 item IDs represented twice and 59 represented three times. This is explained exactly by the helper traffic: every logical ID has one reset, and 67 leaf requests perform a state query; eight continuation steps have a state query but no additional reset. The reconstructed 93 unique items and 298 unique assertions match `run.stats` exactly.
+- HTTP 4xx/5xx values were not treated as failures by themselves. `API-011` remains an execution-only manual-review case despite HTTP 500; `API-080` fails because its explicit reviewed assertion requires 4xx.
