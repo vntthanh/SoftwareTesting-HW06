@@ -600,4 +600,19 @@ The test cases were derived from the reviewed analyses in Sections A.2–A.5.
 
 ### C.7. Human Cases
 
+| ID | Category | Test case | Expected result | Notes |
+| --- | --- | --- | --- | --- |
+| **API-080** | CONTRACT | Send otherwise valid JSON text for a `pending → confirmed` update using `Content-Type: text/plain`. Then retry the same order with `Content-Type: application/json`. | The first response is a safe `4xx`, not `5xx`, and does not change the order status. The second request succeeds and changes `pending → confirmed`. | The AI tested missing Content-Type, malformed JSON, and missing bodies, but not valid JSON sent with an unsupported content type. The accepted `4xx` class is a human/external HTTP expectation. |
+| **API-081** | DOMAIN | For a pending order, send `status` as an object: `{"value":"confirmed"}`. Then retry with `status: "confirmed"`. | The first request returns a `4xx` error and does not change the order. The valid retry succeeds with `pending → confirmed`. | The AI used one representative non-string value. This case exercises a different JSON structural representation and verifies that rejection has no state side effect. |
+| **API-082** | DOMAIN | For a pending order, send `status: " confirmed "` with leading and trailing spaces. Then retry with exact `status: "confirmed"`. | The whitespace-modified value is rejected with a `4xx` and leaves the order pending. The exact-value retry succeeds. | The AI tested case variation such as a differently cased state, but not surrounding whitespace. The documented lifecycle uses exact state names. |
+| **API-083** | STATE | Start with an order in `shipping`. First request `shipping → canceled`, then request `shipping → delivered` on the same order. | The first request is rejected with `4xx` and must not change the state. The second request succeeds, proving the invalid transition left the order in `shipping`. | The AI tests invalid transitions individually, but does not verify with a follow-up transition that a rejected request leaves the source state unchanged. |
+| **API-084** | STATE | On one order, execute the full sequence `pending → confirmed → shipping → delivered`, then attempt `delivered → canceled`. | The first three updates succeed in order. The final request is rejected with `4xx` because `delivered` is a final state. | The AI tests the transitions separately. This human case verifies the complete lifecycle on one persistent order and the final-state rule at the end of the workflow. |
+| **API-085** | SECURITY | For a pending order, first send `pending → confirmed` using a valid JWT for a non-Admin user. Then repeat the same update using a valid Admin JWT. | The non-Admin request is rejected with a `4xx` and must not change the order. The Admin retry succeeds with `pending → confirmed`. | The AI checks that a non-Admin JWT is denied, but this case additionally proves that the unauthorized mutation did not change persistent order state. |
+
+The AI missed these cases mainly because the generated tests focused on individual contract partitions, input classes, and state transitions. This gives broad coverage, but it does not always verify what happens to persistent state after a rejected request.
+
+The AI included representative cases for malformed JSON, missing fields, non-string values, and status casing, but did not cover valid JSON sent with an unsupported content type, object-valued status, or surrounding whitespace.
+
+The human cases therefore add cross-request verification. They use a second request to prove that invalid input or unauthorized access did not silently change the order, and they exercise the complete order lifecycle on one order. All six cases can be implemented as ordered Postman requests and executed automatically with Newman.
+
 ### C.8. Newman Execution Analysis
