@@ -14,6 +14,7 @@
 - Human review gate: passed by the user's explicit approval on 2026-08-22 of the exact report versions and hashes recorded above. Retained report-template `PENDING` markers do not override this explicit approval.
 - Target count: at least `35` (explicit user target)
 - Final output path: `review/pool-c/candidate-api-tests.csv`
+- Reviewed suite path: `test-cases/c-order-management.csv`
 
 ## Review focus
 
@@ -44,11 +45,11 @@
 ## Parent aggregation and validation
 
 - Final output: `review/pool-c/candidate-api-tests.csv`
-- Final count: `81` (target minimum `35` exceeded).
-- Per-category counts: CONTRACT `23`, DOMAIN `28`, STATE `20`, SECURITY `10`.
-- Semantic de-duplication: `0` records removed; no identical normalized request-input/expected-result pair exists within a category. Similar cases across categories were retained as separate required coverage.
-- Stable final IDs: `API-001` through `API-081`, sequential and unique; every row preserves its provisional specialist ID in `Assumptions / Notes`.
-- Output schema: exactly the nine required fields on every row.
+- Final count: `79` (target minimum `35` exceeded).
+- Per-category counts: CONTRACT `23`, DOMAIN `26`, STATE `20`, SECURITY `10`.
+- Semantic de-duplication: `2` records removed by merging former `API-024`, `API-030`, and `API-036` into retained `API-024`. All three used the same pending-to-confirmed request and semantic success outcome. The retained case preserves `DP-001`, `DP-007`, and `DP-013` plus provisional specialist IDs `DOMAIN-P001`, `DOMAIN-P007`, and `DOMAIN-P013`. Similar cases across categories remain separate required coverage.
+- Stable final IDs: `API-001` through `API-079`, sequential and unique in both CSV outputs; every row preserves its provisional specialist ID or IDs in `Assumptions / Notes`.
+- Output schema: the candidate CSV preserves the nine generated fields plus the two human audit fields, `Audit Result` and `Audit Reason`; the reviewed suite preserves its established nine-field schema.
 - Endpoint consistency: every row targets `PUT /api/admin/orders/:id/status`.
 - Allowed categories: every row uses CONTRACT, DOMAIN, STATE, or SECURITY.
 - Non-empty validation: objectives, preconditions, request inputs, expected results, specification bases, and assumptions/notes are non-empty on every row.
@@ -56,7 +57,8 @@
 - Traceability: complete for `CR-001`–`CR-013`, `DP-001`–`DP-028`, `TR-001`–`TR-013`, `PR-001`–`PR-007`, `SS-001`–`SS-007`, and applicable `SEC-02`, `SEC-03`, `SEC-05`.
 - Unspecified behavior: no numeric HTTP status codes were asserted; response schemas, exact messages, ID domain/not-found behavior, malformed-body or media-type behavior, JWT mechanics, and same-state behavior remain unresolved or characterization-only as approved.
 - Same-state guard: no STATE same-state candidates were generated.
-- Final CSV SHA-256: `C471B8917D5912A663B1F793E7D58D482A956C0FA8A8173D8955CB95AC26756C`.
+- Candidate CSV SHA-256: `A863DDC71CA4E4F1A6F0B1DCE71D1A0040ED25130702619DED53B6D6F7156178`.
+- Reviewed suite CSV SHA-256: `1DBF75B08ABD70C644B72D71D35AA6959E75CF9BDBFF57E0A7D6005088A19FF5`.
 - Test execution: not performed.
 
 ## Preserved gaps and limitations
