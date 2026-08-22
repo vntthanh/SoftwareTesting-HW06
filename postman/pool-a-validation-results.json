@@ -1,13 +1,16 @@
 {
-  "collectionSha256": "CE0A58BB80DCE3EB0929D96E39D4CD3D985F5240E69DCEAFB84B4011E63F3391",
-  "generatedAt": "2026-08-22 10:19:02 GMT+7",
+  "collectionSha256": "D63A790201DC1D0AF64C43D2983DF6CDAF01537F7A96434D23A5D3E66118A010",
+  "generatedAt": "2026-08-22 10:31:26 GMT+7",
   "static": {
     "status": "PASS",
-    "validatedAt": "2026-08-22 10:19:02 GMT+7",
+    "validatedAt": "2026-08-22 10:31:27 GMT+7",
     "logicalTestIds": 82,
     "generatedRequests": 88,
     "forgotPasswordReferences": 0,
-    "blockedIds": [
+    "fixtureRowsChecked": 73,
+    "structuredMappingsIndependentlyChecked": 36,
+    "studentIdInjectionChecked": true,
+    "blockedSkipRequestIds": [
       "API-025",
       "API-065",
       "API-072",
@@ -17,16 +20,18 @@
   },
   "schema": {
     "status": "PASS",
-    "validatedAt": "2026-08-22 10:19:18 GMT+7",
+    "validatedAt": "2026-08-22 10:31:48 GMT+7",
     "schemaPath": "postman/postman-v2.1.0-schema.json"
   },
   "newman": {
     "status": "PASS",
-    "validatedAt": "2026-08-22 10:20:31 GMT+7",
+    "validatedAt": "2026-08-22 10:32:51 GMT+7",
     "version": "6.2.2",
-    "scope": "Local-mock deterministic/numeric/leading-zero/replay/flow compatibility",
-    "newmanRuns": 8,
+    "scope": "Local-mock deterministic/numeric/leading-zero/replay/flow/blocked-skip compatibility with X-Student-Id capture",
+    "newmanRuns": 9,
     "mockHttpRequestsCaptured": 13,
+    "blockedRequestsSkipped": 1,
+    "studentIdHeaderChecked": true,
     "forgotPasswordRequestsCaptured": 0,
     "sutExecuted": false
   }

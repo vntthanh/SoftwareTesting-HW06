@@ -12,6 +12,7 @@ REQUIRED={'Test ID','Endpoint','Category','Test Objective','Preconditions','Requ
 FLOWS={'API-076':['Request A - registered email','Request B - non-existing email'],'API-077':['Request A - concurrent participant','Request B - concurrent participant'],'API-078':['Step 1 - text/plain','Step 2 - JSON retry'],'API-079':['Step 1 - empty body','Step 2 - valid retry'],'API-080':['Step 1 - object password','Step 2 - string retry'],'API-081':['Step 1 - Account A injection string','Step 2 - Account B integrity check']}
 EXPIRY={'API-025','API-065','API-072'}
 PARTIAL={'API-025','API-030','API-046','API-047','API-050','API-052','API-055','API-057','API-063','API-065','API-067','API-068','API-069','API-070','API-071','API-072','API-073','API-074','API-076','API-077','API-078','API-081'}
+NONMATCHING_TOKEN_IDS={'API-007','API-008','API-010','API-011','API-012','API-014','API-038','API-039','API-040','API-041','API-042','API-043','API-045','API-074','API-076'}
 STUDENT_ID_LOG=["const studentId = pm.variables.replaceIn('{{studentId}}');","","pm.request.headers.upsert({","    key: 'X-Student-Id',","    value: studentId","});","","console.log(","    '[Pool A evidence] X-Student-Id:',","    studentId,","    'request=' + pm.info.requestName",");"]
 
 def now(): return datetime.now(GMT7).strftime('%Y-%m-%d %H:%M:%S GMT+7')
@@ -130,6 +131,16 @@ def walk(items):
     for x in items:
         if 'request' in x: yield x
         yield from walk(x.get('item',[]))
+def independent_structured(row):
+    try: wrapper=json.loads(row['Request Input'])
+    except json.JSONDecodeError: return None
+    if not isinstance(wrapper,dict) or not ({'Headers','Body','Raw Body'}&set(wrapper)): return None
+    headers=[{'key':str(key),'value':str(value),'type':'text'} for key,value in wrapper.get('Headers',{}).items()]
+    if 'Raw Body' in wrapper: raw=wrapper['Raw Body']
+    elif 'Body' in wrapper: raw=json.dumps(wrapper['Body'],ensure_ascii=False,separators=(',',':'))
+    else: raw=''
+    if '<' in raw: raise RuntimeError(f"{row['Test ID']}: unresolved placeholder in structured reviewed input")
+    return {'headers':headers,'raw':raw}
 def static_validate():
     data=rows(); collection=json.loads(OUT_PATH.read_text(encoding='utf-8')); requests=list(walk(collection['item'])); by={}
     executable=json.dumps([{'url':x['request']['url'],'event':x.get('event',[])} for x in requests],ensure_ascii=False)
@@ -141,13 +152,34 @@ def static_validate():
         if len(wanted)!=len(actual): raise RuntimeError(f"{row['Test ID']}: request count mismatch")
         for n,(w,a) in enumerate(zip(wanted,actual),1):
             if a['request']['body']['raw']!=w['raw'] or a['request']['header']!=w['headers']: raise RuntimeError(f"{row['Test ID']} step {n}: CSV mapping mismatch")
+    structured_checked=0
+    for row in data:
+        independent=independent_structured(row)
+        if independent is None: continue
+        structured_checked+=1; request=by[row['Test ID']][0]['request']
+        if request['body']['raw']!=independent['raw'] or request['header']!=independent['headers']: raise RuntimeError(f"{row['Test ID']}: independent structured CSV mapping mismatch")
+    fixture_rows=0
+    for row in data:
+        fixtures=accounts_for(row['Test ID'])
+        if not fixtures: continue
+        fixture_rows+=1
+        for fixture in fixtures:
+            if fixture.email not in row['Preconditions'] or fixture.reset_token not in row['Preconditions']: raise RuntimeError(f"{row['Test ID']}: CSV precondition does not match fixture {fixture.email}/{fixture.reset_token}")
+        if row['Test ID'] not in NONMATCHING_TOKEN_IDS and fixtures[0].reset_token not in row['Request Input']: raise RuntimeError(f"{row['Test ID']}: reviewed request data does not use seeded primary token {fixtures[0].reset_token}")
+        if row['Test ID']=='API-081' and fixtures[1].reset_token not in row['Request Input']: raise RuntimeError('API-081: reviewed request data does not use seeded secondary token')
+    seeder_source=(ROOT/'postman'/'seed_pool_a_fixtures.py').read_text(encoding='utf-8')
+    for marker in ('from pool_a_fixtures import all_accounts','accounts = all_accounts()','account.email','account.reset_token'):
+        if marker not in seeder_source: raise RuntimeError(f'Fixture seeder no longer consumes the shared account/token manifest: missing {marker!r}')
     for tid in BLOCKED_IDS:
-        if 'BLOCKED / NOT EXECUTABLE' not in json.dumps(by[tid]): raise RuntimeError(f'{tid}: missing block')
+        scripts=json.dumps(by[tid])
+        if 'BLOCKED / NOT EXECUTABLE' not in scripts or 'pm.execution.skipRequest()' not in scripts or 'throw new Error' in scripts: raise RuntimeError(f'{tid}: blocked case must use pm.execution.skipRequest() without throwing')
+    collection_pre=json.dumps(collection.get('event',[])); variables={item['key']:item.get('value') for item in collection.get('variable',[])}
+    if not all(marker in collection_pre for marker in ('X-Student-Id','studentId','headers.upsert')) or not variables.get('studentId'): raise RuntimeError('Collection-level X-Student-Id injection is missing or unconfigured')
     for tid in REPLAY_PASSWORDS:
         if json.dumps(by[tid]).count('/api/reset-password')<2 or 'skipRequest' not in json.dumps(by[tid]): raise RuntimeError(f'{tid}: replay setup missing')
     if not isinstance(json.loads(by['API-009'][0]['request']['body']['raw'])['resetToken'],int): raise RuntimeError('API-009 token is not numeric')
     if json.loads(by['API-013'][0]['request']['body']['raw'])['resetToken']!='012345': raise RuntimeError('API-013 leading zero lost')
-    h=digest(OUT_PATH); state=load_state(h); state.update({'collectionSha256':h,'static':{'status':'PASS','validatedAt':now(),'logicalTestIds':82,'generatedRequests':len(requests),'forgotPasswordReferences':0,'blockedIds':sorted(BLOCKED_IDS)}}); save(state); print(f'STATIC PASS: 82 IDs; {len(requests)} requests; zero forgot-password dependencies')
+    h=digest(OUT_PATH); state=load_state(h); state.update({'collectionSha256':h,'static':{'status':'PASS','validatedAt':now(),'logicalTestIds':82,'generatedRequests':len(requests),'forgotPasswordReferences':0,'fixtureRowsChecked':fixture_rows,'structuredMappingsIndependentlyChecked':structured_checked,'studentIdInjectionChecked':True,'blockedSkipRequestIds':sorted(BLOCKED_IDS)}}); save(state); print(f'STATIC PASS: 82 IDs; {len(requests)} requests; {fixture_rows} fixture rows; {structured_checked} independent structured mappings; blocked skipRequest and X-Student-Id verified')
 def schema_validate(path):
     import jsonschema
     collection=json.loads(OUT_PATH.read_text(encoding='utf-8')); schema=json.loads(path.read_text(encoding='utf-8')); errors=list(jsonschema.validators.validator_for(schema)(schema).iter_errors(collection))
@@ -161,13 +193,15 @@ class Mock(BaseHTTPRequestHandler):
 def named(collection,tid): return next(x for x in walk(collection['item']) if x['name'].startswith(tid))
 def newman_validate(command):
     collection=json.loads(OUT_PATH.read_text(encoding='utf-8')); server=ThreadingHTTPServer(('127.0.0.1',0),Mock); thread=threading.Thread(target=server.serve_forever,daemon=True); thread.start(); port=server.server_address[1]; checks={}
-    runs=[('API-001',[200]),('API-009',[400]),('API-013',[200]),('API-026',[200,400]),('API-078',[400,200]),('API-079',[400,200]),('API-080',[400,200]),('API-081',[200,200])]
+    runs=[('API-001',[200]),('API-009',[400]),('API-013',[200]),('API-025',[]),('API-026',[200,400]),('API-078',[400,200]),('API-079',[400,200]),('API-080',[400,200]),('API-081',[200,200])]
     try:
         for tid,statuses in runs:
             Mock.captured=[]; Mock.statuses=list(statuses); folder=f'{tid} - reviewed multi-request flow' if tid in FLOWS else named(collection,tid)['name']; result=subprocess.run(command+['run',str(OUT_PATH),'--folder',folder,'--env-var',f'baseUrl=http://127.0.0.1:{port}','--reporters','cli'],cwd=ROOT,capture_output=True,text=True,encoding='utf-8',errors='replace',timeout=120)
             if result.returncode: raise RuntimeError(f'Newman {tid} failed:\n{result.stdout}\n{result.stderr}')
             if any(x['path']!='/api/reset-password' for x in Mock.captured): raise RuntimeError(f'{tid}: non-reset request emitted')
+            if any(x['studentId']!='23127261' for x in Mock.captured): raise RuntimeError(f'{tid}: X-Student-Id injection failed in Newman')
             checks[tid]=list(Mock.captured)
+        if checks['API-025']: raise RuntimeError('API-025: blocked request was transmitted instead of skipped')
         if json.loads(checks['API-009'][0]['body'])['resetToken']!=123456: raise RuntimeError('numeric serialization failed')
         if json.loads(checks['API-013'][0]['body'])['resetToken']!='012345': raise RuntimeError('leading-zero serialization failed')
         replay=[json.loads(x['body']) for x in checks['API-026']]
@@ -175,14 +209,14 @@ def newman_validate(command):
         cross=[json.loads(x['body']) for x in checks['API-081']]
         if cross[0]['email']==cross[1]['email'] or cross[0]['resetToken']==cross[1]['resetToken']: raise RuntimeError('cross-account fixtures are not distinct')
     finally: server.shutdown(); server.server_close(); thread.join(timeout=5)
-    vr=subprocess.run(command+['--version'],cwd=ROOT,capture_output=True,text=True,encoding='utf-8',errors='replace',timeout=60); version=vr.stdout.strip() if vr.returncode==0 else 'unknown'; h=digest(OUT_PATH); state=load_state(h); state.update({'collectionSha256':h,'newman':{'status':'PASS','validatedAt':now(),'version':version,'scope':'Local-mock deterministic/numeric/leading-zero/replay/flow compatibility','newmanRuns':len(runs),'mockHttpRequestsCaptured':sum(map(len,checks.values())),'forgotPasswordRequestsCaptured':0,'sutExecuted':False}}); save(state); print(f'NEWMAN PASS: {version}; {len(runs)} runs; zero forgot-password requests')
+    vr=subprocess.run(command+['--version'],cwd=ROOT,capture_output=True,text=True,encoding='utf-8',errors='replace',timeout=60); version=vr.stdout.strip() if vr.returncode==0 else 'unknown'; h=digest(OUT_PATH); state=load_state(h); state.update({'collectionSha256':h,'newman':{'status':'PASS','validatedAt':now(),'version':version,'scope':'Local-mock deterministic/numeric/leading-zero/replay/flow/blocked-skip compatibility with X-Student-Id capture','newmanRuns':len(runs),'mockHttpRequestsCaptured':sum(map(len,checks.values())),'blockedRequestsSkipped':1,'studentIdHeaderChecked':True,'forgotPasswordRequestsCaptured':0,'sutExecuted':False}}); save(state); print(f'NEWMAN PASS: {version}; {len(runs)} runs; zero forgot-password requests')
 def report():
     data=rows(); _,entries=build(data); h=digest(OUT_PATH); state=load_state(h); missing=[x for x in ('static','schema','newman') if state.get(x,{}).get('status')!='PASS']
     if missing: raise RuntimeError(f'Missing passing validation: {missing}')
     lines=['# Pool A Postman Conversion Report','','## Fixture strategy','','- Start/init the SUT first because its `database.js` drops and recreates `users` on every start.','- Then run `postman/seed_pool_a_fixtures.py`. It opens `backend/database.sqlite` directly, validates the live `users` schema, replaces only owned `poola-api-%@example.test` rows, and verifies every OTP is SQLite TEXT.','- Each independent executable case has a dedicated account. Cross-account cases have distinct A/B accounts and OTPs. The collection never calls `/api/forgot-password`.','- API-013 stores TEXT `012345`; API-009/API-044 store TEXT `123456` but send JSON number `123456`; replay cases seed fresh OTPs and consume them once before retry.','','## Traceability and execution classification','','| Test ID | Category | Requests | Status oracle(s) | Fixture / execution classification |','|---|---|---:|---|---|']
     for e in entries:
         row=e['row']; statuses=', '.join('any 4xx' if row['Test ID']=='API-078' and n==0 else (str(v) if v is not None else 'manual') for n,v in enumerate(e['statuses'])); lines.append(f"| {row['Test ID']} | {row['Category']} | {len(e['items'])} | {statuses} | {'; '.join(flags(row['Test ID'])) or 'No database fixture required'} |")
-    lines+=['','## Unsupported/manual cases','','- API-025, API-065, API-072: blocked because the actual SUT has no OTP expiry column/state/check.','- API-075: blocked because the actual SUT has no rate limiter or authoritative threshold.','- API-077: blocked in sequential Postman/Newman; a concurrent harness with a synchronization barrier is required.','- API-068 HTTP execution is automated, but its plaintext-storage oracle requires authorized SQLite inspection. Other partial/manual labels preserve reviewed external side-effect or persistence oracles.','','## Exact SUT → seed → Newman commands','','```powershell','Set-Location D:\\GitHub\\eshop-sut\\backend','npm install','node server.js','# In a second PowerShell after the server reports it is running:','Set-Location D:\\GitHub\\SoftwareTesting-HW06','C:\\Users\\xing0\\AppData\\Local\\Python\\bin\\python.exe postman\\seed_pool_a_fixtures.py --sut-dir D:\\GitHub\\eshop-sut','newman run postman\\pool-a-forgot-password.postman_collection.json --env-var baseUrl=http://127.0.0.1:3000','```','','## Validation results','',f'- Collection SHA-256: `{h}`',f"- Static: **PASS** ({state['static']['validatedAt']}); 82 IDs, {state['static']['generatedRequests']} requests, zero forgot-password references.",f"- Full Postman v2.1 schema: **PASS** ({state['schema']['validatedAt']}) using `{state['schema']['schemaPath']}`.",f"- Newman {state['newman']['version']}: **PASS** ({state['newman']['validatedAt']}); {state['newman']['newmanRuns']} local-mock runs and zero forgot-password requests.",'- Full-suite SUT conformance execution: **NOT PERFORMED**.']
+    lines+=['','## Unsupported/manual cases','','- API-025, API-065, API-072: blocked because the actual SUT has no OTP expiry column/state/check.','- API-075: blocked because the actual SUT has no rate limiter or authoritative threshold.','- API-077: blocked in sequential Postman/Newman; a concurrent harness with a synchronization barrier is required.','- Every blocked request uses `pm.execution.skipRequest()` without throwing a runtime error.','- API-068 HTTP execution is automated, but its plaintext-storage oracle requires authorized SQLite inspection. Other partial/manual labels preserve reviewed external side-effect or persistence oracles.','','## Exact SUT → seed → Newman commands','','```powershell','Set-Location D:\\GitHub\\eshop-sut\\backend','npm install','node server.js','# In a second PowerShell after the server reports it is running:','Set-Location D:\\GitHub\\SoftwareTesting-HW06','C:\\Users\\xing0\\AppData\\Local\\Python\\bin\\python.exe postman\\seed_pool_a_fixtures.py --sut-dir D:\\GitHub\\eshop-sut','newman run postman\\pool-a-forgot-password.postman_collection.json --env-var baseUrl=http://127.0.0.1:3000','```','','## Validation results','',f'- Collection SHA-256: `{h}`',f"- Static: **PASS** ({state['static']['validatedAt']}); 82 IDs, {state['static']['generatedRequests']} requests, {state['static']['fixtureRowsChecked']} fixture rows matched to the seeder manifest, {state['static']['structuredMappingsIndependentlyChecked']} structured mappings independently checked, all blocked cases use skipRequest, X-Student-Id injection present, and zero forgot-password references.",f"- Full Postman v2.1 schema: **PASS** ({state['schema']['validatedAt']}) using `{state['schema']['schemaPath']}`.",f"- Newman {state['newman']['version']}: **PASS** ({state['newman']['validatedAt']}); {state['newman']['newmanRuns']} local-mock runs, blocked request skipped, X-Student-Id captured, and zero forgot-password requests.",'- Full-suite SUT conformance execution: **NOT PERFORMED**.']
     REPORT_PATH.write_text('\n'.join(lines)+'\n',encoding='utf-8'); print('REPORT FINALIZED')
 def main():
     p=argparse.ArgumentParser(); sub=p.add_subparsers(dest='cmd',required=True); sub.add_parser('generate'); sub.add_parser('validate-static'); sub.add_parser('report'); s=sub.add_parser('validate-schema'); s.add_argument('--schema',type=Path,default=SCHEMA_PATH); n=sub.add_parser('validate-newman'); n.add_argument('--newman-command',nargs='+',required=True); a=p.parse_args()

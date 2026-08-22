@@ -1216,3 +1216,114 @@ newman run postman\pool-a-forgot-password.postman_collection.json --env-var base
   - Replace `throw new Error(...)` for BLOCKED cases with `pm.execution.skipRequest()`.
   - Restore clear `X-Student-Id` console logging for execution evidence.
   - Guide the agent to update stale CSV preconditions and expected results to match the new SQLite fixture strategy.
+
+### Artifact 13
+
+- **User:** Vương Ngũ Tín Thành
+- **Date and Time:** 2026-08-22 10:47:47 GMT+7
+- **Model Used:** GPT-5.6 Sol
+- **Skill Used:**
+  - `postman-test-generator`
+  - `ai-audit`
+- **Prompt:**
+
+````markdown
+Fix the remaining issues from the direct-SQLite fixture migration.
+
+1. Update stale CSV/report wording.
+   - Remove references to `/api/forgot-password` generating fixture OTPs where fixtures are now seeded directly in SQLite.
+   - Replace outdated OTP values such as `123456` with the actual deterministic token for each case.
+   - Keep each test's original intent unchanged.
+   - Check especially API-027, 030, 031, 033–035, 045–047, 050, 052, 055, 057, 063, 064, 067, 068, 070, and 071.
+2. Strengthen static validation without restoring the old oversized validator.\
+   Add independent checks for:
+   - fixture seeder account/token values matching CSV test preconditions/data;
+   - every BLOCKED case using `pm.execution.skipRequest()` rather than throwing an error;
+   - `X-Student-Id` injection remaining present;
+   - important structured CSV → Postman mappings being independently validated.
+3. Regenerate the collection and rerun:
+   - Python/static validation,
+   - Postman v2.1 schema validation,
+   - Newman compatibility tests.
+
+Do not redesign the SQLite fixture architecture.
+
+At the end, report only files changed, fixes made, and validation results.
+````
+
+- **AI Output:**
+
+````markdown
+## Files changed
+
+- `test-cases/a-forgot-password.csv`
+- `postman/generate_pool_a.py`
+- `postman/pool-a-forgot-password.postman_collection.json`
+- `postman/pool-a-conversion-report.md`
+- `postman/pool-a-validation-results.json`
+- `Main_Report.md`
+- `AI_Audit.md`
+
+## Fixes made
+
+- Replaced stale generated/issued OTP wording and obsolete `123456` values with each case’s deterministic SQLite token.
+- Preserved intentional `123456` uses in API-009 and API-032.
+- Added independent checks for:
+  - 73 CSV fixture rows against seeder account/token definitions.
+  - 36 structured CSV-to-Postman mappings.
+  - All blocked cases using `pm.execution.skipRequest()` without throwing.
+  - Collection-level `X-Student-Id` injection.
+- Added Newman coverage for blocked-request skipping and student-ID header capture.
+- Updated report validation evidence and CSV checksum.
+
+## Validation results
+
+- Python compilation: **PASS**
+- Static validation: **PASS** — 82 IDs, 88 requests, 73 fixture rows, 36 independent structured mappings.
+- Blocked-case skip validation: **PASS**
+- `X-Student-Id` validation: **PASS**
+- Full Postman v2.1 schema: **PASS**
+- Newman 6.2.2: **PASS** — 9 runs, 13 transmitted reset requests, one blocked request skipped, zero forgot-password requests.
+- `git diff --check`: **PASS** (line-ending notices only).
+- Collection SHA-256: `D63A790201DC1D0AF64C43D2983DF6CDAF01537F7A96434D23A5D3E66118A010`
+````
+
+- **File Modifications:**
+  - `File:` `test-cases/a-forgot-password.csv`.
+    - `Action:` edited.
+    - `Deleted:` Stale generated/issued fixture wording and obsolete `123456` values in deterministic fixture preconditions, results, and notes.
+    - `Replaced With:` Exact per-case SQLite tokens and direct-seeding wording while preserving each reviewed test intent.
+    - `Appended:` None.
+  - `File:` `postman/generate_pool_a.py`.
+    - `Action:` edited.
+    - `Deleted:` Weak blocked-case validation and generator-coupled-only CSV mapping checks.
+    - `Replaced With:` Compact independent fixture-manifest/CSV checks, 36 independently reconstructed structured mappings, skipRequest-without-throw enforcement, X-Student-Id checks, and Newman blocked/header compatibility coverage.
+    - `Appended:` None.
+  - `File:` `postman/pool-a-forgot-password.postman_collection.json`.
+    - `Action:` replaced content.
+    - `Deleted:` Generated descriptions containing stale CSV fixture wording.
+    - `Replaced With:` Regenerated descriptions with exact deterministic tokens and direct-SQLite wording; blocked requests use `pm.execution.skipRequest()`.
+    - `Appended:` None.
+  - `File:` `postman/pool-a-conversion-report.md`.
+    - `Action:` replaced content.
+    - `Deleted:` Prior validation summary and stale collection hash.
+    - `Replaced With:` Current fixture/static/schema/Newman evidence, blocked skip behavior, and current collection hash.
+    - `Appended:` None.
+  - `File:` `postman/pool-a-validation-results.json`.
+    - `Action:` replaced content.
+    - `Deleted:` Validation evidence for the superseded collection.
+    - `Replaced With:` PASS evidence for 73 fixture rows, 36 independent structured mappings, blocked skipRequest cases, X-Student-Id, full schema, and nine Newman runs.
+    - `Appended:` None.
+  - `File:` `Main_Report.md`.
+    - `Action:` edited.
+    - `Deleted:` Superseded CSV SHA-256.
+    - `Replaced With:` Current CSV SHA-256 `DB9858994918754E48299DA6EF52455BAACE66419E43A36488BA613B64981AEA`.
+    - `Appended:` None.
+  - `File:` `AI_Audit.md`.
+    - `Action:` appended.
+    - `Deleted:` None.
+    - `Replaced With:` None.
+    - `Appended:` Audit artifacts for the completed interactions.
+- **Verdict:** VALID
+- **Reasoning:** The agent correctly resolved SQLite defects.
+- **Student Fixes:** None

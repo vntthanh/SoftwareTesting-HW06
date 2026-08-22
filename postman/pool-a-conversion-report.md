@@ -99,6 +99,7 @@
 - API-025, API-065, API-072: blocked because the actual SUT has no OTP expiry column/state/check.
 - API-075: blocked because the actual SUT has no rate limiter or authoritative threshold.
 - API-077: blocked in sequential Postman/Newman; a concurrent harness with a synchronization barrier is required.
+- Every blocked request uses `pm.execution.skipRequest()` without throwing a runtime error.
 - API-068 HTTP execution is automated, but its plaintext-storage oracle requires authorized SQLite inspection. Other partial/manual labels preserve reviewed external side-effect or persistence oracles.
 
 ## Exact SUT → seed → Newman commands
@@ -115,8 +116,8 @@ newman run postman\pool-a-forgot-password.postman_collection.json --env-var base
 
 ## Validation results
 
-- Collection SHA-256: `CE0A58BB80DCE3EB0929D96E39D4CD3D985F5240E69DCEAFB84B4011E63F3391`
-- Static: **PASS** (2026-08-22 10:19:02 GMT+7); 82 IDs, 88 requests, zero forgot-password references.
-- Full Postman v2.1 schema: **PASS** (2026-08-22 10:19:18 GMT+7) using `postman/postman-v2.1.0-schema.json`.
-- Newman 6.2.2: **PASS** (2026-08-22 10:20:31 GMT+7); 8 local-mock runs and zero forgot-password requests.
+- Collection SHA-256: `D63A790201DC1D0AF64C43D2983DF6CDAF01537F7A96434D23A5D3E66118A010`
+- Static: **PASS** (2026-08-22 10:31:27 GMT+7); 82 IDs, 88 requests, 73 fixture rows matched to the seeder manifest, 36 structured mappings independently checked, all blocked cases use skipRequest, X-Student-Id injection present, and zero forgot-password references.
+- Full Postman v2.1 schema: **PASS** (2026-08-22 10:31:48 GMT+7) using `postman/postman-v2.1.0-schema.json`.
+- Newman 6.2.2: **PASS** (2026-08-22 10:32:51 GMT+7); 9 local-mock runs, blocked request skipped, X-Student-Id captured, and zero forgot-password requests.
 - Full-suite SUT conformance execution: **NOT PERFORMED**.
