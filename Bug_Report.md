@@ -51,3 +51,29 @@ Requests with missing, malformed, invalid-signature, or expired JWTs can receive
 **Impacted Test Cases:** Pool B API-068
 
 Sending an otherwise valid apply-coupon body as `text/plain` causes `500 Internal Server Error` instead of safe client-error handling. This is consolidated into the existing cross-pool unsupported-content-type issue already reported for FR-03.
+
+## Feature FR-18: Admin Order Management
+
+### Authorization scheme is not validated
+
+**Impacted Test Cases:** API-006
+
+The Admin order-status endpoint accepts a valid Admin JWT under the `Basic` scheme and updates the target order, although the documented authorization scheme is `Bearer`.
+
+### Admin role is not enforced for order status updates
+
+**Impacted Test Cases:** API-008, API-034, API-076, API-085
+
+Requests with valid non-Admin JWTs update the order status instead of being denied. Independent contract, domain, security, and ordered-flow cases reproduce the unauthorized mutation.
+
+### Canceled orders can transition to delivered
+
+**Impacted Test Cases:** API-062
+
+The endpoint accepts `canceled → delivered`, allowing an order to leave the FR-10 final `canceled` state.
+
+### Unsupported content type causes an internal server error
+
+**Impacted Test Cases:** API-080
+
+Sending otherwise valid JSON as `text/plain` returns `500 Internal Server Error` instead of a safe `4xx` rejection. The request leaves the order unchanged, and the same update succeeds when retried as `application/json`. This case is consolidated into the existing cross-pool unsupported-content-type issue reported for FR-03 and FR-09.

@@ -143,7 +143,6 @@ I also tested the validator with both a passing collection and a deliberately sc
 - **Verdict:** VALID
 - **Reasoning:** The agent successfully fixed all defects.
 - **Student Fixes:** None
-
 ### Artifact 3
 
 - **User:** Vương Ngũ Tín Thành
@@ -3389,4 +3388,235 @@ Artifacts 38-38 successfully appended to [AI_Audit.md](/D:/GitHub/SoftwareTestin
     - `Appended:` Artifact 38 containing the exact Pool C analysis prompt, AI output, and file-modification record.
 - **Verdict:** VALID
 - **Reasoning:** The generated report contains no found problem.
+- **Student Fixes:** None
+
+### Artifact 39
+
+- **User:** Vương Ngũ Tín Thành
+- **Date and Time:** 2026-08-23 00:05:15 GMT+7
+- **Model Used:** GPT-5
+- **Skill Used:**
+  - `append-bug`
+  - `ai-audit`
+- **Prompt:**
+
+````markdown
+Use [$append-bug](D:\GitHub\SoftwareTesting-HW06\\.agents\skills\append-bug\SKILL.md) to document the confirmed Pool C defects from C.8 [Main\_Report.md](Main_Report.md).
+````
+
+- **AI Output:**
+
+````markdown
+Documented the four confirmed Pool C root-cause defects and added the FR-18 summary to [Bug_Report.md](/D:/GitHub/SoftwareTesting-HW06/Bug_Report.md:55).
+
+Created these issue files with the following exact content:
+
+[Authorization scheme validation](/D:/GitHub/SoftwareTesting-HW06/issues/bug_fr18-authorization-scheme-validation.md)
+
+````
+---
+labels: bug, fr-18, medium
+---
+
+## Bug: Authorization scheme is not validated
+
+**Impacted Test Case ID(s):** API-006
+
+### Description
+
+The Admin order-status endpoint accepts a valid Admin JWT under a non-Bearer `Authorization` scheme. Authentication extracts and verifies the second whitespace-delimited value without first requiring the documented `Bearer` scheme.
+
+### Steps to Reproduce
+
+1. Seed an existing order in `pending` state and obtain a valid JWT whose role is `admin`.
+2. Send `PUT /api/admin/orders/<existing-pending-order-id>/status` with `Authorization: Basic <valid-admin-JWT>`, `Content-Type: application/json`, and body `{"status":"confirmed"}`.
+3. Query the order state after the request.
+
+### Expected Result
+
+The non-Bearer request does not satisfy the documented authorization prerequisite and must not update the order.
+
+### Actual Result
+
+The request is authenticated despite using the `Basic` scheme, and the target order changes from `pending` to `confirmed`. The Pool C Newman artifact contains the failed unchanged-state assertion: [`pool-c.json`](../reports/pool-c/pool-c.json).
+
+### Environment
+
+- **Browser/OS:** Newman CLI on Windows (browser not applicable)
+- **Version:** EShop requirements v2.0; Newman 6.2.2
+````
+
+[Admin role enforcement](/D:/GitHub/SoftwareTesting-HW06/issues/bug_fr18-admin-role-enforcement.md)
+
+````
+---
+labels: bug, fr-18, high
+---
+
+## Bug: Admin role is not enforced for order status updates
+
+**Impacted Test Case ID(s):** API-008, API-034, API-076, API-085
+
+### Description
+
+The Admin order-status endpoint validates JWT authenticity but does not enforce `role = admin`. A valid JWT for a non-Admin user can perform the protected order mutation.
+
+### Steps to Reproduce
+
+1. Seed an existing order in `pending` state and obtain valid JWTs for a non-Admin user and an Admin user.
+2. Send `PUT /api/admin/orders/<existing-pending-order-id>/status` with the non-Admin Bearer token, `Content-Type: application/json`, and body `{"status":"confirmed"}`.
+3. Observe the response and query the target order state.
+4. For the ordered control flow, retry the same update with the valid Admin Bearer token.
+
+### Expected Result
+
+The non-Admin request is denied and the target order remains `pending`; only the Admin-authorized request may perform the update.
+
+### Actual Result
+
+The non-Admin request is accepted, returns `200 OK` in API-085, and changes the target order from `pending` to `confirmed`. Three independent single-request cases and the ordered two-step flow reproduce the missing role check in the Pool C Newman artifact: [`pool-c.json`](../reports/pool-c/pool-c.json).
+
+### Environment
+
+- **Browser/OS:** Newman CLI on Windows (browser not applicable)
+- **Version:** EShop requirements v2.0; Newman 6.2.2
+````
+
+[Canceled final-state transition](/D:/GitHub/SoftwareTesting-HW06/issues/bug_fr18-canceled-final-state-transition.md)
+
+````
+---
+labels: bug, fr-18, high
+---
+
+## Bug: Canceled orders can transition to delivered
+
+**Impacted Test Case ID(s):** API-062
+
+### Description
+
+The order-status transition logic explicitly permits `canceled → delivered`, violating the FR-10 rule that `canceled` is a final state.
+
+### Steps to Reproduce
+
+1. Seed an existing order in `canceled` state and obtain a valid Admin JWT.
+2. Send `PUT /api/admin/orders/<canceled-order-id>/status` with `Authorization: Bearer <valid-admin-JWT>`, `Content-Type: application/json`, and body `{"status":"delivered"}`.
+3. Query the order state after the request.
+
+### Expected Result
+
+The transition is rejected and the order remains in the final `canceled` state.
+
+### Actual Result
+
+The endpoint accepts the invalid transition and changes the target order from `canceled` to `delivered`. The Pool C Newman artifact contains the failed final-state assertion: [`pool-c.json`](../reports/pool-c/pool-c.json).
+
+### Environment
+
+- **Browser/OS:** Newman CLI on Windows (browser not applicable)
+- **Version:** EShop requirements v2.0; Newman 6.2.2
+````
+
+[Unsupported content type](/D:/GitHub/SoftwareTesting-HW06/issues/bug_fr18-unsupported-content-type-server-error.md)
+
+````
+---
+labels: bug, fr-18, medium
+---
+
+## Bug: Unsupported content type causes an internal server error
+
+**Impacted Test Case ID(s):** API-080
+
+### Description
+
+The Admin order-status endpoint destructures `req.body` without guarding against an undefined body. When valid JSON text is sent as `text/plain`, the JSON parser does not populate `req.body`, and the endpoint raises an unhandled `TypeError`.
+
+### Steps to Reproduce
+
+1. Seed an existing order in `pending` state and obtain a valid Admin JWT.
+2. Send `PUT /api/admin/orders/<existing-pending-order-id>/status` with `Authorization: Bearer <valid-admin-JWT>`, `Content-Type: text/plain`, and raw body `{"status":"confirmed"}`.
+3. Query the order state.
+4. Retry the same update with `Content-Type: application/json` and the same JSON body.
+
+### Expected Result
+
+The `text/plain` request receives a safe `4xx` response and leaves the order `pending`; the corrected JSON retry succeeds and changes the order to `confirmed`.
+
+### Actual Result
+
+The `text/plain` request returns `500 Internal Server Error` with an unhandled `TypeError`, although it leaves the order unchanged. The corrected JSON retry succeeds. Exploratory API-011 independently records the same HTTP 500 behavior when the body is absent, corroborating the root cause. The Pool C Newman artifact preserves both observations: [`pool-c.json`](../reports/pool-c/pool-c.json).
+
+### Environment
+
+- **Browser/OS:** Newman CLI on Windows (browser not applicable)
+- **Version:** EShop requirements v2.0; Newman 6.2.2
+````
+
+Appended this exact FR-18 section to `Bug_Report.md`:
+
+````
+## Feature FR-18: Admin Order Management
+
+### Authorization scheme is not validated
+
+**Impacted Test Cases:** API-006
+
+The Admin order-status endpoint accepts a valid Admin JWT under the `Basic` scheme and updates the target order because authentication does not require the documented `Bearer` scheme.
+
+### Admin role is not enforced for order status updates
+
+**Impacted Test Cases:** API-008, API-034, API-076, API-085
+
+Valid non-Admin JWTs can update order status because the protected Admin route never checks `role = admin`. Independent contract, domain, security, and ordered-flow cases reproduce the unauthorized mutation.
+
+### Canceled orders can transition to delivered
+
+**Impacted Test Cases:** API-062
+
+The transition logic accepts `canceled → delivered`, allowing an order to leave the FR-10 final `canceled` state.
+
+### Unsupported content type causes an internal server error
+
+**Impacted Test Cases:** API-080
+
+Sending otherwise valid JSON as `text/plain` causes an unhandled `TypeError` and `500 Internal Server Error` instead of a safe `4xx` rejection. The same request succeeds when retried as `application/json`, and exploratory API-011 corroborates the undefined-body failure.
+````
+
+Artifacts 39-39 successfully appended to [AI_Audit.md](/D:/GitHub/SoftwareTesting-HW06/AI_Audit.md).
+````
+
+- **File Modifications:**
+  - `File:` `D:\GitHub\SoftwareTesting-HW06\issues\bug_fr18-authorization-scheme-validation.md`.
+    - `Action:` created.
+    - `Deleted:` None.
+    - `Replaced With:` None.
+    - `Appended:` Complete FR-18 issue for API-006, including metadata, reproduction steps, expected and actual results, evidence link, and environment.
+  - `File:` `D:\GitHub\SoftwareTesting-HW06\issues\bug_fr18-admin-role-enforcement.md`.
+    - `Action:` created.
+    - `Deleted:` None.
+    - `Replaced With:` None.
+    - `Appended:` Complete FR-18 issue consolidating API-008, API-034, API-076, and API-085 under the missing Admin-role check.
+  - `File:` `D:\GitHub\SoftwareTesting-HW06\issues\bug_fr18-canceled-final-state-transition.md`.
+    - `Action:` created.
+    - `Deleted:` None.
+    - `Replaced With:` None.
+    - `Appended:` Complete FR-18 issue for API-062 and the invalid `canceled → delivered` transition.
+  - `File:` `D:\GitHub\SoftwareTesting-HW06\issues\bug_fr18-unsupported-content-type-server-error.md`.
+    - `Action:` created.
+    - `Deleted:` None.
+    - `Replaced With:` None.
+    - `Appended:` Complete FR-18 issue for API-080, with API-011 retained as corroborating exploratory evidence.
+  - `File:` `D:\GitHub\SoftwareTesting-HW06\Bug_Report.md`.
+    - `Action:` appended.
+    - `Deleted:` None.
+    - `Replaced With:` None.
+    - `Appended:` Feature FR-18 section with four consolidated bug summaries and complete impacted-test traceability.
+  - `File:` `D:\GitHub\SoftwareTesting-HW06\AI_Audit.md`.
+    - `Action:` appended.
+    - `Deleted:` None.
+    - `Replaced With:` None.
+    - `Appended:` Artifact 39 containing the exact request, AI output, and file-modification record.
+- **Verdict:** VALID
+- **Reasoning:** The agent correctly grouped issues and create reports.
 - **Student Fixes:** None
