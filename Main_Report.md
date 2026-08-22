@@ -12,7 +12,7 @@
 | SUT repository | <https://github.com/ttbhanh/eshop-sut> |
 | Submission repository | <https://github.com/vntthanh/SoftwareTesting-HW06> |
 | Report date | 2026-08-18 |
-| Last updated | 2026-08-22 |
+| Last updated | 2026-08-23 |
 
 ## 2. Selected APIs
 
@@ -44,6 +44,16 @@ The **AI Audit** skill (reused from homework `HW05-AI`) operates alongside this 
 The design artifacts for the **API Test Generator** and its four specialized generators are stored in the `skills-design/` folder. Each generator has its own subfolder containing its design specification and corresponding diagram.
 
 The **AI Audit** skill is not included in this folder because it is a reusable skill carried over from HW05.
+
+### 3.3. Agent Skill Demonstrations
+
+| Agent skill | Demonstration |
+| --- | --- |
+| **API Test Generator** | [Stage 1](https://youtu.be/I07mqk73pFg) · [Stage 2](https://youtu.be/nrPLMDqrL6A) |
+| **Postman Test Generator** | <https://youtu.be/cua5521dNAA> |
+| **Newman Result Analyzer** | <https://youtu.be/clgm8yc12GM> |
+| **Append Bug** (HW02) | <https://youtu.be/G0DPfJ1dkqE> |
+| **AI Audit** (HW02) | <https://youtu.be/1gSqi7MfGV> |
 
 ## Pool A: Forgot Password
 
