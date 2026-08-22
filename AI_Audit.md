@@ -1369,3 +1369,63 @@ Validation passed with `skill-creator`’s `quick_validate.py`.
 - **Verdict:** INCOMPLETE
 - **Reasoning:** The original design defines the precedence: `REQUEST_ERROR`, `RUNTIME_ERROR`, `FAIL_ASSERTION`, `PASS`, while the implemented skill currently defines `RUNTIME_ERROR`, `REQUEST_ERROR`, `FAIL_ASSERTION`, `PASS`. The implementation should preserve the designed precedence.
 - **Student Fixes:** Fix the precedence to match the design.
+
+### Artifact 15
+
+- **User:** Vương Ngũ Tín Thành
+- **Date and Time:** 2026-08-22 14:15:57 GMT+7
+- **Model Used:** GPT-5.6 Sol
+- **Skill Used:**
+  - `newman-result-analyzer`
+  - `ai-audit`
+- **Prompt:**
+
+````markdown
+Use [$newman-result-analyzer](D:\GitHub\SoftwareTesting-HW06\\.agents\skills\newman-result-analyzer\SKILL.md) to analyze the final Pool A Newman result:
+
+- Input: [pool-a.json](reports/pool-a/pool-a.json)&#x20;
+- Output: [Main\_Report.md](Main_Report.md) at secton `### A.8. Newman Execution Analysis`
+
+Write the normalized execution analysis to the output file.
+````
+
+- **AI Output:**
+
+````markdown
+I’m using the named `newman-result-analyzer` skill. I’ll first read its full workflow, inspect the Newman JSON and the target section, then write and verify the normalized analysis.
+
+The skill requires evidence-based classification at the logical test-case level, preserving assertion/runtime/request distinctions and any unexecuted collection items. I’m now reconciling the embedded collection, detailed executions, Newman stats, and failures before editing the report.
+
+Reconciliation is complete: the artifact represents 82 logical cases. Outcomes are 55 `PASS`, 22 `FAIL_ASSERTION`, and 5 explicitly `BLOCKED_NOT_EXECUTED`; there are no request or script errors. I also found three pre-request helper calls whose main execution rows are duplicated in the JSON, so I’m collapsing only those identical duplicates while retaining Newman’s 85-request run total and documenting the reconciliation.
+
+The normalized report is now written into Section A.8. I’m doing a final integrity check on table row counts, status totals, required fields, section boundaries, and the exact file diff before handing it back.
+
+Updated [Main_Report.md](D:/GitHub/SoftwareTesting-HW06/Main_Report.md:155) Section A.8 with the normalized Newman analysis.
+
+Results:
+
+- `PASS`: 55
+- `FAIL_ASSERTION`: 22
+- `BLOCKED_NOT_EXECUTED`: 5
+- 82 logical test cases documented
+- 23 explicit manual-oracle cases
+- Request/statistics reconciliation included
+- No request or script errors found
+````
+
+- **File Modifications:**
+  - `File:` `Main_Report.md`.
+    - `Action:` appended content to the existing `### A.8. Newman Execution Analysis` section.
+    - `Deleted:` None.
+    - `Replaced With:` None.
+    - `Appended:` Lines 157–271: normalized run summary, one outcome record for each of 82 logical test cases, explicit manual-oracle requirements, and coverage/reconciliation notes. The analysis records 55 `PASS`, 22 `FAIL_ASSERTION`, 5 `BLOCKED_NOT_EXECUTED`, 82 assertions (59 passed and 23 failed), 85 total requests, and no request or script errors.
+  - `File:` `tmp/analyze-pool-a.js`.
+    - `Action:` created as a temporary analysis helper, then deleted after verification.
+    - `Deleted:` The temporary Newman parsing, logical-case grouping, duplicate-correlation, classification, and Markdown-generation helper after its output was written and verified.
+    - `Replaced With:` None.
+    - `Appended:` Temporary helper code used to inspect the embedded collection, executions, failures, manual-oracle metadata, and run-stat reconciliation.
+- **Verdict:** INCOMPLETE
+- **Reasoning:** The Newman analysis correctly recorded the automated execution results, but API-068 and API-077 still showed their Newman-only states even though their required manual executions had been completed.
+- **Student Fixes:** Replaced the final results for API-068 and API-077 with the completed manual outcomes.
+  - API-068 is `FAIL` because database inspection confirmed plaintext password storage.
+  - API-077 is `PASS` because the separate synchronized concurrency test confirmed exactly one successful reset. Updated the summary and reconciliation notes accordingly.
