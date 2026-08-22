@@ -1,4 +1,4 @@
-# AI Audit Report
+﻿# AI Audit Report
 
 - **Student ID:** 23127261
 - **Student Name:** Vương Ngũ Tín Thành
@@ -1649,3 +1649,424 @@ Validation now confirms all 23 final failures in Section A.8—including the man
 - **Verdict:** INCOMPLETE
 - **Reasoning:** The bug grouping is appropriate, but the new-password validation issue overstates the execution evidence. The Newman results show that the invalid `newPassword` cases returned `200 OK`, but only API-080 directly demonstrates reset-token consumption through the failed corrected retry.
 - **Student Fixes:** Revised the new-password validation bug summary, description, and actual result to report only confirmed behavior. Kept token-consumption evidence specific to API-080.
+
+### Artifact 17
+
+- **User:** Vương Ngũ Tín Thành
+- **Date and Time:** 2026-08-22 15:12:56 GMT+7
+- **Model Used:** GPT-5.6 Sol
+- **Skill Used:**
+  - `api-test-generator`
+  - `contract-test-generator`
+  - `domain-test-generator`
+  - `state-transition-test-generator`
+  - `security-test-generator`
+  - `ai-audit`
+- **Prompt:**
+
+````markdown
+Use [$api-test-generator](D:\GitHub\SoftwareTesting-HW06\\.agents\skills\api-test-generator\SKILL.md) for Pool B: `POST /api/apply-coupon` (FR-09).
+Write the reviewed analysis reports under `review/pool-b/reports/` and the final candidate test cases to `test-cases/b-discount-coupons.csv`.
+Use the API specification and system requirements as authoritative sources.
+````
+
+- **AI Output:**
+
+````markdown
+I’m using the `api-test-generator` skill because this request needs coordinated contract, domain, state-transition, and security analysis. I’ll follow its required review checkpoints and write only to the requested Pool B report and CSV paths.
+
+The workflow’s first gate is analysis-only. I’m extracting one shared endpoint context from the authoritative specification and requirements now; four specialists will then write separate review reports in parallel. No test-case CSV will be generated until those reports are explicitly approved.
+
+I’ve confirmed the endpoint is uniquely identified and the source contract is intentionally sparse: it documents the JSON fields and output shape but no HTTP status/error schemas. The shared context will preserve those gaps instead of inventing behavior, while FR-09 supplies the coupon rules and authentication requirement.
+
+The shared context and orchestration status are now written. Per the skill, I’m starting all four Phase-1 specialists concurrently; each owns only its category report and cannot touch the shared context, status file, final CSV, or another specialist’s files.
+
+Three specialists are active, which fills this runtime’s four-agent concurrency limit including me. The security specialist is queued to start as soon as one slot frees; this affects timing only, not the required report boundaries or review gate.
+
+All four Phase-1 reports are complete. State testing is applicable because coupon eligibility depends on stored active/expiry/usage states, but the report correctly avoids assuming this endpoint consumes a use. I’m validating report structure, traceability, and file ownership before updating the review status.
+
+Phase 1 analysis is complete and awaiting human review:
+
+- [Contract report](D:\GitHub\SoftwareTesting-HW06\review\pool-b\reports\contract-report.md)
+- [Domain report](D:\GitHub\SoftwareTesting-HW06\review\pool-b\reports\domain-report.md)
+- [State report](D:\GitHub\SoftwareTesting-HW06\review\pool-b\reports\state-report.md)
+- [Security report](D:\GitHub\SoftwareTesting-HW06\review\pool-b\reports\security-report.md)
+- [Shared API context](D:\GitHub\SoftwareTesting-HW06\review\pool-b\shared-api-context.md)
+- [Orchestration status](D:\GitHub\SoftwareTesting-HW06\review\pool-b\orchestration-status.md)
+
+Coverage includes 12 contract rules, 37 domain partitions, 7 boundaries, 5 state evaluations, and 7 security scenarios. State testing is applicable, although no coupon-consumption side effect was inferred.
+
+The reports remain `PENDING`. Per the required review gate, `test-cases/b-discount-coupons.csv` has not been generated. Please review and explicitly approve these exact report versions—or provide revision notes—so I can proceed with Phase 2.
+````
+
+- **File Modifications:**
+  - `File:` `review/pool-b/shared-api-context.md`.
+    - `Action:` created.
+    - `Deleted:` None.
+    - `Replaced With:` None.
+    - `Appended:` Complete normalized context for `POST /api/apply-coupon`, including authoritative source hashes and line references, request and response inventories, FR-09 coupon rules, SEC-01–SEC-07 applicability evidence, state cues, baseline request, and explicit specification gaps.
+  - `File:` `review/pool-b/orchestration-status.md`.
+    - `Action:` created, then edited after all Phase-1 reports completed.
+    - `Deleted:` Initial `ANALYSIS_IN_PROGRESS` status and not-yet-produced category rows.
+    - `Replaced With:` `AWAITING_HUMAN_REVIEW` status, four completed Phase-1 category rows, state applicability, report-version provenance, and the explicit generation gate.
+    - `Appended:` None.
+  - `File:` `review/pool-b/reports/contract-report.md`.
+    - `Action:` created.
+    - `Deleted:` None.
+    - `Replaced With:` None.
+    - `Appended:` Complete Phase-1 CONTRACT analysis with request/response inventories, CR-001–CR-012, gaps, assumptions, and a PENDING human-review block.
+  - `File:` `review/pool-b/reports/domain-report.md`.
+    - `Action:` created.
+    - `Deleted:` None.
+    - `Replaced With:` None.
+    - `Appended:` Complete Phase-1 DOMAIN analysis with baseline, parameter inventory, DP-001–DP-037, DB-001–DB-007, cross-parameter constraints, gaps, and a PENDING human-review block.
+  - `File:` `review/pool-b/reports/state-report.md`.
+    - `Action:` created.
+    - `Deleted:` None.
+    - `Replaced With:` None.
+    - `Appended:` Complete Phase-1 STATE analysis marking state applicability as APPLICABLE, defining stored coupon and per-user states, modeling TR-001–TR-005, preserving the absence of documented endpoint mutations, and including a PENDING review block.
+  - `File:` `review/pool-b/reports/security-report.md`.
+    - `Action:` created.
+    - `Deleted:` None.
+    - `Replaced With:` None.
+    - `Appended:` Complete Phase-1 SECURITY analysis with the SEC-01–SEC-07 applicability matrix, SS-001–SS-007, security gaps, and a PENDING human-review block.
+- **Verdict:** INCOMPLETE
+- **Reasoning:**
+  - CONTRACT wrongly treats sample coupons as already active.
+  - DOMAIN uses `unsupported syntax` without a documented syntax rule.
+  - STATE should be `NOT_APPLICABLE`.
+  - SECURITY misses SEC-05 coverage for `user_id`.
+- **Student Fixes:**
+  - Manually fixed the CONTRACT fixture wording.
+  - Manually changed `unsupported syntax` to `unusual/arbitrary string`.
+  - Asked the agent to change STATE to `NOT_APPLICABLE`.
+  - Asked the agent to add SEC-05 coverage for `user_id`.
+  - Asked the agent to keep cross-report summaries consistent.
+
+### Artifact 18
+
+- **User:** Vương Ngũ Tín Thành
+- **Date and Time:** 2026-08-22 15:26:08 GMT+7
+- **Model Used:** GPT-5.6 Sol
+- **Skill Used:**
+  - `api-test-generator`
+  - `contract-test-generator`
+  - `domain-test-generator`
+  - `state-transition-test-generator`
+  - `security-test-generator`
+  - `ai-audit`
+- **Prompt:**
+
+````markdown
+Revise Pool B Phase-1 analysis based on the review.
+
+- Replace the current transition model with a concise justification that `POST /api/apply-coupon` has state-dependent preconditions but no documented endpoint-driven state transition. Keep active/inactive, expiry, and usage-limit coverage under DOMAIN.
+- Add SEC-05 coverage for client-controlled `user_id` using a controlled inert SQL/metacharacter input. Do not invent an HTTP status oracle.
+- Preserve the rest of the approved analysis and update cross-report summaries for consistency.
+
+Do not generate Phase-2 test cases yet.
+````
+
+- **AI Output:**
+
+````markdown
+I’m using the API test-generation workflow again for this Phase-1 revision. The review keeps CONTRACT and DOMAIN analysis substantively approved, while STATE must be recast as non-applicable to transition testing and SECURITY must gain controlled `user_id` coverage. I’ll keep the reports at the human-review gate and will not generate candidate JSON or the final CSV.
+
+The review changes the classification, not the underlying FR-09 facts: active/inactive, expiry, and usage count remain testable partitions and boundaries, but they are DOMAIN setup conditions because this operation documents calculation only—no source state, trigger-driven mutation, or destination state. I’m updating that shared interpretation before the specialists revise their reports.
+
+Three revision specialists are active, filling the runtime’s concurrency limit with me included. SECURITY is queued next; its required addition will use a controlled inert metacharacter value in client-supplied `user_id`, asserting only query-semantic safety—not a fabricated status code or error body.
+
+The revisions are in place: STATE is now a minimal `NOT_APPLICABLE` record, DOMAIN retains all 37 partitions and 7 boundaries, and SECURITY adds `SS-008` for inert `user_id` metacharacter handling. I’m doing the final cross-report consistency check and updating the parent-owned status; Phase 2 remains untouched.
+
+Pool B Phase-1 analysis has been revised:
+
+- [State report](D:\GitHub\SoftwareTesting-HW06\review\pool-b\reports\state-report.md) now records `State Applicability: NOT_APPLICABLE`, with no transition model or review requirement.
+- [Domain report](D:\GitHub\SoftwareTesting-HW06\review\pool-b\reports\domain-report.md) retains all 37 partitions and 7 boundaries, including active/inactive, expiry, and usage-limit coverage.
+- [Security report](D:\GitHub\SoftwareTesting-HW06\review\pool-b\reports\security-report.md) adds `SS-008` for controlled inert `user_id` SQL/metacharacter input without inventing an HTTP response oracle.
+- [Contract report](D:\GitHub\SoftwareTesting-HW06\review\pool-b\reports\contract-report.md), [shared context](D:\GitHub\SoftwareTesting-HW06\review\pool-b\shared-api-context.md), and [orchestration status](D:\GitHub\SoftwareTesting-HW06\review\pool-b\orchestration-status.md) were updated for consistency.
+
+CONTRACT, DOMAIN, and SECURITY remain `PENDING` for the revised versions. No candidate fragments or Phase-2 CSV were generated.
+````
+
+- **File Modifications:**
+  - `File:` `review/pool-b/shared-api-context.md`.
+    - `Action:` edited.
+    - `Deleted:` Prior classification of active/inactive, expiry, and per-user usage conditions as applicable STATE dimensions for transition-specialist review.
+    - `Replaced With:` State-dependent-precondition classification; exact `State Applicability: NOT_APPLICABLE` basis; DOMAIN ownership of active/inactive, expiry, and usage-limit coverage; and SEC-05 treatment of both `code` and client-controlled `user_id` as controlled inert database-query inputs without an HTTP status oracle.
+    - `Appended:` None.
+  - `File:` `review/pool-b/reports/contract-report.md`.
+    - `Action:` edited.
+    - `Deleted:` Prior v1 review metadata and the absence of an explicit cross-category disposition.
+    - `Replaced With:` Preserved CR-001–CR-012 and substantive contract analysis plus a concise cross-category disposition assigning state-dependent eligibility coverage to DOMAIN, transition testing to `NOT_APPLICABLE`, and SEC-05 `code`/`user_id` coverage to SECURITY; version advanced to `contract-report-v2 — 2026-08-22` with `PENDING` review status.
+    - `Appended:` None.
+  - `File:` `review/pool-b/reports/domain-report.md`.
+    - `Action:` edited.
+    - `Deleted:` Prior wording that did not explicitly distinguish state-dependent eligibility preconditions from endpoint-driven transitions and prior draft review metadata.
+    - `Replaced With:` Preserved DP-001–DP-037 and DB-001–DB-007 plus explicit DOMAIN ownership of active/inactive, expiry, and usage-limit partitions/boundaries, `STATE NOT_APPLICABLE` cross-report wording, revised DC-007, and version `POOL-B-DOMAIN-v2` with `PENDING` review status.
+    - `Appended:` None.
+  - `File:` `review/pool-b/reports/state-report.md`.
+    - `Action:` replaced content.
+    - `Deleted:` The prior APPLICABLE state model, state definitions, guards, TR-001–TR-005 transition table, invalid-transition discussion, gaps list, and PENDING review block.
+    - `Replaced With:` Concise `STATE-PHASE1-v2` applicability record marking `State Applicability: NOT_APPLICABLE` and `Review Required: NO`, with exact source identity and justification that C1, C2, and C5 are state-dependent preconditions but the endpoint documents no state mutation or destination; active/inactive, expiry, and usage-limit coverage is routed to DOMAIN.
+    - `Appended:` None.
+  - `File:` `review/pool-b/reports/security-report.md`.
+    - `Action:` edited.
+    - `Deleted:` Prior SEC-05 coverage summary limited to controlled `code` inputs and v1 review metadata.
+    - `Replaced With:` Existing SS-001–SS-007 preserved, new SS-008 for controlled inert SQL/metacharacter input in client-controlled `user_id`, updated SEC-05 coverage/gaps and cross-category consistency, and `security-report-v2` with `PENDING` review status. SS-008 prescribes no HTTP status, error schema, or message.
+    - `Appended:` None.
+  - `File:` `review/pool-b/orchestration-status.md`.
+    - `Action:` edited.
+    - `Deleted:` Prior STATE APPLICABLE/PENDING disposition, v1 category versions, and the requirement that all four categories receive approval.
+    - `Replaced With:` `AWAITING_HUMAN_REVIEW` revision-complete status; v2 provenance; STATE `NOT_APPLICABLE` with no review required; DOMAIN ownership of state-dependent eligibility coverage; SECURITY SS-008 summary; and a generation gate requiring revised CONTRACT, DOMAIN, and SECURITY approval only.
+    - `Appended:` None.
+- **Verdict:** VALID
+- **Reasoning:** The revision version of these documents look good and ready to be used in next step.
+- **Student Fixes:** None
+
+### Artifact 19
+
+- **User:** Vương Ngũ Tín Thành
+- **Date and Time:** 2026-08-22 15:40:33 GMT+7
+- **Model Used:** GPT-5.6 Sol
+- **Skill Used:**
+  - `api-test-generator`
+  - `contract-test-generator`
+  - `domain-test-generator`
+  - `state-transition-test-generator`
+  - `security-test-generator`
+  - `ai-audit`
+- **Prompt:**
+
+````markdown
+Continue to phase 2
+````
+
+- **AI Output:**
+
+````markdown
+Your instruction explicitly approves the current revised Phase-1 reports for generation. I’m entering Phase 2 with CONTRACT v2, DOMAIN v2, SECURITY v2, and the STATE `NOT_APPLICABLE` record; specialists will generate category-owned JSON fragments, then I’ll validate coverage, deduplicate within categories, and write the requested CSV only if the suite passes.
+
+Phase 2 is now recorded as in progress. The state worker will materialize the required empty `[]` fragment from the preserved `NOT_APPLICABLE` basis; the other specialists will generate only from their reviewed rule, partition/boundary, and security-scenario models.
+
+Generation produced 81 applicable candidates before parent validation: 15 CONTRACT, 58 DOMAIN, 0 STATE, and 8 SECURITY. The count exceeds the 35-case target because the reviewed DOMAIN model contains 37 partitions plus 21 atomic boundary representatives; I’m now checking whether any same-category cases are semantically duplicate while preserving every reviewed ID and boundary value.
+
+One genuine same-category duplicate group was found: seven DOMAIN entries used the identical baseline preconditions, request, and expected result while separately labeling DP-001, DP-005, DP-008, DP-012, DP-019, DP-029, and DP-032. I’m consolidating them into one retained baseline case with all seven reviewed IDs and specification bases preserved, removing six duplicates without losing coverage.
+
+After consolidation, the validated suite contains 75 distinct candidates: 15 CONTRACT, 52 DOMAIN, 0 STATE, and 8 SECURITY. All CR-001–CR-012, DP-001–DP-037, DB-001–DB-007, and SS-001–SS-008 remain covered, with no duplicate provisional IDs or remaining same-category semantic duplicates. I’m assigning final sequential IDs and writing the CSV now.
+
+Phase 2 is complete.
+
+Created [b-discount-coupons.csv](D:\GitHub\SoftwareTesting-HW06\test-cases\b-discount-coupons.csv) with 75 validated candidates:
+
+- CONTRACT: 15
+- DOMAIN: 52
+- SECURITY: 8
+- STATE: 0 (`NOT_APPLICABLE`)
+
+All reviewed CR, DP, DB, and SS identifiers are covered. Six duplicate DOMAIN baseline cases were consolidated without losing traceability. IDs are unique and sequential from `API-001` to `API-075`.
+
+Updated [orchestration-status.md](D:\GitHub\SoftwareTesting-HW06\review\pool-b\orchestration-status.md) with coverage, deduplication, assumptions, and validation results. No tests were executed.
+````
+
+- **File Modifications:**
+  - `File:` `review/pool-b/orchestration-status.md`.
+    - `Action:` edited.
+    - `Deleted:` The Phase-1 `AWAITING_HUMAN_REVIEW` workflow state and the pre-generation gate wording.
+    - `Replaced With:` Phase-2 authorization provenance followed by final `COMPLETE` status, 75-case category counts, reviewed trace-ID coverage, STATE empty-output handling, six-case DOMAIN deduplication summary, validation results, preserved specification gaps, and confirmation that no tests were executed.
+    - `Appended:` None.
+  - `File:` `review/pool-b/candidates/contract-tests.json`.
+    - `Action:` created.
+    - `Deleted:` None.
+    - `Replaced With:` None.
+    - `Appended:` JSON array containing 15 CONTRACT candidates covering CR-001–CR-012 with exact specification bases and explicit assumptions for undocumented behavior.
+  - `File:` `review/pool-b/candidates/domain-tests.json`.
+    - `Action:` created, then edited by same-category semantic deduplication.
+    - `Deleted:` Six duplicate baseline records with provisional IDs `DOMAIN-005`, `DOMAIN-008`, `DOMAIN-012`, `DOMAIN-019`, `DOMAIN-029`, and `DOMAIN-032` after confirming identical preconditions, request input, and expected result.
+    - `Replaced With:` A 52-record DOMAIN JSON array. Retained `DOMAIN-001` consolidates DP-001, DP-005, DP-008, DP-012, DP-019, DP-029, and DP-032 and preserves every specification basis and provisional ID; all DP-001–DP-037 and DB-001–DB-007 remain covered.
+    - `Appended:` None.
+  - `File:` `review/pool-b/candidates/state-tests.json`.
+    - `Action:` created.
+    - `Deleted:` None.
+    - `Replaced With:` None.
+    - `Appended:` Exact empty JSON array `[]`, preserving the reviewed `State Applicability: NOT_APPLICABLE` result without placeholder tests.
+  - `File:` `review/pool-b/candidates/security-tests.json`.
+    - `Action:` created.
+    - `Deleted:` None.
+    - `Replaced With:` None.
+    - `Appended:` JSON array containing 8 SECURITY candidates covering SS-001–SS-008, SEC-02, and SEC-05, including controlled inert client `user_id` metacharacter coverage without an invented HTTP status oracle.
+  - `File:` `test-cases/b-discount-coupons.csv`.
+    - `Action:` created.
+    - `Deleted:` None.
+    - `Replaced With:` None.
+    - `Appended:` Final nine-column CSV with 75 distinct candidates, sequential IDs `API-001`–`API-075`, category counts CONTRACT 15 / DOMAIN 52 / SECURITY 8 / STATE 0, exact traceability, and preserved provisional specialist IDs in notes.
+- **Verdict:** INCOMPLETE
+- **Reasoning:**
+  - The generator produced enough test cases and kept STATE empty.
+  - Some DOMAIN boundary labels are reversed.
+  - API-049 uses an unsupported floating-point precision value.
+  - Some test preconditions do not match their request data.
+  - The deduplication check says no duplicates remain, but some DOMAIN cases still overlap.
+- **Student Fixes:**
+  - Asked the agent to correct the boundary labels.
+  - Asked the agent to remove the floating-point artifact from API-049.
+  - Asked the agent to fix inconsistent BIGBUY, EXPIRED, and nonexistent-coupon preconditions.
+  - Asked the agent to rerun same-category deduplication and preserve all traceability.
+  - Asked the agent to regenerate the CSV, IDs, counts, and orchestration status consistently.
+
+### Artifact 20
+
+- **User:** Vương Ngũ Tín Thành
+- **Date and Time:** 2026-08-22 15:49:41 GMT+7
+- **Model Used:** GPT-5.6 Sol
+- **Skill Used:**
+  - `api-test-generator`
+  - `domain-test-generator`
+  - `ai-audit`
+- **Prompt:**
+
+````markdown
+Revise Pool B Phase-2 output based on human review.
+
+- Fix DOMAIN BVA labels for minimum thresholds: for `total_amount >= min_order_amount`, just-below is outside, boundary is inside, and just-above is inside.
+- Fix API-049 so it does not assert the floating-point artifact `30000.100000000002`. Use the documented mathematical result without inventing precision/rounding behavior.
+- Fix inconsistent DOMAIN preconditions:
+  - BIGBUY cases must establish BIGBUY eligibility.
+  - EXPIRED expiry testing must arrange the EXPIRED coupon active and satisfy all non-expiry conditions.
+  - The nonexistent-code case must explicitly establish that the submitted code does not exist.
+- Re-run same-category semantic deduplication. In particular review the overlaps represented by current API-016/API-062, API-022/API-051, API-031/API-048, and API-033/API-054. Preserve all DP/DB traceability on whichever case is retained.
+- Regenerate the final CSV with sequential IDs and update candidate files, counts, deduplication notes, and orchestration status consistently.
+
+Do not remove cross-category coverage and do not execute the API tests yet.
+````
+
+- **AI Output:**
+
+````markdown
+I’m using the API/domain test-generation workflow for this reviewed Phase-2 revision. A DOMAIN specialist will correct the candidate content and preconditions from the approved model; I’ll then perform parent-owned semantic deduplication, preserve every DP/DB trace ID, regenerate sequential final IDs, and revalidate the full cross-category suite without executing it.
+
+The reviewed overlaps map to DOMAIN provisional cases as follows: API-016/API-062, API-022/API-051, API-031/API-048, and API-033/API-054. I’m handing the existing DOMAIN fragment to the specialist for factual corrections only; the parent will decide consolidation afterward so content repair and deduplication remain separate.
+
+The specialist corrected 52 DOMAIN records without deduplicating: threshold labels now follow the inclusive predicate, the 300001 oracle is `30000.1`/`270000.9`, and BIGBUY, EXPIRED, and nonexistent-code setups are explicit. I’m now comparing the four reviewed overlap pairs semantically, not merely by exact string equality.
+
+The semantic review confirms exactly four removable overlaps. Other repeated requests have different expiry or usage-count preconditions and therefore remain distinct. I’m retaining DOMAIN-001, DOMAIN-009, DOMAIN-020, and DOMAIN-022, merging the corresponding DB bases and provisional IDs from DOMAIN-053, DOMAIN-042, DOMAIN-039, and DOMAIN-045.
+
+Validation now passes with 71 distinct cases: 15 CONTRACT, 48 DOMAIN, and 8 SECURITY. All DP/DB coverage remains present, the four reviewed overlap pairs are consolidated, no same-category semantic duplicates remain, and the corrected setup/oracle checks pass. I’m regenerating the final CSV and synchronizing the orchestration record.
+
+Pool B Phase-2 output is revised and validated.
+
+- [Final CSV](D:\GitHub\SoftwareTesting-HW06\test-cases\b-discount-coupons.csv): 71 sequential cases, `API-001`–`API-071`
+- CONTRACT: 15
+- DOMAIN: 48
+- SECURITY: 8
+- STATE: 0 (`NOT_APPLICABLE`)
+
+Corrections include proper inclusive-threshold BVA labels, explicit BIGBUY/EXPIRED/nonexistent-code setups, and mathematical results `30000.1`/`270000.9`. After deduplication, the former API-049 is now API-048.
+
+Four additional DOMAIN overlaps were consolidated while preserving every DP/DB basis. All CR, DP, DB, and SS coverage remains intact, with zero remaining semantic duplicates. [Orchestration status](D:\GitHub\SoftwareTesting-HW06\review\pool-b\orchestration-status.md) and candidate files were updated consistently.
+
+No API tests were executed.
+````
+
+- **File Modifications:**
+  - `File:` `review/pool-b/candidates/domain-tests.json`.
+    - `Action:` edited and deleted content.
+    - `Deleted:` Four semantically overlapping DOMAIN records: `DOMAIN-053`, `DOMAIN-042`, `DOMAIN-039`, and `DOMAIN-045`; the prior incorrect minimum-threshold BVA labels; the floating-point artifact `30000.100000000002`; and inconsistent BIGBUY, EXPIRED, and nonexistent-code preconditions.
+    - `Replaced With:` A validated 48-record DOMAIN fragment. Minimum-threshold cases label just-below as outside and boundary/just-above as inside; the SAVE10/300001 oracle uses mathematical results `30000.1` and `270000.9` without a precision/rounding assertion; BIGBUY cases establish BIGBUY eligibility; EXPIRED isolates expiry while all other conditions qualify; and the nonexistent-code case explicitly establishes database absence. DOMAIN-001, DOMAIN-009, DOMAIN-020, and DOMAIN-022 retain the merged DB bases, provisional IDs, and boundary objectives from the four removed overlaps.
+    - `Appended:` None.
+  - `File:` `test-cases/b-discount-coupons.csv`.
+    - `Action:` replaced content.
+    - `Deleted:` The prior 75-row CSV with DOMAIN count 52, IDs `API-001`–`API-075`, the reviewed duplicate pairs, incorrect BVA labels/setup wording, and the floating-point artifact.
+    - `Replaced With:` A 71-row nine-column CSV with sequential IDs `API-001`–`API-071`, category counts CONTRACT 15 / DOMAIN 48 / SECURITY 8 / STATE 0, corrected DOMAIN cases, zero same-category semantic duplicates, and complete CR/DP/DB/SS traceability.
+    - `Appended:` None.
+  - `File:` `review/pool-b/orchestration-status.md`.
+    - `Action:` edited.
+    - `Deleted:` The prior 75-case / DOMAIN 52 completion summary and six-duplicate-only deduplication account.
+    - `Replaced With:` Final 71-case / DOMAIN 48 completion status, human-review correction summary, ten-total DOMAIN deduplication record, retained traceability mappings, validation results through `API-071`, and confirmation that no API tests were executed.
+    - `Appended:` None.
+- **Verdict:** INCOMPLETE
+- **Reasoning:**
+  - The requested BVA labels, API-049 precision, and fixture preconditions were fixed correctly.
+  - The four previously reported duplicate pairs were merged correctly.
+  - Some DOMAIN duplicates still remain.
+  - API-032 and API-047 both test `SAVE10` with `total_amount=299999`.
+  - API-025 and API-054 both test the coupon exactly at the expiry boundary.
+  - Therefore, `Remaining semantic duplicate groups: 0` is not yet correct.
+- **Student Fixes:**
+  - Asked the agent to merge the remaining same-category duplicates.
+  - Asked the agent to preserve both DP and DB traceability in the retained cases.
+  - Asked the agent to regenerate sequential API IDs, counts, CSV, and orchestration status.
+
+### Artifact 21
+
+- **User:** Vương Ngũ Tín Thành
+- **Date and Time:** 2026-08-22 15:59:49 GMT+7
+- **Model Used:** GPT-5.6 Sol
+- **Skill Used:**
+  - `api-test-generator`
+  - `domain-test-generator`
+  - `ai-audit`
+- **Prompt:**
+
+````markdown
+Revise the Pool B Phase-2 output again.
+
+Same-category semantic deduplication is still incomplete.
+
+- Merge the case for SAVE10 `total_amount=299999` with the DB-001 just-below case. Preserve both DP-021 and DB-001 traceability.
+- Merge the coupon-at-expiry-date partition case with the DB-004 equal-to-expiry boundary case. Preserve both DP-013 and DB-004 traceability.
+- Recheck the remaining DOMAIN cases for the same kind of overlap.
+- Regenerate sequential API IDs, category/total counts, final CSV, and orchestration status consistently.
+- Do not remove cross-category coverage or execute tests.
+````
+
+- **AI Output:**
+
+````markdown
+I’m using the API/domain workflow for this second Phase-2 deduplication review. I’ll compare DOMAIN cases by effective setup, request, and oracle—including equivalent wording—merge only genuine same-category overlaps, preserve every DP/DB basis on retained records, and then regenerate and validate the full CSV without executing tests.
+
+The two requested merges are confirmed. A broader equivalence scan also flags another likely overlap: DP-031’s SAVE10 prior-use count `2` and DB-006’s above-limit count `2`. I’m having the DOMAIN specialist independently audit all remaining cases for this exact partition-versus-boundary pattern before the parent performs the final merges.
+
+The independent audit found four remaining duplicates total: the two you named plus DP-030/DB-006 at-limit and DP-031/DB-006 above-limit. Cases with different concrete expiry timing, coupon minimums, or usage maxima/counts are materially distinct and will remain. I’m consolidating those four pairs now.
+
+Post-merge validation yields 67 distinct cases: 15 CONTRACT, 44 DOMAIN, and 8 SECURITY. The four removed provisional records are absent, each retained case contains both partition and boundary trace IDs, and CR/DP/DB/SS coverage is complete with no exact semantic duplicate groups.
+
+Pool B Phase-2 deduplication is complete.
+
+- [Final CSV](D:\GitHub\SoftwareTesting-HW06\test-cases\b-discount-coupons.csv): 67 sequential cases, `API-001`–`API-067`
+- CONTRACT: 15
+- DOMAIN: 44
+- SECURITY: 8
+- STATE: 0
+
+Merged DOMAIN coverage now includes:
+
+- API-032: `DP-021` + `DB-001` just-below
+- API-025: `DP-013` + `DB-004` equal-to-expiry
+- API-040: `DP-030` + `DB-006` at-limit
+- API-041: `DP-031` + `DB-006` above-limit
+
+All CR/DP/DB/SS traceability remains complete. No remaining same-category semantic duplicates were identified, and no tests were executed. [Orchestration status](D:\GitHub\SoftwareTesting-HW06\review\pool-b\orchestration-status.md) was updated consistently.
+````
+
+- **File Modifications:**
+  - `File:` `review/pool-b/candidates/domain-tests.json`.
+    - `Action:` edited and deleted content.
+    - `Deleted:` Four remaining semantically overlapping DOMAIN records: `DOMAIN-038` (DB-001 just-below), `DOMAIN-048` (DB-004 equal-to-expiry), `DOMAIN-054` (DB-006 at-limit), and `DOMAIN-055` (DB-006 above-limit).
+    - `Replaced With:` A validated 44-record DOMAIN fragment. DOMAIN-021 retains `DP-021 + DB-001`; DOMAIN-013 retains `DP-013 + DB-004`; DOMAIN-030 retains `DP-030 + DB-006`; and DOMAIN-031 retains `DP-031 + DB-006`. Each retained case includes the removed record's boundary objective, exact specification basis, and provisional ID. Consolidated objective wording was normalized without changing behavior.
+    - `Appended:` None.
+  - `File:` `test-cases/b-discount-coupons.csv`.
+    - `Action:` replaced content.
+    - `Deleted:` The prior 71-row CSV with DOMAIN count 48 and sequential IDs through `API-071`, including the four reviewed overlap records.
+    - `Replaced With:` A 67-row nine-column CSV with sequential IDs `API-001`–`API-067`, category counts CONTRACT 15 / DOMAIN 44 / SECURITY 8 / STATE 0, four newly consolidated partition/boundary pairs, no exact same-category semantic duplicate groups, and complete CR/DP/DB/SS traceability.
+    - `Appended:` None.
+  - `File:` `review/pool-b/orchestration-status.md`.
+    - `Action:` edited.
+    - `Deleted:` The prior 71-case / DOMAIN 48 result and ten-total DOMAIN deduplication summary.
+    - `Replaced With:` Final 67-case / DOMAIN 44 completion status, fourteen-total DOMAIN deduplication record, explicit mappings for the second review pass, validation through `API-067`, and confirmation that cross-category coverage was preserved and no tests were executed.
+    - `Appended:` None.
+- **Verdict:** VALID
+- **Reasoning:**
+  - The remaining DOMAIN duplicate cases were merged correctly.
+  - The agent also found and merged two extra usage-limit overlaps.
+  - Test IDs and category counts were regenerated consistently.
+- **Student Fixes:** None

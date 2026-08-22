@@ -12,7 +12,7 @@
 | SUT repository | <https://github.com/ttbhanh/eshop-sut> |
 | Submission repository | <https://github.com/vntthanh/SoftwareTesting-HW06> |
 | Report date | 2026-08-18 |
-| Last updated | 2026-08-21 |
+| Last updated | 2026-08-22 |
 
 ## 2. Selected APIs
 

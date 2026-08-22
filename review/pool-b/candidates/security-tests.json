@@ -1,0 +1,90 @@
+[
+  {
+    "Test ID": "SECURITY-P001",
+    "Endpoint": "POST /api/apply-coupon",
+    "Category": "SECURITY",
+    "Test Objective": "Verify that a valid JWT permits an otherwise qualifying coupon request to proceed to the documented FR-09 calculation behavior (SS-001; SEC-02).",
+    "Preconditions": "SAVE10 is active and unexpired, total_amount 500000 meets its minimum, user_id 1 has remaining usage, and a non-production test JWT valid under the SUT's configured validation rules is available.",
+    "Request Input": "Header: Authorization: Bearer <valid test JWT>. JSON body: {\"code\":\"SAVE10\",\"total_amount\":500000,\"user_id\":1}.",
+    "Expected Result": "Authentication permits evaluation of the FR-09 eligibility conditions; with all stated preconditions satisfied, the JSON result contains discount_amount 50000 and final_amount 450000.",
+    "Specification Basis": "SS-001; SEC-02, system requirements line 279: security-sensitive APIs require a valid JWT; FR-09 C4, line 119: the user must have a valid JWT; API specification §5.1, lines 154-162: POST /api/apply-coupon, documented JSON request and discount response; FR-09 lines 124-126: percent and final-amount formulas.",
+    "Assumptions / Notes": "The test environment establishes JWT validity. The JWT identity is represented by body user_id 1 only as fixture setup; no JWT-subject/body-user_id binding rule is documented. Status code, response MIME string, and additional response properties are unspecified."
+  },
+  {
+    "Test ID": "SECURITY-P002",
+    "Endpoint": "POST /api/apply-coupon",
+    "Category": "SECURITY",
+    "Test Objective": "Verify that a coupon calculation cannot succeed when the required Authorization header is absent (SS-002; SEC-02).",
+    "Preconditions": "SAVE10 and user_id 1 otherwise satisfy every FR-09 coupon eligibility condition.",
+    "Request Input": "No Authorization header. JSON body: {\"code\":\"SAVE10\",\"total_amount\":500000,\"user_id\":1}.",
+    "Expected Result": "The operation does not apply the coupon and does not return a successful discounted calculation because no valid JWT is supplied.",
+    "Specification Basis": "SS-002; SEC-02, system requirements line 279: security-sensitive APIs require a valid JWT; FR-09 C4, line 119: the user must have a valid JWT.",
+    "Assumptions / Notes": "HTTP status, response body/schema, exact message, challenge headers, and rejection precedence are not documented and are not asserted."
+  },
+  {
+    "Test ID": "SECURITY-P003",
+    "Endpoint": "POST /api/apply-coupon",
+    "Category": "SECURITY",
+    "Test Objective": "Verify that a malformed bearer-token placeholder cannot satisfy the valid-JWT requirement (SS-003; SEC-02).",
+    "Preconditions": "SAVE10 and user_id 1 otherwise satisfy every FR-09 coupon eligibility condition.",
+    "Request Input": "Header: Authorization: Bearer not-a-jwt. JSON body: {\"code\":\"SAVE10\",\"total_amount\":500000,\"user_id\":1}.",
+    "Expected Result": "The operation does not apply the coupon and does not return a successful discounted calculation because the supplied credential is not a valid JWT.",
+    "Specification Basis": "SS-003; SEC-02, system requirements line 279: security-sensitive APIs require a valid JWT; FR-09 C4, line 119: the user must have a valid JWT.",
+    "Assumptions / Notes": "Exact bearer grammar and malformed-token classification are unspecified. HTTP status, response body/schema, exact message, and rejection precedence are not asserted."
+  },
+  {
+    "Test ID": "SECURITY-P004",
+    "Endpoint": "POST /api/apply-coupon",
+    "Category": "SECURITY",
+    "Test Objective": "Verify that a test JWT with a signature invalid for the SUT cannot authorize coupon calculation (SS-004; SEC-02).",
+    "Preconditions": "SAVE10 and user_id 1 otherwise satisfy every FR-09 coupon eligibility condition; an isolated non-production JWT whose signature is known to be invalid for the SUT is available.",
+    "Request Input": "Header: Authorization: Bearer <test JWT with invalid signature>. JSON body: {\"code\":\"SAVE10\",\"total_amount\":500000,\"user_id\":1}.",
+    "Expected Result": "The operation does not apply the coupon and does not return a successful discounted calculation because the token is not a valid JWT credential.",
+    "Specification Basis": "SS-004; SEC-02, system requirements line 279: security-sensitive APIs require a valid JWT; FR-09 C4, line 119: the user must have a valid JWT.",
+    "Assumptions / Notes": "The invalid-signature condition is established safely without live credentials. Signing algorithm, issuer, audience, claim validation, HTTP status, response body, and exact message are unspecified and are not asserted."
+  },
+  {
+    "Test ID": "SECURITY-P005",
+    "Endpoint": "POST /api/apply-coupon",
+    "Category": "SECURITY",
+    "Test Objective": "Verify that a test JWT established as expired under the SUT's accepted time semantics cannot authorize coupon calculation (SS-005; SEC-02).",
+    "Preconditions": "SAVE10 and user_id 1 otherwise satisfy every FR-09 coupon eligibility condition; an isolated non-production JWT that the test environment establishes as expired is available.",
+    "Request Input": "Header: Authorization: Bearer <expired test JWT>. JSON body: {\"code\":\"SAVE10\",\"total_amount\":500000,\"user_id\":1}.",
+    "Expected Result": "The operation does not apply the coupon and does not return a successful discounted calculation because the expired JWT is not valid.",
+    "Specification Basis": "SS-005; SEC-02, system requirements line 279: security-sensitive APIs require a valid JWT; FR-09 C4, line 119: the user must have a valid JWT.",
+    "Assumptions / Notes": "The test environment establishes that the SUT recognizes the token as expired. Required claims, clock skew, timezone, expiry mechanics, HTTP status, response body, and exact message are unspecified and are not asserted."
+  },
+  {
+    "Test ID": "SECURITY-P006",
+    "Endpoint": "POST /api/apply-coupon",
+    "Category": "SECURITY",
+    "Test Objective": "Verify that a controlled inert tautology-like coupon code remains literal data and cannot change coupon lookup semantics (SS-006; SEC-05).",
+    "Preconditions": "A valid non-production test JWT is present; the coupon database contains only isolated controlled fixtures; no coupon has the literal code supplied; user_id 1 has controlled usage data.",
+    "Request Input": "Header: Authorization: Bearer <valid test JWT>. JSON body: {\"code\":\"' OR '1'='1\",\"total_amount\":500000,\"user_id\":1}.",
+    "Expected Result": "The complete code value is handled as data: it does not alter query structure, match an unrelated coupon, expose database contents or query diagnostics, or produce a discounted calculation for another coupon. It may be rejected or treated as a nonexistent literal coupon code.",
+    "Specification Basis": "SS-006; SEC-05, system requirements line 282: database queries must use parameterized queries rather than string concatenation; FR-09 C1, line 116: coupon qualification requires an existing active code.",
+    "Assumptions / Notes": "The input is controlled and inert and is not sent to a live service. No HTTP status, exact message, error schema, or diagnostic-redaction wording is documented or asserted. A black-box pass cannot conclusively prove parameterized-query use; implementation review or instrumentation is needed for proof."
+  },
+  {
+    "Test ID": "SECURITY-P007",
+    "Endpoint": "POST /api/apply-coupon",
+    "Category": "SECURITY",
+    "Test Objective": "Verify that a controlled inert delimiter/comment-like coupon code remains literal data and cannot execute an additional database statement (SS-007; SEC-05).",
+    "Preconditions": "A valid non-production test JWT is present; coupon and usage records are isolated controlled fixtures with baseline snapshots available.",
+    "Request Input": "Header: Authorization: Bearer <valid test JWT>. JSON body: {\"code\":\"SAVE10'; SELECT 1; --\",\"total_amount\":500000,\"user_id\":1}.",
+    "Expected Result": "The entire code value remains data: it does not execute an additional statement, alter coupon or usage state, expose database contents or query diagnostics, or match SAVE10 by truncating the literal. It is handled only under normal literal coupon-code semantics.",
+    "Specification Basis": "SS-007; SEC-05, system requirements line 282: database queries must use parameterized queries rather than string concatenation; FR-09 C1 and C5, lines 116 and 120: eligibility uses coupon and per-user usage lookups.",
+    "Assumptions / Notes": "The input is controlled and inert and is not sent to a live service. Database engine and driver are unspecified. No endpoint-driven mutation is documented; fixture comparison checks only for unexpected effects. HTTP status, exact response, and diagnostic wording are unspecified. A black-box pass cannot prove parameterization."
+  },
+  {
+    "Test ID": "SECURITY-P008",
+    "Endpoint": "POST /api/apply-coupon",
+    "Category": "SECURITY",
+    "Test Objective": "Verify that a controlled inert SQL/metacharacter string in client-controlled user_id remains literal data and cannot broaden or bypass the per-user usage lookup (SS-008; SEC-05).",
+    "Preconditions": "A valid non-production test JWT is present; coupon and per-user usage records are isolated controlled fixtures; no user is identified by the supplied literal user_id value; baseline database snapshots are available.",
+    "Request Input": "Header: Authorization: Bearer <valid test JWT>. JSON body: {\"code\":\"SAVE10\",\"total_amount\":500000,\"user_id\":\"1' OR '1'='1\"}.",
+    "Expected Result": "The complete user_id value remains data and does not alter query semantics, broaden or bypass per-user usage scope, select another user's usage record, change database state, or obtain a discounted calculation through an injection effect.",
+    "Specification Basis": "SS-008; SEC-05, system requirements line 282: database queries must use parameterized queries rather than string concatenation; FR-09 C5, line 120: prior use by the user must be below max_uses_per_user.",
+    "Assumptions / Notes": "The documented example represents user_id as a JSON number, but type validation and coercion are unspecified; this string is a controlled inert security input, not a claimed valid domain value. No HTTP status, error schema, exact message, or response form is prescribed. JWT-subject/body-user_id binding is unspecified. A black-box pass cannot conclusively prove parameterized-query use."
+  }
+]
