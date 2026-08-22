@@ -1066,3 +1066,153 @@ Static, schema, and Newman validation all pass.
 - **Verdict:** VALID
 - **Reasoning:** The agent worked good enough for simple tasks. With user expectation provided, it has read and fixed all related files, ensuring consistency.
 - **Student Fixes:** None
+
+### Artifact 12
+
+- **User:** Vương Ngũ Tín Thành
+- **Date and Time:** 2026-08-22 09:55:29 GMT+7
+- **Model Used:** GPT-5.6 Sol
+- **Skill Used:**
+  - `postman-test-generator`
+  - `ai-audit`
+- **Prompt:**
+
+````markdown
+Revise Pool A reset-password fixtures to use deterministic SQLite setup instead of `/api/forgot-password`.
+
+SUT repo is available at: `D:\GitHub\eshop-sut`
+
+Requirements:
+
+- Create a fixture script that opens the SUT SQLite DB directly; do not modify SUT source code and do not import its `database.js`.
+- Start/init the SUT first, then seed fixtures.
+- Prefer one dedicated test account per independent reset-password case.
+- Seed exact deterministic OTPs needed by each case.
+- Preserve the intended test dimension:
+  - leading-zero OTP → seed exact text OTP such as `012345`;
+  - numeric-type case → DB stores `"123456"` but request sends JSON number `123456`;
+  - cross-account case → two accounts with different OTPs;
+  - replay case → seed fresh OTP, let first reset consume it, then retry same OTP.
+- Remove obsolete `/api/forgot-password` fixture calls and related runtime variables/guards where no longer needed.
+- Keep genuinely unsupported cases blocked/manual, especially expiry, rate-limit, and API-077 concurrency if the SUT cannot objectively support their preconditions.
+- Update collection generator, CSV/preconditions, reports/docs only where needed.
+- Regenerate and validate:
+  - static checks,
+  - Postman v2.1 schema,
+  - Newman compatibility tests.
+- Verify no baseline reset-password test still depends on `/api/forgot-password`.
+````
+
+- **AI Output:**
+
+````markdown
+1. Files changed
+
+- `Main_Report.md`
+- `test-cases/a-forgot-password.csv`
+- `postman/pool_a_fixtures.py` (new)
+- `postman/seed_pool_a_fixtures.py` (new)
+- `postman/generate_pool_a.py`
+- `postman/pool-a-forgot-password.postman_collection.json`
+- `postman/pool-a-conversion-report.md`
+- `postman/pool-a-validation-results.json`
+- `AI_Audit.md`
+
+2. Fixture strategy
+
+Start the SUT first because its startup drops/recreates `users`. The idempotent Python seeder then opens `backend/database.sqlite` directly, validates the real `users` schema, replaces only owned `poola-api-%@example.test` rows, inserts dedicated per-case accounts, and verifies every `reset_token` is SQLite TEXT. It does not import or modify SUT code.
+
+API-013 uses TEXT `012345`; API-009/API-044 store TEXT `"123456"` but send JSON number `123456`; cross-account cases use distinct A/B accounts and OTPs; replay cases seed fresh OTPs, consume them through a successful setup reset, then retry the same OTP.
+
+3. Cases that became executable
+
+The 73 fixture-dependent baseline cases are now deterministically executable: API-001, API-004–API-024, API-026–API-027, API-030–API-064, API-066–API-071, API-073–API-074, API-076, and API-078–API-082. API-002, API-003, API-028, and API-029 already required no database fixture.
+
+4. Cases still blocked/manual and why
+
+- API-025, API-065, API-072: blocked; the SUT has no OTP expiry column, state, or check.
+- API-075: blocked; the SUT has no rate limiter/abuse-control threshold.
+- API-077: manual/blocked in Postman/Newman; sequential collection execution cannot create a true concurrent barrier.
+- API-030 remains exploratory with no conformance oracle. API-068 requires authorized storage inspection. API-046, API-047, API-050, API-052, API-055, API-057, API-063, API-067, API-069–API-071, API-073–API-074, API-076, API-078, and API-081 retain partial/manual side-effect, persistence, or external oracles while their HTTP requests are executable.
+
+5. Exact SUT → fixture seeding → Newman commands
+
+```powershell
+# PowerShell 1
+Set-Location D:\GitHub\eshop-sut\backend
+npm install
+node server.js
+
+# PowerShell 2, after the SUT reports it is running
+Set-Location D:\GitHub\SoftwareTesting-HW06
+C:\Users\xing0\AppData\Local\Python\bin\python.exe postman\seed_pool_a_fixtures.py --sut-dir D:\GitHub\eshop-sut
+newman run postman\pool-a-forgot-password.postman_collection.json --env-var baseUrl=http://127.0.0.1:3000
+```
+
+6. Validation results
+
+- Live SUT initialization and fixture seed: PASS; 78 deterministic accounts inserted and re-read with TEXT OTP storage.
+- Static checks: PASS; 82 logical IDs, 88 requests, zero executable `/api/forgot-password` dependencies.
+- Full Postman Collection v2.1 schema: PASS.
+- Newman 6.2.2 compatibility: PASS; 8 representative runs, 13 reset requests, zero forgot-password requests.
+- `git diff --check`: PASS (line-ending notices only).
+- Collection SHA-256: `C596D11862793ADAE08223DC94F903EF7E92D7D1DF85F9B9DB6625C9F6934B2F`.
+- Full-suite SUT conformance execution was not performed.
+````
+
+- **File Modifications:**
+  - `File:` `Main_Report.md`.
+    - `Action:` edited.
+    - `Deleted:` Obsolete Pool A CSV checksum and lack of deterministic fixture execution documentation.
+    - `Replaced With:` Current CSV checksum and direct-SQLite fixture/unsupported-case policy.
+    - `Appended:` None.
+  - `File:` `test-cases/a-forgot-password.csv`.
+    - `Action:` replaced content mechanically while preserving 82 reviewed IDs and nine fields.
+    - `Deleted:` Shared accounts, forgot-password setup language, runtime OTP placeholders, and obsolete fixture assumptions for executable cases.
+    - `Replaced With:` Dedicated deterministic account emails, exact OTP values, direct-SQLite preconditions, distinct cross-account fixtures, and replay setup details.
+    - `Appended:` None.
+  - `File:` `postman/pool_a_fixtures.py`.
+    - `Action:` created.
+    - `Deleted:` None.
+    - `Replaced With:` None.
+    - `Appended:` Shared deterministic fixture manifest, account mapping, OTP mapping, cross-account definitions, and blocked/replay classifications.
+  - `File:` `postman/seed_pool_a_fixtures.py`.
+    - `Action:` created.
+    - `Deleted:` None.
+    - `Replaced With:` None.
+    - `Appended:` Idempotent direct-SQLite seeder with running-SUT check, schema validation, scoped replacement, exact TEXT OTP verification, and absence fixture handling.
+  - `File:` `postman/generate_pool_a.py`.
+    - `Action:` replaced content.
+    - `Deleted:` Forgot-password prerequest calls, generated OTP extraction/regeneration, runtime readiness variables/guards, and old compatibility mocks.
+    - `Replaced With:` Literal CSV-aligned deterministic fixture inputs, replay-only setup resets, explicit unsupported-case blocks, executable-dependency static checks, full-schema validation, and deterministic Newman compatibility runs.
+    - `Appended:` None.
+  - `File:` `postman/pool-a-forgot-password.postman_collection.json`.
+    - `Action:` replaced content.
+    - `Deleted:` Runtime forgot-password setup scripts and OTP/readiness collection variables.
+    - `Replaced With:` Regenerated 82-ID/88-request collection using deterministic accounts/OTPs, replay setup resets, and explicit blocked/manual gates.
+    - `Appended:` None.
+  - `File:` `postman/pool-a-conversion-report.md`.
+    - `Action:` replaced content.
+    - `Deleted:` Obsolete forgot-password fixture strategy and validation evidence.
+    - `Replaced With:` Direct-SQLite strategy, per-case classifications, exact execution commands, unsupported-case reasons, and current validation results.
+    - `Appended:` None.
+  - `File:` `postman/pool-a-validation-results.json`.
+    - `Action:` replaced content.
+    - `Deleted:` Validation state for the superseded collection.
+    - `Replaced With:` PASS evidence for 82 IDs, 88 requests, full v2.1 schema, Newman 6.2.2, and zero forgot-password requests.
+    - `Appended:` None.
+  - `File:` `AI_Audit.md`.
+    - `Action:` appended.
+    - `Deleted:` None.
+    - `Replaced With:` None.
+    - `Appended:` Artifact 12 containing the verbatim interaction, file modifications, and review TODOs.
+- **Verdict:** INCOMPLETE
+- **Reasoning:**
+  - BLOCKED cases currently throw errors, which can make Newman report them as failures.
+  - Some CSV descriptions still mention old `/api/forgot-password` or outdated OTP values.
+  - The `X-Student-Id` console log for screenshot evidence was removed.
+  - Static validation is weaker than before.
+- **Student Fixes:**
+  - Replace `throw new Error(...)` for BLOCKED cases with `pm.execution.skipRequest()`.
+  - Restore clear `X-Student-Id` console logging for execution evidence.
+  - Guide the agent to update stale CSV preconditions and expected results to match the new SQLite fixture strategy.
