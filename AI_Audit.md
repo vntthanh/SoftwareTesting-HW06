@@ -2404,3 +2404,139 @@ Artifacts 25-25 successfully appended to `D:\GitHub\SoftwareTesting-HW06\AI_Audi
 - **Verdict:** VALID
 - **Reasoning:** The agent correctly fixed all found defects.
 - **Student Fixes:** None
+
+### Artifact 26
+
+- **User:** Vương Ngũ Tín Thành
+- **Date and Time:** 2026-08-22 17:20:17 GMT+7
+- **Model Used:** GPT-5.6 So
+- **Skill Used:**
+  - `postman-test-generator`
+  - `ai-audit`
+- **Prompt:**
+
+````markdown
+Prepare the runtime preconditions for Pool B before Newman execution.
+Use the reviewed Pool B test cases to identify all required database fixtures, user coupon-usage states, and JWT variants. Follow the existing Pool A setup approach where applicable.
+Create a deterministic setup/reset mechanism so every test runs with its required preconditions, including cases that require different usage counts for the same coupon/user.
+Do not change the 74 reviewed test cases and do not run the full Newman suite yet.
+Validate the setup and document how to use it.
+````
+
+- **AI Output:**
+
+````markdown
+I’ll use the Postman generation workflow to add runtime setup without altering the 74 reviewed requests, following Pool A’s deterministic fixture pattern. I’ll first inventory every Pool B fixture/token/usage-state requirement and inspect Pool A’s seeder/reset mechanics, then build and validate the setup without running the full suite; the repository audit workflow will record the resulting file edits.
+
+Pool A confirms the intended pattern: start the SUT first, then seed owned SQLite rows directly with schema checks and post-write verification. Pool B additionally needs per-request resets because multiple reviewed cases intentionally require conflicting usage counts for the same coupon/user; I’m now mapping those states to the actual SUT schema before designing the reset hook.
+
+The reviewed runtime matrix resolves to 11 controlled coupon fixtures, users 1 and 2 present, users 0 and 999999999 absent where required, five JWT variants, and nine nonzero usage-count cases (`API-040`, `041`, `054`–`059`, `072`). I’ll reset the isolated coupon tables before every request, while snapshotting/restoring their prior contents in the Newman wrapper so conflicting counts cannot leak between cases.
+
+The runtime design now separates concerns cleanly: a reusable fixture manifest/reset library, a Pool A-style one-case seeder for inspection, and a canonical Newman wrapper that snapshots the database, serves authenticated per-request resets on localhost, injects deterministic JWT variables, and restores the original state in `finally`. Next I’m wiring the collection’s pre-request hook to that local controller and building a self-test against a temporary SQLite database.
+
+The first self-test caught an assumption in the validator—not in the fixtures: the collection executes by category folders, so its 74 IDs are complete but not numerically ordered. I’m changing both the validator and runner completion check to require exactly one reset for every reviewed ID regardless of folder execution order.
+
+The full fixture self-test now passes for all 74 IDs on a temporary database, including snapshot restoration and all conflicting counts; the live SUT database was opened read-only only to validate schema compatibility. The collection also passes the full v2.1 schema. I’m adding a targeted seven-request Newman check against temporary fixture and HTTP mocks to verify the asynchronous reset hook and JWT/header delivery without touching the real SUT or running the full suite.
+
+The targeted Newman validation passed for seven representative cases covering baseline state, conflicting usage counts, relative expiry dates, invalid-signature/limit-reached JWTs, student-header injection, and snapshot restoration. I’m retaining that harness as a reproducible validation tool, then I’ll update the runtime guide, validation record, and conversion report.
+
+The runtime guide and conversion report now document the exact fixture/JWT matrix, safe commands, local controller behavior, and the “full suite not executed” boundary. I’m doing the final handoff checks now: request-item byte-equivalence against the prior collection, CLI parsing, validation-record consistency, schema validation, and repository cleanliness.
+
+Final validation is clean: the 74 request items are byte-equivalent to the prior collection, all 74 temporary-database states and restoration pass, the actual SUT schema passes read-only validation, seven targeted Newman mock requests pass, and the full Postman v2.1 schema passes. Neither the real SUT nor the full Newman suite was run. I’m recording this work as AI Audit Artifact 26.
+
+Prepared deterministic Pool B runtime preconditions without running the real SUT or full Newman suite.
+
+Created:
+
+- [pool_b_fixtures.py](D:/GitHub/SoftwareTesting-HW06/postman/pool_b_fixtures.py) — 11 coupon fixtures, controlled users, five JWT variants, nine usage-count overrides, reset/verify, snapshot, and restore logic.
+- [seed_pool_b_fixtures.py](D:/GitHub/SoftwareTesting-HW06/postman/seed_pool_b_fixtures.py) — Pool A-style one-case seeder for manual inspection.
+- [run_pool_b_with_fixtures.py](D:/GitHub/SoftwareTesting-HW06/postman/run_pool_b_with_fixtures.py) — canonical Newman wrapper with authenticated localhost resets and automatic restoration.
+- [validate_pool_b_runtime.py](D:/GitHub/SoftwareTesting-HW06/postman/validate_pool_b_runtime.py) and [validate_pool_b_targeted_newman.py](D:/GitHub/SoftwareTesting-HW06/postman/validate_pool_b_targeted_newman.py) — reusable setup validation.
+- [pool-b-runtime-setup.md](D:/GitHub/SoftwareTesting-HW06/postman/pool-b-runtime-setup.md) — complete fixture matrix and usage instructions.
+- [pool-b-runtime-validation.json](D:/GitHub/SoftwareTesting-HW06/postman/pool-b-runtime-validation.json) — machine-readable validation evidence.
+
+Updated:
+
+- [pool-b-discount-coupons.postman_collection.json](D:/GitHub/SoftwareTesting-HW06/postman/pool-b-discount-coupons.postman_collection.json) — added only collection-level runtime-controller wiring and variables; all 74 reviewed request items are unchanged.
+- [pool-b-conversion-report.md](D:/GitHub/SoftwareTesting-HW06/postman/pool-b-conversion-report.md) — documented fixture automation, commands, validation, and remaining manual oracles.
+- [AI_Audit.md](D:/GitHub/SoftwareTesting-HW06/AI_Audit.md) — appended Artifact 26.
+
+Validation results:
+
+- PASS — all 74 reviewed request items are byte-equivalent to the prior collection.
+- PASS — all 74 per-case resets and exact snapshot restoration on temporary SQLite.
+- PASS — 11 coupon fixtures, users 1/2 present, users 0/999999999 absent, five JWT variants, and all nine conflicting usage overrides.
+- PASS — actual SUT SQLite schema checked read-only; the SUT was not contacted.
+- PASS — targeted Newman 6.2.2 validation for seven representative cases using local mocks.
+- PASS — full Postman Collection v2.1 schema and `git diff --check`.
+
+For the later authorized full run, start the SUT and execute:
+
+```powershell
+C:\Users\xing0\AppData\Local\Python\bin\python.exe postman\run_pool_b_with_fixtures.py --sut-dir D:\GitHub\eshop-sut --newman-command npx.cmd newman
+```
+
+The wrapper snapshots and restores the test database automatically. The standalone one-case seeder intentionally leaves its selected fixture state in place. Existing exploratory/security/manual oracles remain unchanged.
+
+Artifacts 26-26 successfully appended to `D:\GitHub\SoftwareTesting-HW06\AI_Audit.md`.
+````
+
+- **File Modifications:**
+  - `File:` `postman/pool_b_fixtures.py`.
+    - `Action:` created.
+    - `Deleted:` None.
+    - `Replaced With:` None.
+    - `Appended:` Deterministic coupon/JWT/user/usage manifests plus schema validation, per-case reset verification, snapshot, and restoration functions for all 74 reviewed IDs.
+  - `File:` `postman/seed_pool_b_fixtures.py`.
+    - `Action:` created.
+    - `Deleted:` None.
+    - `Replaced With:` None.
+    - `Appended:` A Pool A-style CLI that requires the initialized SUT, applies one selected Pool B state, verifies it, and optionally prints runtime JWT variables.
+  - `File:` `postman/run_pool_b_with_fixtures.py`.
+    - `Action:` created.
+    - `Deleted:` None.
+    - `Replaced With:` None.
+    - `Appended:` A canonical full-run wrapper that snapshots database state, serves authenticated localhost per-request resets, supplies runtime variables to Newman, verifies 74 reset IDs, and restores state in `finally`.
+  - `File:` `postman/validate_pool_b_runtime.py`.
+    - `Action:` created.
+    - `Deleted:` None.
+    - `Replaced With:` None.
+    - `Appended:` Validation for the reviewed mapping, all 74 temporary-database states, snapshot restoration, JWT semantics, collection wiring, and optional read-only SUT schema.
+  - `File:` `postman/validate_pool_b_targeted_newman.py`.
+    - `Action:` created.
+    - `Deleted:` None.
+    - `Replaced With:` None.
+    - `Appended:` A seven-request Newman compatibility harness using temporary SQLite and local HTTP mocks, with machine-readable result recording.
+  - `File:` `postman/pool-b-runtime-setup.md`.
+    - `Action:` created.
+    - `Deleted:` None.
+    - `Replaced With:` None.
+    - `Appended:` Runtime fixture tables, JWT definitions, validation commands, one-case inspection instructions, canonical full-run command, and restoration behavior.
+  - `File:` `postman/pool-b-runtime-validation.json`.
+    - `Action:` created.
+    - `Deleted:` None.
+    - `Replaced With:` None.
+    - `Appended:` Passing all-74 fixture/reset/restore/JWT/schema results plus the seven-request Newman compatibility result, explicitly recording no real-SUT or full-suite execution.
+  - `File:` `postman/pool-b-discount-coupons.postman_collection.json`.
+    - `Action:` edited.
+    - `Deleted:` The prior collection description and pre-request script that only injected/logged `X-Student-Id`.
+    - `Replaced With:` A runtime-aware description, blank fixture-controller variables, and a collection-level hook that retains student evidence logging, requests an authenticated localhost reset by Test ID, and skips the SUT request on setup failure.
+    - `Appended:` None.
+  - `File:` `postman/pool-b-conversion-report.md`.
+    - `Action:` edited.
+    - `Deleted:` The prior statements that runtime coupon/user/token setup was unresolved and the earlier collection hash/validation results.
+    - `Replaced With:` The deterministic runtime strategy, controller variables, resolved automated preconditions, SHA-256 `85B1F2563DD2DEDD19BC5DDED320A639F0CD5680324793BA74FA932F692AD7EF`, and current fixture/schema/targeted-Newman results.
+    - `Appended:` Links to the runtime guide and validation evidence.
+  - `File:` `AI_Audit.md`.
+    - `Action:` appended.
+    - `Deleted:` None.
+    - `Replaced With:` None.
+    - `Appended:` Artifact 26 containing this exact prompt, AI output, and file-modification record.
+  - `File:` `tmp/wire_pool_b_runtime.py`.
+    - `Action:` created and deleted file.
+    - `Deleted:` The temporary invariant-checked collection wiring helper after use.
+    - `Replaced With:` None.
+    - `Appended:` None.
+- **Verdict:** VALID
+- **Reasoning:** The precondition prepared correctly.
+- **Student Fixes:** None

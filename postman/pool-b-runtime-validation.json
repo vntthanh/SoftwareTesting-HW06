@@ -1,0 +1,208 @@
+{
+  "validatedAt": "2026-08-22 17:18:13 GMT+7",
+  "reviewedTestIds": 74,
+  "fixtureManifest": "PASS",
+  "allPerCaseResetsOnTemporaryDatabase": "PASS",
+  "snapshotRestore": "PASS",
+  "jwtVariants": "PASS",
+  "collectionRuntimeHook": "PASS",
+  "sutSchema": "PASS_READ_ONLY",
+  "realSutStartedOrContacted": false,
+  "fullNewmanSuiteExecuted": false,
+  "summary": {
+    "reviewedTestIds": 74,
+    "couponFixtures": [
+      {
+        "id": 1001,
+        "code": "SAVE10",
+        "type": "percent",
+        "discount_value": 10,
+        "min_order_amount": 300000,
+        "expired_at": "2099-12-31",
+        "is_active": 1,
+        "max_uses_per_user": 1
+      },
+      {
+        "id": 1002,
+        "code": "BIGBUY",
+        "type": "fixed",
+        "discount_value": 50000,
+        "min_order_amount": 500000,
+        "expired_at": "2099-12-31",
+        "is_active": 1,
+        "max_uses_per_user": 1
+      },
+      {
+        "id": 1003,
+        "code": "VIP100",
+        "type": "fixed",
+        "discount_value": 100000,
+        "min_order_amount": 300000,
+        "expired_at": "2099-12-31",
+        "is_active": 1,
+        "max_uses_per_user": 2
+      },
+      {
+        "id": 1004,
+        "code": "EXPIRED",
+        "type": "percent",
+        "discount_value": 20,
+        "min_order_amount": 100000,
+        "expired_at": "2020-01-01",
+        "is_active": 1,
+        "max_uses_per_user": 1
+      },
+      {
+        "id": 1005,
+        "code": "INACTIVE_TEST",
+        "type": "percent",
+        "discount_value": 10,
+        "min_order_amount": 300000,
+        "expired_at": "2099-12-31",
+        "is_active": 0,
+        "max_uses_per_user": 1
+      },
+      {
+        "id": 1006,
+        "code": "EXPIRES_TODAY_TEST",
+        "type": "percent",
+        "discount_value": 10,
+        "min_order_amount": 300000,
+        "expired_at": "2026-08-22",
+        "is_active": 1,
+        "max_uses_per_user": 1
+      },
+      {
+        "id": 1007,
+        "code": "ZERO_MIN_TEST",
+        "type": "percent",
+        "discount_value": 10,
+        "min_order_amount": 0,
+        "expired_at": "2099-12-31",
+        "is_active": 1,
+        "max_uses_per_user": 1
+      },
+      {
+        "id": 1008,
+        "code": "EXPIRY_BOUNDARY_TEST",
+        "type": "percent",
+        "discount_value": 10,
+        "min_order_amount": 300000,
+        "expired_at": "2026-08-23",
+        "is_active": 1,
+        "max_uses_per_user": 1
+      },
+      {
+        "id": 1009,
+        "code": "GENERIC_LIMIT_TEST",
+        "type": "fixed",
+        "discount_value": 50000,
+        "min_order_amount": 300000,
+        "expired_at": "2099-12-31",
+        "is_active": 1,
+        "max_uses_per_user": 3
+      },
+      {
+        "id": 1010,
+        "code": "PERCENT1",
+        "type": "percent",
+        "discount_value": 1,
+        "min_order_amount": 0,
+        "expired_at": "2099-12-31",
+        "is_active": 1,
+        "max_uses_per_user": 1
+      },
+      {
+        "id": 1011,
+        "code": "PERCENT100",
+        "type": "percent",
+        "discount_value": 100,
+        "min_order_amount": 0,
+        "expired_at": "2099-12-31",
+        "is_active": 1,
+        "max_uses_per_user": 1
+      }
+    ],
+    "usageOverrides": {
+      "API-040": {
+        "coupon": "SAVE10",
+        "userId": 1,
+        "priorUses": 1
+      },
+      "API-041": {
+        "coupon": "SAVE10",
+        "userId": 1,
+        "priorUses": 2
+      },
+      "API-054": {
+        "coupon": "GENERIC_LIMIT_TEST",
+        "userId": 1,
+        "priorUses": 2
+      },
+      "API-055": {
+        "coupon": "GENERIC_LIMIT_TEST",
+        "userId": 1,
+        "priorUses": 3
+      },
+      "API-056": {
+        "coupon": "GENERIC_LIMIT_TEST",
+        "userId": 1,
+        "priorUses": 4
+      },
+      "API-057": {
+        "coupon": "VIP100",
+        "userId": 1,
+        "priorUses": 1
+      },
+      "API-058": {
+        "coupon": "VIP100",
+        "userId": 1,
+        "priorUses": 2
+      },
+      "API-059": {
+        "coupon": "VIP100",
+        "userId": 1,
+        "priorUses": 3
+      },
+      "API-072": {
+        "coupon": "SAVE10",
+        "userId": 1,
+        "priorUses": 1
+      }
+    },
+    "controlledUsers": {
+      "present": [
+        1,
+        2
+      ],
+      "absent": [
+        0,
+        999999999
+      ]
+    },
+    "jwtVariables": [
+      "authToken",
+      "expiredToken",
+      "invalidSignatureToken",
+      "invalidToken",
+      "limitReachedAuthToken"
+    ]
+  },
+  "targetedNewmanCompatibility": {
+    "status": "PASS",
+    "validatedAt": "2026-08-22 17:18:27 GMT+7",
+    "newmanVersion": "6.2.2",
+    "selectedTestIds": [
+      "API-001",
+      "API-040",
+      "API-041",
+      "API-052",
+      "API-053",
+      "API-063",
+      "API-072"
+    ],
+    "requestsExecutedAgainstLocalMock": 7,
+    "realSutStartedOrContacted": false,
+    "fullNewmanSuiteExecuted": false
+  }
+}

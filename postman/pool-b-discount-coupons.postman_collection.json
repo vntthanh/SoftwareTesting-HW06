@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "7a1179fc-0e38-565b-9453-9ce0adc2d055",
     "name": "Pool B - Discount Coupon Reviewed Tests",
-    "description": "Exactly one request for each final reviewed Pool B test case. Runtime fixture and token setup remains external and is preserved per request.",
+    "description": "Exactly one request for each final reviewed Pool B test case. Run through postman/run_pool_b_with_fixtures.py so the collection-level pre-request hook can apply deterministic per-case SQLite state and runtime JWT variables.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -3795,6 +3795,16 @@
       "key": "limitReachedAuthToken",
       "value": "",
       "type": "string"
+    },
+    {
+      "key": "fixtureControlUrl",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "fixtureControlKey",
+      "value": "",
+      "type": "string"
     }
   ],
   "event": [
@@ -3805,7 +3815,28 @@
         "exec": [
           "var evidenceStudentId = pm.variables.replaceIn('{{studentId}}');",
           "pm.request.headers.upsert({key: 'X-Student-Id', value: evidenceStudentId});",
-          "console.log('[Pool B execution evidence]', 'request=' + pm.info.requestName, 'method=' + pm.request.method, 'url=' + pm.request.url.toString(), 'studentId=' + evidenceStudentId);"
+          "console.log('[Pool B execution evidence]', 'request=' + pm.info.requestName, 'method=' + pm.request.method, 'url=' + pm.request.url.toString(), 'studentId=' + evidenceStudentId);",
+          "var fixtureMatch = pm.info.requestName.match(/^API-\\d{3}/);",
+          "var fixtureTestId = fixtureMatch && fixtureMatch[0];",
+          "var fixtureControlUrl = pm.variables.replaceIn('{{fixtureControlUrl}}');",
+          "var fixtureControlKey = pm.variables.replaceIn('{{fixtureControlKey}}');",
+          "if (!fixtureTestId || !/^http:\\/\\/127\\.0\\.0\\.1:\\d+$/.test(fixtureControlUrl) || !fixtureControlKey) {",
+          "  console.error('[Pool B fixture error]', 'Missing or unsafe local fixture controller configuration', 'request=' + pm.info.requestName);",
+          "  pm.execution.skipRequest();",
+          "} else {",
+          "  pm.sendRequest({",
+          "    url: fixtureControlUrl + '/reset/' + fixtureTestId,",
+          "    method: 'POST',",
+          "    header: [{key: 'X-Fixture-Control-Key', value: fixtureControlKey}]",
+          "  }, function (error, response) {",
+          "    if (error || response.code !== 204) {",
+          "      console.error('[Pool B fixture error]', fixtureTestId, error || ('HTTP ' + response.code));",
+          "      pm.execution.skipRequest();",
+          "      return;",
+          "    }",
+          "    console.log('[Pool B fixture ready]', fixtureTestId);",
+          "  });",
+          "}"
         ]
       }
     }

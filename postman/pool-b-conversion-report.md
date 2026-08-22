@@ -9,12 +9,24 @@
 - Automated machine-checkable assertions: 27 cases; remaining cases preserve manual/exploratory oracles.
 - Expected HTTP status assertions: none, because the reviewed CSV intentionally defines no concrete success or failure status codes.
 
+## Runtime fixture strategy
+
+- Runtime instructions and the exact fixture matrix are documented in `postman/pool-b-runtime-setup.md`.
+- `postman/pool_b_fixtures.py` defines 11 controlled coupons, users 1/2 present, users 0/999999999 absent, five deterministic JWT variants, and the nine reviewed nonzero usage-count overrides.
+- `postman/seed_pool_b_fixtures.py` applies and verifies one reviewed state after the SUT has initialized its SQLite database, following the Pool A direct-SQLite approach.
+- `postman/run_pool_b_with_fixtures.py` is the canonical full-run entry point. It snapshots the original coupon/usage and controlled-user state, starts an authenticated localhost fixture controller, resets the database before each request, supplies JWT variables, and restores the snapshot in `finally`.
+- The collection-level pre-request hook extracts the reviewed Test ID from the unchanged request name, calls the local reset endpoint, and skips the SUT request if setup is missing or fails.
+- Conflicting states cannot leak: API-040/041, API-054/055/056, API-057/058/059, and API-072 each receive their exact prior-use count immediately before execution.
+- `postman/pool-b-runtime-validation.json` records all-74 temporary-database reset/restore validation, read-only SUT-schema compatibility, JWT validation, and a targeted seven-request Newman compatibility run.
+
 ## Runtime variables
 
 - `baseUrl` defaults to `http://localhost:3000`.
 - `studentId` defaults to `23127261`. A collection-level pre-request script upserts `X-Student-Id: {{studentId}}` on every outgoing request, so the header is not duplicated in the 74 request definitions.
 - The same collection-level script logs `[Pool B execution evidence]` with the request name/Test ID, method, URL, and resolved student ID for each execution.
+- `fixtureControlUrl` and `fixtureControlKey` intentionally default to blank. The wrapped runner supplies a random localhost endpoint/key; requests are skipped safely when the controller is absent.
 - Supply `authToken`, `invalidToken`, `invalidSignatureToken`, `expiredToken`, and `limitReachedAuthToken` where their corresponding cases require them.
+- The wrapped runner supplies all five JWT variables deterministically; plain Newman execution is intentionally unsupported because it cannot establish per-request database states.
 
 ## Traceability
 
@@ -107,15 +119,16 @@
 
 ## Unresolved / manual-review issues
 
-- The sources provide no API for creating or resetting coupon fixtures, coupon-use counts, current-date boundary fixtures, or user/token identities. These reviewed preconditions remain external runtime setup and are preserved per request.
+- Coupon, usage-count, controlled-date, user-presence, and JWT input preconditions are now automated by the local runtime wrapper. The fixture controller is test-only, localhost-bound, authenticated per run, and never added to the SUT.
 - No HTTP status oracle is documented for this endpoint; the collection does not invent one.
 - Exploratory responses, rounding/precision observations, authentication semantics, query-parameterization evidence, database diagnostics, and persistent-state effects remain manual where the reviewed result is not fully observable from one response.
-- Full-suite SUT conformance execution is outside this conversion; validation checks artifact structure and Newman execution compatibility only.
+- Full-suite SUT conformance execution has not been performed. The setup validation uses a temporary SQLite database, a read-only live-schema check, and local HTTP mocks only.
 
 ## Validation results
 
-- Collection SHA-256: `2323D04DF15152C14FB2FCA92813D93BA2E46F9F6EA799CD509689F29A2B75A7`.
-- Static traceability: **PASS** (2026-08-22 17:00:21 GMT+7) — 74 source rows, 74 requests, 74 unique matching IDs, exact category totals, complete supported descriptions, zero request-level `X-Student-Id` duplicates, one collection-level header injection/evidence event, and reviewed authentication mappings preserved.
-- Full Postman v2.1 JSON Schema: **PASS** (2026-08-22 17:00:21 GMT+7) using the trusted local official schema `postman/postman-v2.1.0-schema.json` and the skill's deterministic validator.
-- Newman 6.2.2 compatibility: **PASS** (2026-08-22 17:00:21 GMT+7) against a local deterministic compatibility mock — 74 requests, 74 collection-level pre-request script executions, 74 evidence-log entries, 74 injected student headers observed, 74 test scripts, 27 assertions, and zero failures.
+- Collection SHA-256: `85B1F2563DD2DEDD19BC5DDED320A639F0CD5680324793BA74FA932F692AD7EF`.
+- Static traceability/runtime wiring: **PASS** (2026-08-22 17:18:13 GMT+7) — 74 source rows, 74 unchanged request items, 74 unique matching IDs, exact category totals, complete descriptions, collection-level student header/evidence logging, authenticated local reset hook, and all required runtime variables.
+- Fixture manifest and reset/restore: **PASS** (2026-08-22 17:18:13 GMT+7) — all 74 per-case states verified on temporary SQLite; 11 coupon fixtures, nine usage overrides, controlled users, five JWT variants, and exact snapshot restoration passed. The actual SUT database schema passed a read-only compatibility check.
+- Full Postman v2.1 JSON Schema: **PASS** (2026-08-22 17:18:27 GMT+7) using the trusted local official schema `postman/postman-v2.1.0-schema.json` and the skill's deterministic validator.
+- Targeted Newman 6.2.2 compatibility: **PASS** (2026-08-22 17:18:27 GMT+7) — seven representative requests (`API-001`, `API-040`, `API-041`, `API-052`, `API-053`, `API-063`, `API-072`) verified reset callbacks, conflicting counts, date states, JWT delivery, student header injection, and restoration against local mocks.
 - Full-suite SUT conformance execution: **NOT PERFORMED**.
