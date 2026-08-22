@@ -1,9 +1,9 @@
 {
-  "collectionSha256": "F679AADE649F0AD84A3873E83A2DD4152107DEA619194C579F7FDBC9DFFD4F20",
-  "generatedAt": "2026-08-22 00:01:22 GMT+7",
+  "collectionSha256": "60E3A7860056FA43576CA699B0A2E2F2844F94B2D3CBEABF71EB668EEBAD0597",
+  "generatedAt": "2026-08-22 00:48:34 GMT+7",
   "static": {
     "status": "PASS",
-    "validatedAt": "2026-08-22 00:01:30 GMT+7",
+    "validatedAt": "2026-08-22 00:49:44 GMT+7",
     "logicalTestIds": 82,
     "generatedRequests": 88,
     "multiRequestFlows": {
@@ -21,16 +21,61 @@
   },
   "schema": {
     "status": "PASS",
-    "validatedAt": "2026-08-22 00:01:38 GMT+7",
+    "validatedAt": "2026-08-22 00:49:44 GMT+7",
     "schemaPath": "postman/postman-v2.1.0-schema.json"
   },
   "newman": {
     "status": "PASS",
-    "validatedAt": "2026-08-22 00:01:49 GMT+7",
+    "validatedAt": "2026-08-22 00:49:56 GMT+7",
     "version": "6.2.2",
-    "scope": "Representative API-001 compatibility run against a local mock; not full-suite functional SUT execution",
-    "requestsExecuted": 1,
+    "scope": "Local-mock compatibility runs for API-001, API-009, API-026, and fixture flows API-078 through API-081; not full-suite functional SUT execution",
+    "requestsExecuted": 11,
+    "mockHttpRequestsCaptured": 24,
+    "newmanRuns": 9,
     "sutExecuted": false,
-    "studentIdHeaderCaptured": "23127261"
+    "studentIdHeaderCaptured": "23127261",
+    "automaticOtpFixtureVerified": true,
+    "failedFixtureBlocksTestedRequest": true,
+    "numericIssuedOtpVerified": {
+      "testId": "API-009",
+      "leadingZeroOtpRegenerated": "012345",
+      "issuedString": "246810",
+      "sentJsonNumber": 246810
+    },
+    "consumedReplayFixtureVerified": {
+      "successfulSetup": {
+        "forgotRequests": 1,
+        "setupResetRequests": 1,
+        "testedReplayRequests": 1
+      },
+      "failedSetup": {
+        "forgotRequests": 1,
+        "setupResetRequests": 1,
+        "testedReplayRequests": 0
+      }
+    },
+    "fixtureFlowsVerified": {
+      "API-078": {
+        "forgotRequests": 1,
+        "resetRequests": 2
+      },
+      "API-079": {
+        "forgotRequests": 1,
+        "resetRequests": 2
+      },
+      "API-080": {
+        "forgotRequests": 1,
+        "resetRequests": 2
+      },
+      "API-081": {
+        "forgotRequests": 2,
+        "resetRequests": 2,
+        "fixtureEmails": [
+          "account-a@domain.com",
+          "account-b@domain.com"
+        ],
+        "distinctAccountOtpsVerified": true
+      }
+    }
   }
 }

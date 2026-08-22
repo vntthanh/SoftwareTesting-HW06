@@ -751,7 +751,9 @@ All report links, IDs, counts, and the final CSV checksum were verified. Pools B
 - **User:** Vương Ngũ Tín Thành
 - **Date and Time:** 2026-08-21 10:44:39 GMT+7
 - **Model Used:** GPT-5.6 Sol
-- **Skill Used:** `postman-test-generator`
+- **Skill Used:**
+  - `postman-test-generator`
+  - `ai-audit`
 - **Prompt:**
 
 ````markdown
@@ -841,7 +843,9 @@ Verification completed:
 - **User:** Vương Ngũ Tín Thành
 - **Date and Time:** 2026-08-21 11:25:08 GMT+7
 - **Model Used:** GPT-5.6 Sol
-- **Skill Used:** `postman-test-generator`
+- **Skill Used:**
+  - `postman-test-generator`
+  - `ai-audit`
 - **Prompt:**
 
 ````markdown
@@ -986,4 +990,79 @@ Validation results:
     - `Appended:` None.
 - **Verdict:** VALID
 - **Reasoning:** The agent correctly resolved all found defects.
+- **Student Fixes:** None
+
+### Artifact 11
+
+- **User:** Vương Ngũ Tín Thành
+- **Date and Time:** 2026-08-21 23:49:33 GMT+7
+- **Model Used:** GPT-5.6 Sol
+- **Skill Used:**
+  - `spreadsheets:Spreadsheets`
+  - `postman-test-generator`
+  - `ai-audit`
+- **Prompt:**
+
+````markdown
+Revise API-078 test cases for pool A.
+
+It is a good robustness test, but `415` is **my external HTTP expectation**, not a specification requirement. More importantly, if the SUT returns a safe `400` while rejecting the request and leaving the OTP intact, it should **not automatically report that as a genuine SUT bug** based on the supplied requirements alone.
+
+Way to fix: Read [api\_specification.md](reference/api_specification.md) then expect the respone in 4xx status is accepted.
+````
+
+- **AI Output:**
+
+````markdown
+Revised API-078 for pool A:
+
+- `415` is explicitly a human/external HTTP expectation, not a specification requirement.
+- A safe `400` is accepted when the same OTP remains usable and the JSON retry succeeds.
+- Both requests now use the same OTP variable.
+- Updated the generated Postman assertions and traceability report.
+
+Files: [test cases](/D:/GitHub/SoftwareTesting-HW06/test-cases/a-forgot-password.csv:79), [Main Report](/D:/GitHub/SoftwareTesting-HW06/Main_Report.md:141), [generator](/D:/GitHub/SoftwareTesting-HW06/postman/generate_pool_a.py:307), and [conversion report](/D:/GitHub/SoftwareTesting-HW06/postman/pool-a-conversion-report.md:94).
+
+Validation passed: 82 unique cases, static mapping, full Postman v2.1 schema, and Newman 6.2.2 compatibility. The real SUT was not executed.
+
+Fixed API-078: step 1 now accepts only `400–499`. Any `2xx`, `3xx`, or `5xx` fails; exact `415` remains optional.
+
+Updated [test case CSV](/D:/GitHub/SoftwareTesting-HW06/test-cases/a-forgot-password.csv:79), [Main Report](/D:/GitHub/SoftwareTesting-HW06/Main_Report.md:141), Postman collection, and conversion report.
+
+Static, schema, and Newman validation all pass.
+````
+
+- **File Modifications:**
+  - `File:` `Main_Report.md`.
+    - `Action:` edited.
+    - `Deleted:` The API-078 human-case oracle that required exact `415`, followed by the intermediate oracle that accepted any non-`200`, non-`5xx` response.
+    - `Replaced With:` API-078 now accepts only a `4xx` client-error response (`400`–`499`), retains `415 Unsupported Media Type` as the preferred human/external HTTP expectation, accepts any safe `4xx` including `400`, and requires the same-OTP JSON retry to succeed.
+    - `Appended:` None.
+  - `File:` `test-cases/a-forgot-password.csv`.
+    - `Action:` edited.
+    - `Deleted:` The prior API-078 row whose first-step oracle was exact `415`, followed by its intermediate non-normal-status/non-`5xx` formulation.
+    - `Replaced With:` A nine-field API-078 row requiring a first-step status from `400` through `499`, documenting the `4xx` class and preferred `415` as human/external expectations, and using the same OTP fixture in both requests so the successful retry evidences non-consumption.
+    - `Appended:` None.
+  - `File:` `postman/generate_pool_a.py`.
+    - `Action:` edited.
+    - `Deleted:` API-078's exact `415` automated status mapping and the intermediate assertions that only rejected `200` and `5xx`.
+    - `Replaced With:` API-078 step 1 has no exact-status mapping and asserts `status >= 400 && status < 500`; non-`415` responses produce only a human/external expectation warning; API-078 is marked partially automated; and report labels/policy describe the `4xx`-only boundary.
+    - `Appended:` None.
+  - `File:` `postman/pool-a-forgot-password.postman_collection.json`.
+    - `Action:` replaced content.
+    - `Deleted:` Generated API-078 descriptions and scripts with the exact-`415` oracle, followed by the intermediate non-`200`/non-`5xx` oracle.
+    - `Replaced With:` Regenerated API-078 requests sharing `{{sameValidOTP}}`; step 1 asserts a `400`–`499` response and treats `415` as a warning-only preference, while step 2 retains the reviewed external `200` success assertion.
+    - `Appended:` None.
+  - `File:` `postman/pool-a-conversion-report.md`.
+    - `Action:` replaced content.
+    - `Deleted:` API-078 traceability and policy text describing exact `415`, followed by the broader non-`200`/non-`5xx` acceptance rule.
+    - `Replaced With:` API-078 traceability labels step 1 as `any 4xx`, identifies `415` as a human/external expectation, accepts safe `400`, and records the same-OTP retry and partial/manual oracle classification.
+    - `Appended:` None.
+  - `File:` `postman/pool-a-validation-results.json`.
+    - `Action:` replaced content.
+    - `Deleted:` Validation state keyed to the superseded generated collection hashes.
+    - `Replaced With:` PASS evidence keyed to collection SHA-256 `F679AADE649F0AD84A3873E83A2DD4152107DEA619194C579F7FDBC9DFFD4F20`, covering 82 logical IDs, 88 requests, full Postman v2.1 schema validation, and Newman 6.2.2 representative compatibility.
+    - `Appended:` None.
+- **Verdict:** VALID
+- **Reasoning:** The agent worked good enough for simple tasks. With user expectation provided, it has read and fixed all related files, ensuring consistency.
 - **Student Fixes:** None

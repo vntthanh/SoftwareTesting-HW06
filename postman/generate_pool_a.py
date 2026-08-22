@@ -43,6 +43,90 @@ PARTIAL_MANUAL_ORACLE_IDS = {
     "API-077", "API-078", "API-081",
 }
 
+# OTP values in these cases are valid baseline data rather than the tested
+# dimension. Each independent case obtains a fresh value at runtime.
+RUNTIME_OTP_VARIABLES = {
+    "API-001": ["otpApi001"],
+    "API-004": ["otpApi004"], "API-005": ["otpApi005"], "API-006": ["otpApi006"],
+    "API-009": ["otpApi009AsNumber"],
+    "API-015": ["otpIssuedForAccountA"],
+    "API-016": ["otpApi016"], "API-017": ["otpApi017"], "API-018": ["otpApi018"],
+    "API-019": ["otpApi019"], "API-020": ["otpApi020"], "API-021": ["otpApi021"],
+    "API-022": ["otpApi022"], "API-023": ["otpApi023"], "API-024": ["otpApi024"],
+    "API-026": ["sameOTPAlreadyUsed"], "API-027": ["otpApi027"],
+    "API-030": ["otpApi030"], "API-031": ["otpApi031"],
+    "API-033": ["otpApi033"], "API-034": ["otpApi034"], "API-035": ["otpApi035"],
+    "API-036": ["otpApi036"], "API-037": ["otpApi037"],
+    "API-044": ["otpApi044AsNumber"],
+    "API-046": ["otpApi046"], "API-047": ["otpApi047"], "API-048": ["otpApi048"],
+    "API-049": ["otpApi049"], "API-050": ["otpApi050"], "API-051": ["otpApi051"],
+    "API-052": ["otpApi052"], "API-053": ["otpApi053"], "API-054": ["otpApi054"],
+    "API-055": ["otpApi055"], "API-056": ["otpApi056"], "API-057": ["otpApi057"],
+    "API-058": ["otpApi058"], "API-059": ["otpApi059"], "API-060": ["otpApi060"],
+    "API-061": ["otpApi061"], "API-062": ["otpApi062"],
+    "API-063": ["otpGeneratedForAccountA"], "API-064": ["otpGeneratedForAccountA"],
+    "API-066": ["sameOTPAlreadyUsedByAccountA"],
+    "API-067": ["unexpiredUnusedOTPGeneratedForAccountA"],
+    "API-068": ["validUnexpiredUnused6DigitOtpForEmail"], "API-069": ["otpApi069"],
+    "API-070": ["validUnexpiredUnused6DigitOtpForEmail"],
+    "API-071": ["validUnexpiredUnusedOtpIssuedForEmailA"],
+    "API-073": ["previouslySuccessfullyUsedOtp"],
+    "API-078": ["sameValidOTP", "sameValidOTP"],
+    "API-079": [None, "sameValidOTP"],
+    "API-080": ["sameValidOTP", "sameValidOTP"],
+    "API-081": ["accountAValidOTP", "accountBValidOTP"],
+    "API-082": ["validOTP"],
+}
+
+OTP_FIXTURE_EMAILS = {
+    **{test_id: "test@domain.com" for test_id in {
+        "API-001", "API-004", "API-005", "API-006", "API-009", "API-016", "API-017", "API-018",
+        "API-019", "API-020", "API-021", "API-022", "API-023", "API-024", "API-026",
+        "API-027", "API-030", "API-031", "API-033", "API-034", "API-035", "API-036",
+        "API-037", "API-044", "API-046", "API-047", "API-048", "API-049", "API-050", "API-051",
+        "API-052", "API-053", "API-054", "API-055", "API-056", "API-057", "API-058",
+        "API-059", "API-060", "API-061", "API-062",
+    }},
+    "API-015": "account-a@domain.com",
+    "API-063": "account-a@domain.com", "API-064": "account-a@domain.com",
+    "API-066": "account-a@domain.com", "API-067": "account-a@domain.com",
+    "API-068": "{{registeredEmail}}", "API-069": "{{registeredEmail}}",
+    "API-070": "{{registeredEmail}}", "API-071": "{{registeredEmailA}}",
+    "API-073": "{{sameRegisteredEmail}}",
+    "API-078": "{{registeredEmail}}", "API-079": "{{registeredEmail}}",
+    "API-080": "{{registeredEmail}}", "API-082": "{{registeredEmail}}",
+}
+
+REPLAY_SETUP_PASSWORDS = {
+    "API-026": "FixtureConsumed1!", "API-066": "FixtureConsumed2!", "API-073": "FixtureConsumed3!",
+}
+
+NUMERIC_OTP_IDS = {"API-009", "API-044"}
+
+# These cases only need a registered-account baseline. The intentionally invalid
+# OTP literals/types/omissions in their reset requests must remain unchanged.
+REGISTRATION_FIXTURE_EMAILS = {
+    **{test_id: "test@domain.com" for test_id in {
+        "API-007", "API-008", "API-010", "API-011", "API-012",
+        "API-014", "API-038", "API-039", "API-040", "API-041", "API-042",
+        "API-043", "API-045",
+    }},
+    "API-074": "{{registeredEmail}}",
+}
+
+FORBIDDEN_ISSUED_OTPS = {"API-014": "654321", "API-045": "654321"}
+
+# Cross-account fixtures are ready only after the secondary registered account
+# is also objectively established through forgot-password. API-081 additionally
+# preserves Account B's issued OTP for its second flow request.
+SECONDARY_OTP_FIXTURES = {
+    "API-015": {"email": "account-b@domain.com"},
+    "API-031": {"email": "other@domain.com"},
+    "API-064": {"email": "account-b@domain.com"},
+    "API-071": {"email": "{{registeredEmailB}}"},
+    "API-081": {"email": "{{accountBEmail}}", "otp": "accountBValidOTP"},
+}
+
 
 def now_gmt7():
     return datetime.now(GMT7).strftime("%Y-%m-%d %H:%M:%S GMT+7")
@@ -138,6 +222,19 @@ def request_specs(row):
     test_id = row["Test ID"]
     structured = structured_input(row["Request Input"])
     if structured is not None:
+        otp_vars = RUNTIME_OTP_VARIABLES.get(test_id, [])
+        otp_var = otp_vars[0] if otp_vars else None
+        if otp_var and structured["raw"]:
+            if test_id in NUMERIC_OTP_IDS and "{{" not in structured["raw"]:
+                structured["raw"] = re.sub(
+                    r'("resetToken"\s*:\s*)123456',
+                    r'\1{{' + otp_var + '}}', structured["raw"], count=1,
+                )
+            elif '"resetToken":"{{' not in structured["raw"]:
+                structured["raw"] = re.sub(
+                    r'("resetToken"\s*:\s*)"123456"',
+                    r'\1"{{' + otp_var + '}}"', structured["raw"], count=1,
+                )
         return [structured]
     if test_id == "API-002":
         return [{
@@ -162,6 +259,15 @@ def request_specs(row):
         headers = [{"key": "Content-Type", "value": content_type, "type": "text"}]
         if test_id == "API-082":
             headers.append({"key": "Authorization", "value": "Bearer definitely-not-a-valid-jwt", "type": "text"})
+        otp_vars = RUNTIME_OTP_VARIABLES.get(test_id, [])
+        otp_var = otp_vars[step] if step < len(otp_vars) else None
+        if otp_var and raw:
+            if test_id == "API-080" and step == 0:
+                raw = raw.replace("{{validOTP}}", "{{sameValidOTP}}")
+            elif test_id in NUMERIC_OTP_IDS and "{{" not in raw:
+                raw = re.sub(r'("resetToken"\s*:\s*)123456', r'\1{{' + otp_var + '}}', raw, count=1)
+            elif '"resetToken":"{{' not in raw:
+                raw = re.sub(r'("resetToken"\s*:\s*)"123456"', r'\1"{{' + otp_var + '}}"', raw, count=1)
         specs.append({"headers": headers, "raw": raw, "body_kind": body_kind})
     return specs
 
@@ -197,7 +303,16 @@ def execution_flags(row):
             "SINGLE REQUEST TEMPLATE ONLY — REPEAT THROUGH THE AUTHORITATIVE CONFIGURED TRIGGER",
         ])
     if test_id == "API-077":
-        flags.append("MANUAL CONCURRENT DISPATCH")
+        flags.extend([
+            "TRUE CONCURRENT HARNESS REQUIRED",
+            "BLOCKED / NOT EXECUTABLE IN SEQUENTIAL POSTMAN / NEWMAN RUNS",
+        ])
+    if test_id in RUNTIME_OTP_VARIABLES or test_id in REGISTRATION_FIXTURE_EMAILS:
+        flags.append("AUTOMATED FORGOT-PASSWORD FIXTURE")
+    if test_id in REPLAY_SETUP_PASSWORDS:
+        flags.append("AUTOMATED OTP-CONSUMPTION FIXTURE")
+    if test_id == "API-013":
+        flags.append("BLOCKED / NOT EXECUTABLE UNTIL EXACT CONTROLLED OTP 012345 IS OBJECTIVELY ISSUED")
     if test_id == "API-030":
         flags.append("EXPLORATORY / MANUAL ORACLE REQUIRED")
     elif test_id in PARTIAL_MANUAL_ORACLE_IDS:
@@ -222,12 +337,35 @@ def required_variables(row, spec):
     required.discard("studentId")
     if row["Test ID"] not in NO_SERVER_FIXTURE_IDS:
         required.add(fixture_ready_variable(row["Test ID"]))
+    setup_email = OTP_FIXTURE_EMAILS.get(row["Test ID"]) or REGISTRATION_FIXTURE_EMAILS.get(row["Test ID"])
+    if setup_email:
+        required.update(template_variables(setup_email))
+    secondary = SECONDARY_OTP_FIXTURES.get(row["Test ID"])
+    if secondary:
+        required.update(template_variables(secondary["email"]))
     return sorted(required)
 
 
-def prerequest_script(required):
-    if not required:
-        return None
+def otp_fixture_config(row, step):
+    test_id = row["Test ID"]
+    otp_vars = RUNTIME_OTP_VARIABLES.get(test_id)
+    if otp_vars:
+        if test_id in {"API-078", "API-079", "API-080", "API-081"} and step > 0:
+            return {"carry": otp_vars[step]}
+        otp_var = otp_vars[step] if step < len(otp_vars) else None
+        if otp_var is not None:
+            email = OTP_FIXTURE_EMAILS.get(test_id)
+            if test_id == "API-081":
+                email = "{{accountAEmail}}" if step == 0 else "{{accountBEmail}}"
+            return {"email": email, "otp": otp_var, "replayPassword": REPLAY_SETUP_PASSWORDS.get(test_id)}
+        if test_id == "API-079" and step == 0:
+            return {"email": OTP_FIXTURE_EMAILS[test_id], "otp": "sameValidOTP", "replayPassword": None}
+    if test_id in REGISTRATION_FIXTURE_EMAILS:
+        return {"email": REGISTRATION_FIXTURE_EMAILS[test_id], "otp": "__issued" + test_id.replace("-", ""), "registrationOnly": True}
+    return None
+
+
+def fixture_gate(required):
     ready_vars = [name for name in required if name.startswith("fixtureReady")]
     value_vars = [name for name in required if name not in ready_vars]
     return [
@@ -238,6 +376,142 @@ def prerequest_script(required):
         "var blockedBy = missingFixtureValues.concat(unconfirmedFixtures);",
         "if (blockedBy.length) { console.error('[Pool A BLOCKED / NOT EXECUTABLE] Missing runtime fixture(s): ' + blockedBy.join(', ')); throw new Error('BLOCKED / NOT EXECUTABLE: supply and confirm required runtime fixtures: ' + blockedBy.join(', ')); }",
     ]
+
+
+def prerequest_script(row, required, step):
+    if not required:
+        return None
+    test_id = row["Test ID"]
+    if test_id == "API-077":
+        return [
+            "console.error('[API-077 BLOCKED / NOT EXECUTABLE] Postman/Newman collection runs are sequential and cannot establish the reviewed concurrency barrier. Use a true concurrent harness.');",
+            "throw new Error('BLOCKED / NOT EXECUTABLE: API-077 requires true concurrent dispatch; sequential Newman execution is not evidence.');",
+        ]
+    fixture = otp_fixture_config(row, step)
+    if fixture and fixture.get("carry"):
+        carry = fixture["carry"]
+        ready_var = fixture_ready_variable(test_id)
+        return [
+            f"var carriedOtp = pm.collectionVariables.get('{carry}');",
+            f"var carriedReady = pm.collectionVariables.get('{ready_var}');",
+            f"if (carriedOtp !== undefined) pm.variables.set('{carry}', carriedOtp);",
+            f"if (carriedReady !== undefined) pm.variables.set('{ready_var}', carriedReady);",
+            *fixture_gate(required),
+        ]
+    if not fixture:
+        return fixture_gate(required)
+    ready_var = fixture_ready_variable(test_id)
+    otp_var = fixture["otp"]
+    email = fixture["email"]
+    value_vars = [name for name in required if not name.startswith("fixtureReady")]
+    prerequisite_vars = sorted((set(value_vars) | template_variables(email)) - {otp_var})
+    secondary_otp_var = SECONDARY_OTP_FIXTURES.get(test_id, {}).get("otp")
+    secondary_clear = ([
+        f"pm.collectionVariables.unset('{secondary_otp_var}');",
+        f"pm.variables.unset('{secondary_otp_var}');",
+    ] if secondary_otp_var else [])
+    secondary_block_clear = ([
+        f"  pm.collectionVariables.unset('{secondary_otp_var}');",
+        f"  pm.variables.unset('{secondary_otp_var}');",
+    ] if secondary_otp_var else [])
+    numeric_otp_fixture = test_id in NUMERIC_OTP_IDS
+    lines = [
+        f"var fixtureInputVariables = {json.dumps(prerequisite_vars)};",
+        "var missingFixtureInputs = fixtureInputVariables.filter(function (name) { var value = pm.variables.get(name); return value === undefined || value === null || String(value).trim() === '' || /{{.+}}/.test(String(value)); });",
+        "if (missingFixtureInputs.length) { throw new Error('BLOCKED / NOT EXECUTABLE: supply fixture input(s): ' + missingFixtureInputs.join(', ')); }",
+        f"var fixtureEmail = pm.variables.replaceIn({json.dumps(email)});",
+        f"pm.collectionVariables.unset('{ready_var}');",
+        f"pm.collectionVariables.unset('{otp_var}');",
+        f"pm.variables.unset('{ready_var}');",
+        f"pm.variables.unset('{otp_var}');",
+        *secondary_clear,
+        "function blockFixture(message) {",
+        "  console.error('[Pool A BLOCKED / NOT EXECUTABLE] ' + message);",
+        f"  pm.collectionVariables.unset('{ready_var}');",
+        f"  pm.collectionVariables.unset('{otp_var}');",
+        f"  pm.variables.unset('{ready_var}');",
+        f"  pm.variables.unset('{otp_var}');",
+        *secondary_block_clear,
+        "  pm.execution.skipRequest();",
+        "}",
+        *(["var fixtureOtpAttempt = 0;", "function requestOtpFixture() {", "  fixtureOtpAttempt += 1;"] if numeric_otp_fixture else []),
+        "pm.sendRequest({",
+        "  url: pm.variables.replaceIn('{{baseUrl}}/api/forgot-password'),",
+        "  method: 'POST',",
+        "  header: [{ key: 'Content-Type', value: 'application/json' }, { key: 'X-Student-Id', value: pm.variables.replaceIn('{{studentId}}') }],",
+        "  body: { mode: 'raw', raw: JSON.stringify({ email: fixtureEmail }), options: { raw: { language: 'json' } } }",
+        "}, function (fixtureError, fixtureResponse) {",
+        "  if (fixtureError) { blockFixture('forgot-password fixture request failed: ' + fixtureError); return; }",
+        "  if (fixtureResponse.code !== 200) { blockFixture('forgot-password fixture returned HTTP ' + fixtureResponse.code); return; }",
+        "  var fixtureJson;",
+        "  try { fixtureJson = fixtureResponse.json(); } catch (error) { blockFixture('forgot-password fixture did not return JSON'); return; }",
+        "  var issuedOtp = fixtureJson && fixtureJson.resetToken;",
+        "  if (!/^\\d{6}$/.test(String(issuedOtp || ''))) { blockFixture('forgot-password fixture did not return a six-digit resetToken'); return; }",
+    ]
+    if numeric_otp_fixture:
+        lines.append("  if (String(issuedOtp).charAt(0) === '0') { if (fixtureOtpAttempt < 5) { requestOtpFixture(); return; } blockFixture('issued OTP begins with zero; cannot emit it as a JSON number without changing its value/representation after 5 fixture attempts'); return; }")
+    forbidden = FORBIDDEN_ISSUED_OTPS.get(test_id)
+    if forbidden:
+        lines.append(f"  if (String(issuedOtp) === '{forbidden}') {{ blockFixture('issued OTP collided with intentionally invalid literal {forbidden}; rerun for a fresh OTP'); return; }}")
+    replay_password = fixture.get("replayPassword")
+    if replay_password:
+        lines.extend([
+            "  pm.sendRequest({",
+            "    url: pm.variables.replaceIn('{{baseUrl}}/api/reset-password'),",
+            "    method: 'POST',",
+            "    header: [{ key: 'Content-Type', value: 'application/json' }, { key: 'X-Student-Id', value: pm.variables.replaceIn('{{studentId}}') }],",
+            f"    body: {{ mode: 'raw', raw: JSON.stringify({{ email: fixtureEmail, resetToken: String(issuedOtp), newPassword: '{replay_password}' }}), options: {{ raw: {{ language: 'json' }} }} }}",
+            "  }, function (consumeError, consumeResponse) {",
+            "    if (consumeError) { blockFixture('OTP-consumption fixture request failed: ' + consumeError); return; }",
+            "    if (consumeResponse.code !== 200) { blockFixture('OTP-consumption fixture returned HTTP ' + consumeResponse.code); return; }",
+            f"    pm.collectionVariables.set('{otp_var}', String(issuedOtp));",
+            f"    pm.variables.set('{otp_var}', String(issuedOtp));",
+            f"    pm.collectionVariables.set('{ready_var}', 'true');",
+            f"    pm.variables.set('{ready_var}', 'true');",
+            "  });",
+        ])
+    elif test_id in SECONDARY_OTP_FIXTURES:
+        secondary = SECONDARY_OTP_FIXTURES[test_id]
+        secondary_email = secondary["email"]
+        secondary_otp_var = secondary.get("otp")
+        lines.extend([
+            f"  var secondaryFixtureEmail = pm.variables.replaceIn({json.dumps(secondary_email)});",
+            "  pm.sendRequest({",
+            "    url: pm.variables.replaceIn('{{baseUrl}}/api/forgot-password'),",
+            "    method: 'POST',",
+            "    header: [{ key: 'Content-Type', value: 'application/json' }, { key: 'X-Student-Id', value: pm.variables.replaceIn('{{studentId}}') }],",
+            "    body: { mode: 'raw', raw: JSON.stringify({ email: secondaryFixtureEmail }), options: { raw: { language: 'json' } } }",
+            "  }, function (secondaryError, secondaryResponse) {",
+            "    if (secondaryError) { blockFixture('secondary forgot-password fixture request failed: ' + secondaryError); return; }",
+            "    if (secondaryResponse.code !== 200) { blockFixture('secondary forgot-password fixture returned HTTP ' + secondaryResponse.code); return; }",
+            "    var secondaryJson;",
+            "    try { secondaryJson = secondaryResponse.json(); } catch (error) { blockFixture('secondary forgot-password fixture did not return JSON'); return; }",
+            "    var secondaryOtp = secondaryJson && secondaryJson.resetToken;",
+            "    if (!/^\\d{6}$/.test(String(secondaryOtp || ''))) { blockFixture('secondary forgot-password fixture did not return a six-digit resetToken'); return; }",
+            f"    pm.collectionVariables.set('{otp_var}', String(issuedOtp));",
+            f"    pm.variables.set('{otp_var}', String(issuedOtp));",
+        ])
+        if secondary_otp_var:
+            lines.extend([
+                f"    pm.collectionVariables.set('{secondary_otp_var}', String(secondaryOtp));",
+                f"    pm.variables.set('{secondary_otp_var}', String(secondaryOtp));",
+            ])
+        lines.extend([
+            f"    pm.collectionVariables.set('{ready_var}', 'true');",
+            f"    pm.variables.set('{ready_var}', 'true');",
+            "  });",
+        ])
+    else:
+        lines.extend([
+            f"  pm.collectionVariables.set('{otp_var}', String(issuedOtp));",
+            f"  pm.variables.set('{otp_var}', String(issuedOtp));",
+            f"  pm.collectionVariables.set('{ready_var}', 'true');",
+            f"  pm.variables.set('{ready_var}', 'true');",
+        ])
+    lines.append("});")
+    if numeric_otp_fixture:
+        lines.extend(["}", "requestOtpFixture();"])
+    return lines
 
 
 def api076_snapshot_script(store):
@@ -290,7 +564,7 @@ def description(row, flags, required, step_label=None):
         "", "Assumptions / Notes:", row["Assumptions / Notes"],
     ])
     if required:
-        parts.extend(["", "Required runtime fixtures (request is blocked until supplied/confirmed):", *[f"- {name}" for name in required]])
+        parts.extend(["", "Runtime fixtures (automatically established when supported; otherwise request is blocked until supplied/confirmed):", *[f"- {name}" for name in required]])
     if flags:
         parts.extend(["", "Execution classification:", *[f"- {flag}" for flag in flags]])
     return "\n".join(parts)
@@ -321,7 +595,7 @@ def request_item(row, spec, step=0, step_label=None):
     if step_label:
         name += f" [{step_label}]"
     events = []
-    pre = prerequest_script(required)
+    pre = prerequest_script(row, required, step)
     if pre:
         events.append({"listen": "prerequest", "script": {"type": "text/javascript", "exec": pre}})
     events.append({"listen": "test", "script": {"type": "text/javascript", "exec": tests}})
@@ -378,7 +652,7 @@ def build_collection(rows):
         "info": {
             "_postman_id": "b4a0b818-b6cd-4ed4-9fa3-23127261000a",
             "name": "Pool A - Forgot Password / Reset Password Reviewed Tests",
-            "description": "Generated only from the final reviewed Pool A CSV. Missing runtime fixtures block requests before transmission. Collection-level scripts inject X-Student-Id and log console evidence.",
+            "description": "Generated only from the final reviewed Pool A CSV. Objectively creatable OTP fixtures are established automatically; unresolved fixtures block requests before transmission. Collection-level scripts inject X-Student-Id and log console evidence.",
             "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
         },
         "event": [{
@@ -502,12 +776,73 @@ def static_validate():
         else:
             independent_body = ""
         independent_body = re.sub(r"<([^>]+)>", lambda match: "{{" + variable_name(match.group(1)) + "}}", independent_body)
+        otp_vars = RUNTIME_OTP_VARIABLES.get(row["Test ID"], [])
+        otp_var = otp_vars[0] if otp_vars else None
+        if otp_var and independent_body:
+            if row["Test ID"] in NUMERIC_OTP_IDS and "{{" not in independent_body:
+                independent_body = re.sub(
+                    r'("resetToken"\s*:\s*)123456',
+                    r'\1{{' + otp_var + '}}', independent_body, count=1,
+                )
+            elif '"resetToken":"{{' not in independent_body:
+                independent_body = re.sub(
+                    r'("resetToken"\s*:\s*)"123456"',
+                    r'\1"{{' + otp_var + '}}"', independent_body, count=1,
+                )
         if actual_request["body"]["raw"] != independent_body:
             raise RuntimeError(f"{row['Test ID']}: independent structured-body assertion failed")
         if actual_request["body"]["raw"] == row["Request Input"]:
             raise RuntimeError(f"{row['Test ID']}: metadata wrapper was transmitted as the request body")
     if independently_checked != 36:
         raise RuntimeError(f"Expected 36 independently checked structured rows, found {independently_checked}")
+    for row in rows:
+        test_id = row["Test ID"]
+        items = by_id[test_id]
+        if test_id in RUNTIME_OTP_VARIABLES or test_id in REGISTRATION_FIXTURE_EMAILS:
+            for step, item in enumerate(items):
+                if test_id in {"API-078", "API-079", "API-080", "API-081"} and step == 1:
+                    continue
+                scripts = "\n".join(
+                    line for event in item.get("event", []) if event.get("listen") == "prerequest"
+                    for line in event.get("script", {}).get("exec", [])
+                )
+                if "/api/forgot-password" not in scripts:
+                    raise RuntimeError(f"{test_id} step {step + 1}: automatic forgot-password fixture is missing")
+                ready_assignment = f"pm.collectionVariables.set('{fixture_ready_variable(test_id)}', 'true')"
+                if ready_assignment not in scripts or "fixtureResponse.code !== 200" not in scripts or "resetToken" not in scripts:
+                    raise RuntimeError(f"{test_id} step {step + 1}: readiness is not guarded by successful OTP fixture validation")
+    for test_id in NUMERIC_OTP_IDS:
+        item = by_id[test_id][0]
+        otp_var = RUNTIME_OTP_VARIABLES[test_id][0]
+        raw = item["request"]["body"]["raw"]
+        scripts = "\n".join(item["event"][0]["script"]["exec"])
+        if f'"resetToken":{{{{{otp_var}}}}}' not in raw or f'"resetToken":"{{{{{otp_var}}}}}"' in raw:
+            raise RuntimeError(f"{test_id}: issued OTP must be emitted as an unquoted JSON number")
+        if "fixtureOtpAttempt < 5" not in scripts or "issued OTP begins with zero" not in scripts:
+            raise RuntimeError(f"{test_id}: leading-zero OTP regeneration/blocking guard is missing")
+    for test_id in {"API-078", "API-079", "API-080"}:
+        first, second = by_id[test_id]
+        first_scripts = "\n".join(first["event"][0]["script"]["exec"])
+        second_scripts = "\n".join(second["event"][0]["script"]["exec"])
+        if "/api/forgot-password" not in first_scripts or "/api/forgot-password" in second_scripts:
+            raise RuntimeError(f"{test_id}: flow must issue exactly one OTP in step 1 and carry it into step 2")
+        first_vars = template_variables(first["request"]["body"]["raw"])
+        second_vars = template_variables(second["request"]["body"]["raw"])
+        if test_id != "API-079" and "sameValidOTP" not in first_vars:
+            raise RuntimeError(f"{test_id}: step 1 does not use the shared runtime OTP")
+        if "sameValidOTP" not in second_vars:
+            raise RuntimeError(f"{test_id}: step 2 does not reuse the shared runtime OTP")
+    api081_first, api081_second = by_id["API-081"]
+    api081_first_scripts = "\n".join(api081_first["event"][0]["script"]["exec"])
+    api081_second_scripts = "\n".join(api081_second["event"][0]["script"]["exec"])
+    if api081_first_scripts.count("/api/forgot-password") != 2 or "/api/forgot-password" in api081_second_scripts:
+        raise RuntimeError("API-081 must issue both account OTPs before step 1 and carry Account B's OTP into step 2")
+    api077_scripts = "\n".join(
+        line for item in by_id["API-077"] for event in item.get("event", [])
+        if event.get("listen") == "prerequest" for line in event.get("script", {}).get("exec", [])
+    )
+    if "requires true concurrent dispatch" not in api077_scripts or "/api/forgot-password" in api077_scripts:
+        raise RuntimeError("API-077 must remain blocked in sequential Postman/Newman execution")
     collection_hash = sha256(OUT_PATH)
     state = load_state(collection_hash)
     state.update({
@@ -550,15 +885,50 @@ def schema_validate(schema_path):
 
 class CompatibilityHandler(BaseHTTPRequestHandler):
     captured = []
+    forgot_status = 200
+    forgot_tokens = {
+        "account-a@domain.com": "246810",
+        "account-b@domain.com": "135790",
+    }
+    forgot_token_queue = []
+    reset_statuses = []
 
     def do_POST(self):
         length = int(self.headers.get("Content-Length", "0"))
         body = self.rfile.read(length).decode("utf-8")
-        self.__class__.captured.append({"path": self.path, "studentId": self.headers.get("X-Student-Id"), "body": body})
-        self.send_response(200)
+        content_type = self.headers.get("Content-Type", "")
+        try:
+            parsed = json.loads(body) if body else None
+        except json.JSONDecodeError:
+            parsed = None
+        self.__class__.captured.append({
+            "path": self.path, "studentId": self.headers.get("X-Student-Id"),
+            "contentType": content_type, "body": body,
+        })
+        if self.path == "/api/forgot-password":
+            status = self.__class__.forgot_status
+        elif self.__class__.reset_statuses:
+            status = self.__class__.reset_statuses.pop(0)
+        elif content_type.startswith("text/plain") or not body:
+            status = 415 if content_type.startswith("text/plain") else 400
+        else:
+            status = 400 if isinstance(parsed, dict) and (
+                isinstance(parsed.get("newPassword"), dict) or
+                isinstance(parsed.get("resetToken"), (int, float))
+            ) else 200
+        self.send_response(status)
         self.send_header("Content-Type", "application/json")
         self.end_headers()
-        self.wfile.write(b"{}")
+        if self.path == "/api/forgot-password":
+            email = parsed.get("email") if isinstance(parsed, dict) else None
+            issued_otp = (
+                self.__class__.forgot_token_queue.pop(0)
+                if self.__class__.forgot_token_queue
+                else self.__class__.forgot_tokens.get(email, "246810")
+            )
+            self.wfile.write(json.dumps({"message": "fixture created", "resetToken": issued_otp}).encode("utf-8"))
+        else:
+            self.wfile.write(b"{}")
 
     def log_message(self, *args):
         return
@@ -567,30 +937,155 @@ class CompatibilityHandler(BaseHTTPRequestHandler):
 def newman_validate(command):
     collection = json.loads(OUT_PATH.read_text(encoding="utf-8"))
     api001 = next(item for item in walk_requests(collection["item"]) if item["name"].startswith("API-001 "))
+    api009 = next(item for item in walk_requests(collection["item"]) if item["name"].startswith("API-009 "))
+    api026 = next(item for item in walk_requests(collection["item"]) if item["name"].startswith("API-026 "))
     CompatibilityHandler.captured = []
+    CompatibilityHandler.forgot_status = 200
+    CompatibilityHandler.forgot_token_queue = []
+    CompatibilityHandler.reset_statuses = []
     server = ThreadingHTTPServer(("127.0.0.1", 0), CompatibilityHandler)
     thread = threading.Thread(target=server.serve_forever, daemon=True)
     thread.start()
     port = server.server_address[1]
     args = command + [
         "run", str(OUT_PATH), "--folder", api001["name"], "--env-var", f"baseUrl=http://127.0.0.1:{port}",
-        "--env-var", "fixtureReadyApi001=true", "--reporters", "cli",
+        "--reporters", "cli",
     ]
     try:
         result = subprocess.run(args, cwd=ROOT, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=120)
+        if result.returncode != 0:
+            raise RuntimeError("Newman representative compatibility run failed:\n" + result.stdout + "\n" + result.stderr)
+        if len(CompatibilityHandler.captured) != 2:
+            raise RuntimeError(f"Newman compatibility server expected fixture plus tested request, captured {len(CompatibilityHandler.captured)}")
+        fixture_capture, captured = CompatibilityHandler.captured
+        if fixture_capture["path"] != "/api/forgot-password" or json.loads(fixture_capture["body"]) != {"email": "test@domain.com"}:
+            raise RuntimeError("Newman did not establish the API-001 forgot-password fixture correctly")
+        if captured["studentId"] != "23127261":
+            raise RuntimeError(f"Newman did not inject expected X-Student-Id; captured {captured['studentId']!r}")
+        expected_body = api001["request"]["body"]["raw"].replace("{{otpApi001}}", "246810")
+        if captured["body"] != expected_body:
+            raise RuntimeError("Newman representative request body differed from the generated collection")
+
+        CompatibilityHandler.captured = []
+        CompatibilityHandler.forgot_status = 500
+        blocked_result = subprocess.run(args, cwd=ROOT, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=120)
+        if len(CompatibilityHandler.captured) != 1 or CompatibilityHandler.captured[0]["path"] != "/api/forgot-password":
+            raise RuntimeError("Newman transmitted the tested reset request after fixture establishment failed")
+
+        CompatibilityHandler.forgot_status = 200
+        flow_fixture_results = {}
+        for test_id, extra_vars in {
+            "API-078": ["registeredEmail=test@domain.com"],
+            "API-079": ["registeredEmail=test@domain.com"],
+            "API-080": ["registeredEmail=test@domain.com"],
+            "API-081": ["accountAEmail=account-a@domain.com", "accountBEmail=account-b@domain.com"],
+        }.items():
+            CompatibilityHandler.captured = []
+            CompatibilityHandler.reset_statuses = []
+            flow_args = command + [
+                "run", str(OUT_PATH), "--folder", f"{test_id} - reviewed multi-request flow",
+                "--env-var", f"baseUrl=http://127.0.0.1:{port}", "--reporters", "cli",
+            ]
+            for value in extra_vars:
+                flow_args.extend(["--env-var", value])
+            flow_result = subprocess.run(flow_args, cwd=ROOT, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=120)
+            if flow_result.returncode != 0:
+                raise RuntimeError(f"Newman {test_id} fixture-flow compatibility run failed:\n" + flow_result.stdout + "\n" + flow_result.stderr)
+            forgot_requests = [entry for entry in CompatibilityHandler.captured if entry["path"] == "/api/forgot-password"]
+            reset_requests = [entry for entry in CompatibilityHandler.captured if entry["path"] == "/api/reset-password"]
+            expected_forgot = 2 if test_id == "API-081" else 1
+            if len(forgot_requests) != expected_forgot or len(reset_requests) != 2:
+                raise RuntimeError(f"{test_id}: unexpected fixture/reset request counts in Newman compatibility run")
+            reset_bodies = []
+            for entry in reset_requests:
+                if not entry["body"]:
+                    continue
+                parsed = json.loads(entry["body"])
+                if isinstance(parsed, dict):
+                    reset_bodies.append(parsed)
+            reset_otps = [str(parsed["resetToken"]) for parsed in reset_bodies if "resetToken" in parsed]
+            if test_id in {"API-078", "API-080"} and reset_otps != ["246810", "246810"]:
+                raise RuntimeError(f"{test_id}: both flow requests did not reuse the issued OTP")
+            if test_id == "API-079" and reset_otps != ["246810"]:
+                raise RuntimeError("API-079: valid retry did not use the OTP issued before the empty-body step")
+            if test_id == "API-081":
+                forgot_bodies = [json.loads(entry["body"]) for entry in forgot_requests]
+                expected_forgot_bodies = [
+                    {"email": "account-a@domain.com"},
+                    {"email": "account-b@domain.com"},
+                ]
+                expected_reset_pairs = [
+                    ("account-a@domain.com", "246810"),
+                    ("account-b@domain.com", "135790"),
+                ]
+                actual_reset_pairs = [(body.get("email"), str(body.get("resetToken"))) for body in reset_bodies]
+                if forgot_bodies != expected_forgot_bodies:
+                    raise RuntimeError("API-081: fixture requests did not use Account A then Account B emails")
+                if actual_reset_pairs != expected_reset_pairs or len(set(reset_otps)) != 2:
+                    raise RuntimeError("API-081: steps did not use distinct account-specific OTPs")
+            flow_fixture_results[test_id] = {"forgotRequests": len(forgot_requests), "resetRequests": len(reset_requests)}
+            if test_id == "API-081":
+                flow_fixture_results[test_id].update({
+                    "fixtureEmails": ["account-a@domain.com", "account-b@domain.com"],
+                    "distinctAccountOtpsVerified": True,
+                })
+
+        CompatibilityHandler.captured = []
+        CompatibilityHandler.reset_statuses = []
+        CompatibilityHandler.forgot_token_queue = ["012345", "246810"]
+        numeric_args = command + [
+            "run", str(OUT_PATH), "--folder", api009["name"],
+            "--env-var", f"baseUrl=http://127.0.0.1:{port}", "--reporters", "cli",
+        ]
+        numeric_result = subprocess.run(numeric_args, cwd=ROOT, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=120)
+        if numeric_result.returncode != 0:
+            raise RuntimeError("Newman API-009 numeric-OTP compatibility run failed:\n" + numeric_result.stdout + "\n" + numeric_result.stderr)
+        if len(CompatibilityHandler.captured) != 3:
+            raise RuntimeError("API-009: expected leading-zero OTP attempt, regenerated OTP attempt, and one tested reset request")
+        if [json.loads(entry["body"]) for entry in CompatibilityHandler.captured[:2]] != [
+            {"email": "test@domain.com"}, {"email": "test@domain.com"},
+        ]:
+            raise RuntimeError("API-009: leading-zero regeneration did not repeat the fixture request for the same account")
+        numeric_body = json.loads(CompatibilityHandler.captured[2]["body"])
+        if numeric_body.get("resetToken") != 246810 or isinstance(numeric_body.get("resetToken"), bool):
+            raise RuntimeError("API-009: issued OTP value was not emitted as the same unquoted JSON number")
+
+        replay_args = command + [
+            "run", str(OUT_PATH), "--folder", api026["name"],
+            "--env-var", f"baseUrl=http://127.0.0.1:{port}", "--reporters", "cli",
+        ]
+        CompatibilityHandler.captured = []
+        CompatibilityHandler.reset_statuses = [200, 400]
+        replay_result = subprocess.run(replay_args, cwd=ROOT, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=120)
+        if replay_result.returncode != 0:
+            raise RuntimeError("Newman API-026 consumed/replay compatibility run failed:\n" + replay_result.stdout + "\n" + replay_result.stderr)
+        if len(CompatibilityHandler.captured) != 3:
+            raise RuntimeError("API-026: expected OTP request, successful setup reset, and tested replay request")
+        replay_fixture, consume_capture, replay_capture = CompatibilityHandler.captured
+        consume_body = json.loads(consume_capture["body"])
+        replay_body = json.loads(replay_capture["body"])
+        if json.loads(replay_fixture["body"]) != {"email": "test@domain.com"}:
+            raise RuntimeError("API-026: forgot-password fixture used the wrong email")
+        if consume_body != {"email": "test@domain.com", "resetToken": "246810", "newPassword": "FixtureConsumed1!"}:
+            raise RuntimeError("API-026: setup reset did not consume the issued OTP as specified")
+        if replay_body != {"email": "test@domain.com", "resetToken": "246810", "newPassword": "AnotherPassword123!"}:
+            raise RuntimeError("API-026: tested replay did not reuse the consumed OTP")
+
+        CompatibilityHandler.captured = []
+        CompatibilityHandler.reset_statuses = [500]
+        blocked_replay_result = subprocess.run(replay_args, cwd=ROOT, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=120)
+        if len(CompatibilityHandler.captured) != 2:
+            raise RuntimeError("API-026: tested replay request was transmitted after setup reset failure")
+        if CompatibilityHandler.captured[0]["path"] != "/api/forgot-password" or CompatibilityHandler.captured[1]["path"] != "/api/reset-password":
+            raise RuntimeError("API-026: failed-setup compatibility path captured unexpected requests")
+        replay_fixture_results = {
+            "successfulSetup": {"forgotRequests": 1, "setupResetRequests": 1, "testedReplayRequests": 1},
+            "failedSetup": {"forgotRequests": 1, "setupResetRequests": 1, "testedReplayRequests": 0},
+        }
     finally:
         server.shutdown()
         server.server_close()
         thread.join(timeout=5)
-    if result.returncode != 0:
-        raise RuntimeError("Newman representative compatibility run failed:\n" + result.stdout + "\n" + result.stderr)
-    if len(CompatibilityHandler.captured) != 1:
-        raise RuntimeError(f"Newman compatibility server expected 1 request, captured {len(CompatibilityHandler.captured)}")
-    captured = CompatibilityHandler.captured[0]
-    if captured["studentId"] != "23127261":
-        raise RuntimeError(f"Newman did not inject expected X-Student-Id; captured {captured['studentId']!r}")
-    if captured["body"] != api001["request"]["body"]["raw"]:
-        raise RuntimeError("Newman representative request body differed from the generated collection")
     version_result = subprocess.run(command + ["--version"], cwd=ROOT, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=60)
     version = version_result.stdout.strip() if version_result.returncode == 0 else "unknown"
     collection_hash = sha256(OUT_PATH)
@@ -599,12 +1094,20 @@ def newman_validate(command):
         "collectionSha256": collection_hash,
         "newman": {
             "status": "PASS", "validatedAt": now_gmt7(), "version": version,
-            "scope": "Representative API-001 compatibility run against a local mock; not full-suite functional SUT execution",
-            "requestsExecuted": 1, "sutExecuted": False, "studentIdHeaderCaptured": captured["studentId"],
+            "scope": "Local-mock compatibility runs for API-001, API-009, API-026, and fixture flows API-078 through API-081; not full-suite functional SUT execution",
+            "requestsExecuted": 11, "mockHttpRequestsCaptured": 24, "newmanRuns": 9,
+            "sutExecuted": False, "studentIdHeaderCaptured": captured["studentId"],
+            "automaticOtpFixtureVerified": True, "failedFixtureBlocksTestedRequest": True,
+            "numericIssuedOtpVerified": {
+                "testId": "API-009", "leadingZeroOtpRegenerated": "012345",
+                "issuedString": "246810", "sentJsonNumber": 246810,
+            },
+            "consumedReplayFixtureVerified": replay_fixture_results,
+            "fixtureFlowsVerified": flow_fixture_results,
         },
     })
     save_state(state)
-    print(f"NEWMAN PASS: {version}; representative API-001 local-mock run only; real SUT not executed")
+    print(f"NEWMAN PASS: {version}; API-001/API-009/API-026 and fixture-flow local-mock runs only; real SUT not executed")
 
 
 def render_report():
@@ -623,7 +1126,11 @@ def render_report():
         "- Ordinary rows map to one request; the six explicitly multi-request rows map to named flow folders with two requests each.",
         "- Structured `Headers`, `Body`, and `Raw Body` inputs are mapped to HTTP headers and raw payloads; metadata wrappers are never transmitted.",
         "- `X-Student-Id` is injected by the collection-level pre-request script from `{{studentId}}` (`23127261`) and logged to the Postman/Newman console.",
-        "- Empty required fixture variables and unconfirmed server-state fixtures throw `BLOCKED / NOT EXECUTABLE` in the request pre-request script before transmission.",
+        "- Valid OTP baseline values are generated immediately before each independent case through `POST /api/forgot-password`; intentional API-078/API-079/API-080 flows issue once in step 1 and reuse the same OTP in step 2.",
+        "- API-009 and API-044 preserve a freshly issued OTP's decimal value while emitting it as an unquoted JSON number. Leading-zero OTPs are regenerated up to five fixture attempts, then the case is blocked rather than changing the value.",
+        "- Cross-account cases validate both registered accounts before readiness; API-081 issues both account OTPs before step 1 and carries Account B's untouched OTP into step 2.",
+        "- A fixture's `fixtureReadyApiXXX` flag is cleared before setup and set to `true` only after a 200 forgot-password response returns a six-decimal-digit `resetToken`; replay fixtures additionally require a successful first reset.",
+        "- Empty required fixture inputs and fixtures that cannot be objectively established throw `BLOCKED / NOT EXECUTABLE` before the tested request is transmitted.",
         "", "## Traceability, fixtures, and oracle coverage", "",
         "| Test ID | Category | Generated request(s) | Automated status oracle(s) | Required runtime fixtures | Execution / oracle classification |",
         "|---|---|---|---|---|---|",
@@ -639,7 +1146,10 @@ def render_report():
         "- API-078 step 1 accepts only a `4xx` client-error status (`400`–`499`). `415 Unsupported Media Type` remains the preferred human/external HTTP expectation rather than a specification requirement; any safe `4xx`, including `400 Bad Request`, is acceptable when the same-OTP JSON retry succeeds.",
         "- API-076 automatically compares the two responses' status, Content-Type, redirect/no-redirect behavior, representation type, and normalized JSON or exact non-JSON body. Only fields predeclared in `api076NondeterministicFields` are removed. Password state, token leakage, and account-metadata disclosure still require the reviewed external/manual oracle.",
         "- Cases labeled `PARTIALLY AUTOMATED / MANUAL ORACLE REQUIRED` retain their full reviewed result in request descriptions; no response-body, persistence, timing, password-state, OTP-state, database, concurrency, or rate-limit assertion is invented.",
-        "- API-075 is a single request template, not an automated repeated-guess loop. It remains blocked until an authoritative abuse-control limit is supplied and then requires manual or data-driven repeated execution through that exact configured trigger. API-025, API-065, and API-072 remain blocked until the real expiry point is configured or objectively observed.",
+        "- Literal invalid OTP values remain unchanged whenever token omission, type, shape, issuance, or other invalid-token behavior is the tested dimension.",
+        "- API-026/API-066/API-073 readiness is set only after the setup reset successfully consumes the issued OTP; a failed setup reset skips the tested replay request.",
+        "- API-077 requests are deliberately blocked in collection/Newman runs because those runners dispatch the folder sequentially; only a true concurrent harness with a synchronization barrier can execute the reviewed race case.",
+        "- API-075 is a single request template, not an automated repeated-guess loop. It remains blocked until an authoritative abuse-control limit is supplied and then requires manual or data-driven repeated execution through that exact configured trigger. API-025, API-065, and API-072 remain blocked until the real expiry point is configured or objectively observed. API-013 remains blocked until the exact controlled OTP `012345` is objectively issued.",
         "", "## Reproducible validation workflow", "",
         "The generator does not rewrite this report during `generate`. Results are keyed to the collection SHA-256 in `postman/pool-a-validation-results.json`, so rerunning deterministic generation preserves successful results for the identical collection. The final report is written only after all gates pass:", "",
         "```powershell",
@@ -654,7 +1164,7 @@ def render_report():
         f"- Collection SHA-256: `{collection_hash}`",
         f"- Deterministic whole-collection static validation: **PASS** ({state['static']['validatedAt']}). Verified 82 logical IDs, {state['static']['generatedRequests']} generated requests, all six expected two-request flows, no unexpected/missing IDs, no undefined variables, and no request body/header mismatches against the reviewed CSV representation. A separate validation path independently checked all {state['static']['independentStructuredMappings']} structured `Headers`/`Body`/`Raw Body` rows without using the generator's `request_specs()` mapping.",
         f"- Full supplied Postman Collection v2.1 schema validation: **PASS** ({state['schema']['validatedAt']}) using `{state['schema']['schemaPath']}`.",
-        f"- Newman {state['newman']['version']} structural/script compatibility: **PASS** ({state['newman']['validatedAt']}). One representative API-001 request ran against a local mock; collection-level header injection, fixture gating, request serialization, console scripting, and the status assertion executed successfully.",
+        f"- Newman {state['newman']['version']} structural/script compatibility: **PASS** ({state['newman']['validatedAt']}). Local-mock runs verified API-001 setup handling, API-009 numeric serialization, API-026 consumed/replay setup success and failure, one-OTP reuse across API-078/API-079/API-080, and distinct Account A/Account B OTPs for API-081; readiness timing, failed-fixture request skipping, headers, serialization, scripts, and status assertions executed successfully.",
         "- Actual SUT execution: **NOT PERFORMED**. The Newman compatibility result does not claim that the full 82-case suite was functionally executed or that any SUT behavior passed.",
     ])
     REPORT_PATH.write_text("\n".join(lines) + "\n", encoding="utf-8")
