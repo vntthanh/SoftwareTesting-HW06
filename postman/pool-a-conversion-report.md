@@ -117,7 +117,7 @@ newman run postman\pool-a-forgot-password.postman_collection.json --env-var base
 ## Validation results
 
 - Collection SHA-256: `D63A790201DC1D0AF64C43D2983DF6CDAF01537F7A96434D23A5D3E66118A010`
-- Static: **PASS** (2026-08-22 10:31:27 GMT+7); 82 IDs, 88 requests, 73 fixture rows matched to the seeder manifest, 36 structured mappings independently checked, all blocked cases use skipRequest, X-Student-Id injection present, and zero forgot-password references.
-- Full Postman v2.1 schema: **PASS** (2026-08-22 10:31:48 GMT+7) using `postman/postman-v2.1.0-schema.json`.
+- Static: **PASS** (2026-08-23 09:43:47 GMT+7); 82 IDs, 88 requests, 73 fixture rows matched to the seeder manifest, 36 structured mappings independently checked, all blocked cases use skipRequest, X-Student-Id injection present, and zero forgot-password references.
+- Full Postman v2.1 schema: **PASS** (2026-08-23 09:43:48 GMT+7) using `postman/postman-v2.1.0-schema.json`.
 - Newman 6.2.2: **PASS** (2026-08-22 10:32:51 GMT+7); 9 local-mock runs, blocked request skipped, X-Student-Id captured, and zero forgot-password requests.
-- Full-suite SUT conformance execution: **NOT PERFORMED**.
+- Full-suite SUT conformance execution was outside this conversion-validation step. The later real-SUT evidence is preserved in `reports/pool-a/pool-a.json` and `reports/pool-a/pool-a.html`, and analyzed in `Main_Report.md` Section A.8.

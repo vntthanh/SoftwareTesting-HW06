@@ -22,6 +22,10 @@
 | B | FR-09 – Discount Coupons | `POST /api/apply-coupon` | Coupon eligibility, amount boundaries, user constraints, calculation |
 | C | FR-18 – Admin Order Management | `PUT /api/admin/orders/:id/status` | Authorization, order-state transitions, invalid transitions |
 
+Execution identity evidence: the Postman console in [`bug_fr03-unsupported-content-type-server-error.png`](issues/evidence/bug_fr03-unsupported-content-type-server-error.png) shows the collection pre-request log `X-Student-Id: 23127261` for a real request to the local SUT. The same collection-level injection pattern is used by all three reviewed collections, and the Newman artifacts retain the corresponding runtime assertions or request headers.
+
+The full-suite GitHub Actions design and the still-pending two-commit evidence checklist are documented in [`CI_CD_Report.md`](CI_CD_Report.md). The CI requirement remains incomplete until the genuine green and intentional-single-failure runs are pushed and their links and screenshots replace the report placeholders.
+
 ## 3. Agent Skills
 
 ### 3.1. Agent Skills Overall
@@ -127,7 +131,7 @@ The complete analysis is stored in [`review/pool-a/reports/security-report.md`](
 
 ### A.6. AI-Generated Test Cases
 
-The final reviewed test cases for this pool are stored in: [`test-cases/a-forgot-password.csv`](test-cases/a-forgot-password.csv)
+The final reviewed test cases for this pool are stored in [`test-cases/a-forgot-password.csv`](test-cases/a-forgot-password.csv). The audited AI-generated subset is stored in [`review/pool-a/candidate-api-tests.csv`](review/pool-a/candidate-api-tests.csv).
 
 The test cases were derived from the reviewed analyses in Sections A.2–A.5.
 
@@ -139,7 +143,7 @@ The test cases were derived from the reviewed analyses in Sections A.2–A.5.
 | Security Testing | 9 |
 | **Total** | **76** |
 
-The suite uses stable IDs `API-001`–`API-082` and exactly nine traceability fields per record. Every case targets `POST /api/reset-password`. The 76 specialist-generated cases retain their provisional specialist IDs in `Assumptions / Notes`; `API-077`–`API-082` are the six human-authored additions documented in Section A.7. Validation found no missing fields, duplicate IDs, endpoint/category mismatches, or unexpected logical cases. Coverage includes `CR-001`–`CR-007`, `CR-009`–`CR-012`, `DP-001`–`DP-026`, `DB-001`–`DB-006`, `TR-001`–`TR-005`, and `SS-001`–`SS-009`; `CR-008` is explicitly unresolved because confirmation-password transport is not documented.
+The suite uses stable IDs `API-001`–`API-082` and exactly nine traceability fields per record. Every case targets `POST /api/reset-password`. The 76 specialist-generated cases retain their provisional specialist IDs in `Assumptions / Notes`; `API-077`–`API-082` are the six human-authored additions documented in Section A.7. The audited candidate artifact adds a `Verdict` and an `Audit Reason` to every AI-generated row; all retained cases are `VALID (after revise)` with case-level reasoning. Validation found no missing fields, duplicate IDs, endpoint/category mismatches, or unexpected logical cases. Coverage includes `CR-001`–`CR-007`, `CR-009`–`CR-012`, `DP-001`–`DP-026`, `DB-001`–`DB-006`, `TR-001`–`TR-005`, and `SS-001`–`SS-009`; `CR-008` is explicitly unresolved because confirmation-password transport is not documented.
 
 Eight specialist-generated cases were revised after review: `API-025`, `API-030`, `API-059`, `API-065`, `API-068`, `API-072`, `API-075`, and `API-076`. These revisions clarified exploratory behavior, valid additional password characters, observable/configurable expiry preconditions, white-box storage verification, configured rate limits, and account-enumeration comparison rules. Six human-authored cases were then added as `API-077`–`API-082`. Revalidation preserved all 82 IDs and coverage.
 
@@ -276,7 +280,7 @@ HTTP 4xx/5xx responses are classified only through their automated assertions; t
 - The embedded collection supplied the authoritative intended set: 88 leaf request items grouped into 82 stable Test IDs. All observed main requests matched collection items by immutable item ID; no ambiguous or unmatched execution remained.
 - Four logical cases remain explicitly blocked before dispatch: `API-025`, `API-065`, and `API-072` because no observable/configurable OTP-expiry state is available, and `API-075` because no authoritative abuse-control threshold is available.
 - `API-026`, `API-066`, and `API-073` each issue a first-use reset through pre-request `pm.sendRequest` before the collection replay request. These three helper calls reconcile Newman’s 85 request total with 82 executed collection leaf requests. The JSON repeats each main execution object twice with identical cursor/request/response/assertion identity; each duplicate pair was correlated once for logical-case and assertion analysis. Newman’s source assertion totals then reconcile exactly to 82 assertions: 59 passed and 23 failed.
-- `API-030` completed with HTTP 200 but defined no automated assertion; its `PASS` status means execution completed without request/runtime error, while its exploratory manual oracle remains pending.
+- `API-030` completed with HTTP 200 but defined no automated assertion; its `PASS` status means execution completed without request/runtime error. Final review classifies it as `exploratory` because the specification provides no additional-property oracle.
 - `API-080` contains two failed assertions across its two ordered steps, so the run has 23 failed assertions but 22 distinct logical cases with failed assertions.
 - Manual-oracle requirements are independent of automated status. Automated results do not satisfy the explicitly retained checks, including storage inspection, password/OTP state verification, side-effect review, configured abuse-control execution, and true concurrency.
 - `API-077` was blocked only in sequential Newman execution, then separately verified with a synchronized concurrency harness and received a final `PASS`.
@@ -390,7 +394,7 @@ The AI missed these cases mainly because the initial generation focused on repre
 
 The generated domain tests also covered the main documented coupon fixtures and representative boundaries, but did not systematically test every documented coupon at its own threshold or additional valid percentage values such as 1% and 100%.
 
-The security analysis tested JWT validity, SQL-like inputs, and per-user usage limits, but did not combine authentication identity with a manipulated `user_id` to check for usage-limit bypass. This gap requires a human security assumption because the exact JWT-to-body-user binding rule is not documented.
+The security analysis tested JWT validity, SQL-like inputs, and per-user usage limits, but did not combine authentication identity with a manipulated `user_id` to characterize JWT/body-user interaction. Human review added that combination, then withdrew the original rejection assumption because the specification does not define an identity-binding rule; `API-072` is therefore exploratory.
 
 These gaps show that specification-based AI generation can provide broad coverage, but human review is still useful for finding robustness cases, additional boundary combinations, and security interactions between otherwise separate input conditions.
 
@@ -402,7 +406,7 @@ The seven human-authored cases above are merged into the final CSV as `API-068`�
 
 This analysis uses the real Newman JSON artifact [`reports/pool-b/pool-b-run.json`](reports/pool-b/pool-b-run.json), the 74 reviewed cases in [`test-cases/b-discount-coupons.csv`](test-cases/b-discount-coupons.csv), the generated collection in [`postman/pool-b-discount-coupons.postman_collection.json`](postman/pool-b-discount-coupons.postman_collection.json), and [`reference/api_specification.md`](reference/api_specification.md). Pool A Section A.8 supplies the presentation format. The original full-run evidence remains unchanged; the later triage resolution corrected only the faulty `API-067` assertion and the unsupported `API-072` human oracle.
 
-Execution status and defect triage are deliberately separate. `FAIL_ASSERTION` means that a reviewed automated oracle failed; it does not by itself prove an SUT defect. Likewise, `PASS` with `NO_AUTOMATED_ASSERTIONS` confirms only that the request completed, while its explicit manual oracle remains pending.
+Execution status and defect triage are deliberately separate. `FAIL_ASSERTION` means that a reviewed automated oracle failed; it does not by itself prove an SUT defect. Likewise, `PASS` with `NO_AUTOMATED_ASSERTIONS` confirms only that the request completed. The later final-review resolution supplies the conformance, blocked, or exploratory disposition.
 
 #### Run summary
 
@@ -542,7 +546,7 @@ Six cases had no automated assertion but produced evidence that conflicts with a
 | API-035 | `SUT_BUG` | The manually observed percent result was `-4500005` / `5000005.5`, not the documented 10% / final-amount formulas. |
 | API-047 | `SUT_BUG` | The manually observed percent result was `-2700009` / `3000010`, not the documented formulas; precision policy cannot explain the magnitude or sign. |
 
-All other explicit manual-oracle cases remain `NEEDS_MANUAL_REVIEW`: `API-004`–`API-012`, `API-015`, `API-017`–`API-019`, `API-023`–`API-030`, `API-032`, `API-034`, `API-036`–`API-046`, `API-048`, `API-050`, `API-053`, `API-055`, `API-056`, `API-058`, `API-059`, `API-065`, `API-066`, and the now-exploratory `API-072`. `API-067` no longer retains a pending manual oracle because implementation inspection and the targeted before/after database comparison supplied the required evidence. The total remains 50: `API-067` was completed while `API-072` became an explicit manual observation.
+The 50 explicit manual-oracle cases are finally adjudicated in the [`Final Manual and Execution-Only Review Resolution`](reports/manual-execution-review-resolution.md): 15 `PASS`, 6 `FAIL`, 2 `BLOCKED`, and 27 `exploratory`. `API-067` remains completed by implementation inspection and the targeted before/after database comparison; `API-072` remains an exploratory observation because its former identity-binding oracle was unsupported.
 
 No case is classified as `SETUP_DEFECT`: all 74 fixture states were reset and verified by the authenticated local controller, every intended ID ran, and Newman recorded no request, pre-request-script, or test-script errors.
 
@@ -555,7 +559,7 @@ No case is classified as `SETUP_DEFECT`: all 74 fixture states were reset and ve
 - Return a controlled 4xx response for unsupported body media types and rerun `API-068`; retain `API-069` as the zero-byte-body robustness check.
 - `API-067` is resolved: retain the corrected diagnostic assertion and the implementation/database evidence; do not report the historical failed assertion as an SUT bug.
 - `API-072` is resolved as an unsupported requirement assumption: do not file a bug from its historical failure. The reviewed row and collection now preserve it only as an exploratory identity-scoping observation. A future binding requirement would need an authoritative specification change before becoming an automated oracle.
-- Complete the remaining 50 explicit manual checks. Apart from the two resolved triage corrections, no Pool B case was redesigned or expanded.
+- Retain the final disposition of all 50 explicit manual checks in the [`Final Manual and Execution-Only Review Resolution`](reports/manual-execution-review-resolution.md); do not promote exploratory observations or blocked evidence gaps to SUT defects.
 
 #### Targeted `API-067` rerun and implementation evidence
 
@@ -577,7 +581,7 @@ The original `API-067` 200 response could not prove or disprove parameterization
 - All 74 intended collection leaf requests were observed; there are no blocked, skipped, filtered, or not-executed cases.
 - Newman `run.stats` reports 148 requests because the runtime performs one fixture-reset helper request for each of the 74 SUT requests. The embedded collection still contains 74 reviewed leaf requests.
 - The detailed execution array repeats each SUT execution object twice with the same immutable item ID and `httpRequestId`. Correlating those duplicate representations yields 74 logical executions, 27 assertions, and 20 assertion failures, matching Newman statistics; no duplicate error was counted twice.
-- HTTP 4xx/5xx responses were not classified as failures merely because of status. `API-068` fails because its explicit assertion requires a status below 500; exploratory cases without a fixed HTTP oracle retain execution-only `PASS` plus a pending manual oracle.
+- HTTP 4xx/5xx responses were not classified as failures merely because of status. `API-068` fails because its explicit assertion requires a status below 500; cases without a fixed HTTP oracle retain execution-only `PASS` and receive a final `exploratory` verdict.
 - The original full-run totals remain 27 assertions (7 passed, 20 failed). The isolated corrected `API-067` rerun contributes a separate 1 passed assertion and does not rewrite the historical artifact. `API-072` was not rerun; its historical assertion failure is retained as evidence of the withdrawn test oracle, not as a product failure.
 
 ## Pool C: Admin Order Management
@@ -677,7 +681,7 @@ AI traceability is complete for `CR-001`–`CR-013`, `DP-001`–`DP-028`, `TR-00
 
 Same-category semantic deduplication removed two DOMAIN records by merging former `API-024`, `API-030`, and `API-036` into retained `API-024`. All three used the same valid pending-to-confirmed request and semantic outcome. The retained case preserves `DP-001`, `DP-007`, and `DP-013` plus provisional specialist IDs `DOMAIN-P001`, `DOMAIN-P007`, and `DOMAIN-P013`.
 
-Final validation confirmed 85 sequential unique IDs, the exact nine-column final schema, endpoint/category consistency, non-empty required content, unchanged AI-generated rows `API-001`–`API-079`, and clear ordered steps for the six human workflows. Unspecified behavior remains unresolved: no AI case invents numeric HTTP statuses, response schemas, exact messages, identifier rules, same-state semantics, or unsupported JWT mechanics. Pool C Postman generation and Newman execution have not yet been performed; execution analysis belongs in Section C.8 after those artifacts exist.
+Final validation confirmed 85 sequential unique IDs, the exact nine-column final schema, endpoint/category consistency, non-empty required content, unchanged AI-generated rows `API-001`–`API-079`, and clear ordered steps for the six human workflows. Unspecified behavior remains unresolved: no AI case invents numeric HTTP statuses, response schemas, exact messages, identifier rules, same-state semantics, or unsupported JWT mechanics. Pool C Postman generation and Newman execution were subsequently completed; Section C.8 analyzes the resulting collection and Newman JSON/HTML evidence.
 
 ### C.7. Human Cases
 
@@ -843,8 +847,14 @@ These are four bug candidates, not eight separate defects. Any issue report shou
 
 #### Manual-oracle and coverage notes
 
-- Twenty-six execution-only cases still require review because their reviewed purpose is characterization rather than an automated conformance oracle: `API-002`–`API-004`, `API-009`–`API-014`, `API-016`, `API-017`, `API-022`, `API-023`, `API-026`–`API-029`, and `API-041`–`API-049`. Their only Newman assertion checks the required student header.
-- `API-080` additionally retains confirmation of the human/external 4xx robustness authority. Its failed assertion and unhandled-exception evidence remain preserved regardless of that review.
+- Final review classifies all twenty-six execution-only characterization cases as `exploratory`: `API-002`–`API-004`, `API-009`–`API-014`, `API-016`, `API-017`, `API-022`, `API-023`, `API-026`–`API-029`, and `API-041`–`API-049`. Their only Newman assertion checks the required student header, and the specification supplies no behavior oracle.
+- Final review classifies `API-080` as `FAIL` under its explicit reviewed human/external 4xx robustness oracle: the observed 500 and unhandled exception contradict that oracle, while captured state evidence proves step 1 did not mutate the order.
 - Source inspection completed the non-black-box parameterization question for `API-077`–`API-079`: the lookup and update statements use `?` placeholders with separate parameter arrays, consistent with their passing whole-table state oracles.
 - The detailed execution array contains 34 item IDs represented twice and 59 represented three times. This is explained exactly by the helper traffic: every logical ID has one reset, and 67 leaf requests perform a state query; eight continuation steps have a state query but no additional reset. The reconstructed 93 unique items and 298 unique assertions match `run.stats` exactly.
-- HTTP 4xx/5xx values were not treated as failures by themselves. `API-011` remains an execution-only manual-review case despite HTTP 500; `API-080` fails because its explicit reviewed assertion requires 4xx.
+- HTTP 4xx/5xx values were not treated as failures by themselves. `API-011` is finalized as execution-only `exploratory` despite HTTP 500; `API-080` fails because its explicit reviewed assertion requires 4xx.
+
+## Final Manual and Execution-Only Review Resolution
+
+All remaining manual-oracle and execution-only cases across Pools A, B, and C have been adjudicated without changing the historical Newman results. The authoritative per-case final-review verdicts and evidence limits are recorded in [`reports/manual-execution-review-resolution.md`](reports/manual-execution-review-resolution.md).
+
+The 98 reviewed cases resolve to **15 PASS, 15 FAIL, 14 BLOCKED, and 54 exploratory**. A `BLOCKED` verdict means the required persistence, implementation, timing, expiry, or configuration evidence is unavailable; an `exploratory` verdict means the specification defines no pass/fail oracle for the observed behavior.

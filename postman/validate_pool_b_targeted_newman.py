@@ -58,7 +58,10 @@ def response_for(item):
 def main():
     collection = json.loads(COLLECTION_PATH.read_text(encoding="utf-8"))
     items = {item["name"][:7]: item for folder in collection["item"] for item in folder["item"]}
-    selected = ["API-001", "API-040", "API-041", "API-052", "API-053", "API-063", "API-072"]
+    selected = [
+        "API-001", "API-040", "API-041", "API-052", "API-053",
+        "API-063", "API-068", "API-069", "API-072",
+    ]
     with tempfile.TemporaryDirectory(prefix="pool-b-newman-") as temp_dir:
         database_path = Path(temp_dir) / "database.sqlite"
         connection = sqlite3.connect(database_path)
@@ -132,7 +135,7 @@ def main():
         "fullNewmanSuiteExecuted": False,
     }
     VALIDATION_PATH.write_text(json.dumps(validation, indent=2) + "\n", encoding="utf-8")
-    print("TARGETED NEWMAN PASS: 7 representative requests; fixture reset hook, conflicting counts, dates, JWT variants, student header, and restoration verified")
+    print("TARGETED NEWMAN PASS: 9 representative requests; fixture reset hook, conflicting counts, dates, JWT variants, robustness assertions, student header, and restoration verified")
 
 
 if __name__ == "__main__":

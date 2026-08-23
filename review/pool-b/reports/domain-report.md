@@ -205,7 +205,7 @@ No source-supported length boundary exists for `code`; no numeric identifier bou
 
 ## Review block
 
-- **Review Status:** PENDING
-- **Reviewer:** _Unassigned_
-- **Review Notes:** _Revised per review to state explicitly that active/inactive, expiry, and per-user usage-limit conditions remain DOMAIN state-dependent preconditions, while endpoint-driven STATE transition testing is NOT_APPLICABLE because no mutation or destination state is documented. All previously approved DOMAIN partitions, boundaries, classifications, and gaps are preserved. Awaiting human approval of this exact revised version; no test generation is authorized._
+- **Review Status:** APPROVED
+- **Reviewer:** Human review (2026-08-23)
+- **Review Notes:** Approved after final cross-artifact review. Active/inactive, expiry, and per-user usage-limit conditions remain DOMAIN state-dependent preconditions, while endpoint-driven STATE transition testing is NOT_APPLICABLE because no mutation or destination state is documented. The partitions, boundaries, classifications, gaps, and retained candidate traceability are consistent with the authoritative sources.
 - **Reviewed Version:** `POOL-B-DOMAIN-v2`

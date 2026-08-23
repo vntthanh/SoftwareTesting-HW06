@@ -60,7 +60,7 @@ C:\Users\xing0\AppData\Local\Python\bin\python.exe postman\validate_pool_b_targe
 C:\Users\xing0\AppData\Local\Python\bin\python.exe .agents\skills\postman-test-generator\scripts\validate_postman_collection.py postman\pool-b-discount-coupons.postman_collection.json postman\postman-v2.1.0-schema.json
 ```
 
-The first command tests all 74 reset states and restoration against a temporary SQLite database, and opens the existing SUT database read-only for schema validation. The second runs only seven representative collection requests against local fixture/SUT mocks. It is not the full Newman suite and does not contact the real SUT.
+The first command tests all 74 reset states and restoration against a temporary SQLite database, and opens the existing SUT database read-only for schema validation. The second runs nine representative collection requests against local fixture/SUT mocks, including the two human-added robustness assertions. It is not the full Newman suite and does not contact the real SUT.
 
 ## Inspect one case after the SUT is started
 

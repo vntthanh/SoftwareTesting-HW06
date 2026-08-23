@@ -88,9 +88,9 @@ All example values below are inert design inputs only. They were not sent to a s
 
 ## Human review
 
-- Review Status: PENDING
-- Reviewer:
-- Review Notes:
+- Review Status: APPROVED
+- Reviewer: Human review (2026-08-23)
+- Review Notes: Approved after final cross-artifact review. SEC-02 and SEC-05 applicability, the limits of black-box parameterization evidence, and the absence of a specified JWT/body identity-binding rule are correctly preserved in the retained candidates and execution triage.
 - Reviewed Version: `security-report-v2; endpoint-context API 488CBCB790099BA9CBB34C7C80BA04C6AEC9E9EBB598F031FFA575737547B139 / requirements 7859599624A8F94E7B28859F5E3EDBEE71F275E1A71043E3EFCAB10D5EE14CDD`
 
-Generation is blocked until a human changes the review status for this exact report version to `APPROVED` or explicitly approves this exact version. The report author does not self-approve.
+The exact report version above is approved for the retained Pool B suite.

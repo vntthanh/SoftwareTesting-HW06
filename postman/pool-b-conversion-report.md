@@ -6,7 +6,7 @@
 - Collection: `postman/pool-b-discount-coupons.postman_collection.json`.
 - Mapping: 74 CSV rows to 74 Postman requests; no cases added, removed, merged, or expanded.
 - Categories: CONTRACT 17; DOMAIN 48; STATE 0; SECURITY 9.
-- Automated machine-checkable assertions: 27 cases; remaining cases preserve manual/exploratory oracles.
+- Automated machine-checkable assertions in the current collection: 26 cases; remaining cases preserve manual/exploratory oracles. The immutable original full-run artifact contains 27 historical assertions because `API-072` still had its subsequently withdrawn identity-binding oracle at execution time.
 - Expected HTTP status assertions: none, because the reviewed CSV intentionally defines no concrete success or failure status codes.
 
 ## Runtime fixture strategy
@@ -17,7 +17,7 @@
 - `postman/run_pool_b_with_fixtures.py` is the canonical full-run entry point. It snapshots the original coupon/usage and controlled-user state, starts an authenticated localhost fixture controller, resets the database before each request, supplies JWT variables, and restores the snapshot in `finally`.
 - The collection-level pre-request hook extracts the reviewed Test ID from the unchanged request name, calls the local reset endpoint, and skips the SUT request if setup is missing or fails.
 - Conflicting states cannot leak: API-040/041, API-054/055/056, API-057/058/059, and API-072 each receive their exact prior-use count immediately before execution.
-- `postman/pool-b-runtime-validation.json` records all-74 temporary-database reset/restore validation, read-only SUT-schema compatibility, JWT validation, and a targeted seven-request Newman compatibility run.
+- `postman/pool-b-runtime-validation.json` records all-74 temporary-database reset/restore validation, read-only SUT-schema compatibility, JWT validation, and a targeted nine-request Newman compatibility run.
 
 ## Runtime variables
 
@@ -98,12 +98,12 @@
 | API-064 | SECURITY | 1 | Response does not expose both successful-calculation fields | Preconditions: SAVE10 and user_id 1 otherwise satisfy every FR-09 coupon eligibility condition; an isolated non-production JWT that the test environment establishes as expired is available. |
 | API-065 | SECURITY | 1 | Response does not expose both successful-calculation fields | Preconditions: A valid non-production test JWT is present; the coupon database contains only isolated controlled fixtures; no coupon has the literal code supplied; user_id 1 has controlled usage data. Database/query-structure, diagnostics, and persistent-state security effects require authorized external observation. |
 | API-066 | SECURITY | 1 | Response does not expose both successful-calculation fields | Preconditions: A valid non-production test JWT is present; coupon and usage records are isolated controlled fixtures with baseline snapshots available. Database/query-structure, diagnostics, and persistent-state security effects require authorized external observation. |
-| API-067 | SECURITY | 1 | Response does not expose both successful-calculation fields | Preconditions: A valid non-production test JWT is present; coupon and per-user usage records are isolated controlled fixtures; no user is identified by the supplied literal user_id value; baseline database snapshots are available. Database/query-structure, diagnostics, and persistent-state security effects require authorized external observation. |
-| API-068 | CONTRACT | 1 | HTTP status is below 500 | Preconditions: SAVE10 exists with its documented 10% value and 300000 minimum, is active and unexpired; user_id 1 has zero prior uses; a valid JWT is available. |
-| API-069 | CONTRACT | 1 | HTTP status is below 500 | Preconditions: A valid JWT is available. No coupon fixture should be reached because the request body contains zero bytes and supplies none of the documented members. |
+| API-067 | SECURITY | 1 | Response exposes no database query diagnostics | Preconditions: A valid non-production test JWT is present; coupon and per-user usage records are isolated controlled fixtures; no user is identified by the supplied literal user_id value; baseline database snapshots are available. The corrected black-box assertion passed in `reports/pool-b/api-067-rerun.json`; bound-query source inspection and unchanged before/after database state complete the non-black-box checks. |
+| API-068 | CONTRACT | 1 | HTTP status is below 500; response does not expose both successful-calculation fields | Preconditions: SAVE10 exists with its documented 10% value and 300000 minimum, is active and unexpired; user_id 1 has zero prior uses; a valid JWT is available. |
+| API-069 | CONTRACT | 1 | HTTP status is below 500; response does not expose both successful-calculation fields | Preconditions: A valid JWT is available. No coupon fixture should be reached because the request body contains zero bytes and supplies none of the documented members. |
 | API-070 | DOMAIN | 1 | Response does not expose both successful-calculation fields | Preconditions: No coupon with code "" exists; total_amount 500000, user_id 1 with remaining usage, and a valid JWT satisfy all non-code conditions. |
 | API-071 | DOMAIN | 1 | JSON discount_amount=100000; final_amount=200000 | Preconditions: VIP100 exists with type fixed, discount_value 100000, min_order_amount 300000, max_uses_per_user 2, is active and unexpired; user_id 1 has zero prior uses; a valid JWT is available. |
-| API-072 | SECURITY | 1 | Response does not expose both successful-calculation fields | Preconditions: A valid JWT authenticates a controlled user who has already reached SAVE10's max_uses_per_user value 1. SAVE10 is active and unexpired and total_amount 500000 meets its minimum. The manipulated body value user_id 0 must not be treated as a different eligible user for bypass. |
+| API-072 | SECURITY | 1 | None — exploratory observation only | Preconditions: A valid JWT authenticates controlled user 1, who has reached SAVE10's usage limit; body `user_id` is 0. JWT/body identity binding is unspecified, so record whether the coupon is applied or rejected without treating either outcome as a conformance failure. |
 | API-073 | DOMAIN | 1 | JSON discount_amount=5000; final_amount=495000 | Preconditions: Arrange PERCENT1 as type percent, discount_value=1, min_order_amount=0, active and unexpired, with max_uses_per_user>=1 and zero prior uses for user_id 1; use a valid JWT. |
 | API-074 | DOMAIN | 1 | JSON discount_amount=500000; final_amount=0 | Preconditions: Arrange PERCENT100 as type percent, discount_value=100, min_order_amount=0, active and unexpired, with max_uses_per_user>=1 and zero prior uses for user_id 1; use a valid JWT. |
 
@@ -126,9 +126,9 @@
 
 ## Validation results
 
-- Collection SHA-256: `85B1F2563DD2DEDD19BC5DDED320A639F0CD5680324793BA74FA932F692AD7EF`.
-- Static traceability/runtime wiring: **PASS** (2026-08-22 17:18:13 GMT+7) — 74 source rows, 74 unchanged request items, 74 unique matching IDs, exact category totals, complete descriptions, collection-level student header/evidence logging, authenticated local reset hook, and all required runtime variables.
-- Fixture manifest and reset/restore: **PASS** (2026-08-22 17:18:13 GMT+7) — all 74 per-case states verified on temporary SQLite; 11 coupon fixtures, nine usage overrides, controlled users, five JWT variants, and exact snapshot restoration passed. The actual SUT database schema passed a read-only compatibility check.
-- Full Postman v2.1 JSON Schema: **PASS** (2026-08-22 17:18:27 GMT+7) using the trusted local official schema `postman/postman-v2.1.0-schema.json` and the skill's deterministic validator.
-- Targeted Newman 6.2.2 compatibility: **PASS** (2026-08-22 17:18:27 GMT+7) — seven representative requests (`API-001`, `API-040`, `API-041`, `API-052`, `API-053`, `API-063`, `API-072`) verified reset callbacks, conflicting counts, date states, JWT delivery, student header injection, and restoration against local mocks.
+- Collection SHA-256: `40F284875860DEDE3E89A4F9DA4A49318187BAE7CF64F8B3744CAAB0AC16C4D5`.
+- Static traceability/runtime wiring: **PASS** (2026-08-23 09:45:00 GMT+7) — 74 source rows, 74 request items, 74 unique matching IDs, exact category totals, complete descriptions, collection-level student header/evidence logging, authenticated local reset hook, and all required runtime variables.
+- Fixture manifest and reset/restore: **PASS** (2026-08-23 09:45:00 GMT+7) — all 74 per-case states verified on temporary SQLite; 11 coupon fixtures, nine usage overrides, controlled users, five JWT variants, and exact snapshot restoration passed. The actual SUT database schema passed a read-only compatibility check.
+- Full Postman v2.1 JSON Schema: **PASS** (2026-08-23 final review) using the trusted local official schema `postman/postman-v2.1.0-schema.json` and the deterministic validator.
+- Targeted Newman 6.2.2 compatibility: **PASS** — nine representative requests (`API-001`, `API-040`, `API-041`, `API-052`, `API-053`, `API-063`, `API-068`, `API-069`, `API-072`) verify reset callbacks, conflicting counts, date states, JWT delivery, the corrected robustness assertions, student header injection, and restoration against local mocks. See `postman/pool-b-runtime-validation.json` for the current validation timestamp.
 - Full-suite SUT conformance execution: **NOT PERFORMED**.

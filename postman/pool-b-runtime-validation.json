@@ -1,5 +1,5 @@
 {
-  "validatedAt": "2026-08-22 17:18:13 GMT+7",
+  "validatedAt": "2026-08-23 09:45:00 GMT+7",
   "reviewedTestIds": 74,
   "fixtureManifest": "PASS",
   "allPerCaseResetsOnTemporaryDatabase": "PASS",
@@ -190,7 +190,7 @@
   },
   "targetedNewmanCompatibility": {
     "status": "PASS",
-    "validatedAt": "2026-08-22 17:18:27 GMT+7",
+    "validatedAt": "2026-08-23 09:45:16 GMT+7",
     "newmanVersion": "6.2.2",
     "selectedTestIds": [
       "API-001",
@@ -199,9 +199,11 @@
       "API-052",
       "API-053",
       "API-063",
+      "API-068",
+      "API-069",
       "API-072"
     ],
-    "requestsExecutedAgainstLocalMock": 7,
+    "requestsExecutedAgainstLocalMock": 9,
     "realSutStartedOrContacted": false,
     "fullNewmanSuiteExecuted": false
   }

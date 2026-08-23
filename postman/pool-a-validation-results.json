@@ -3,7 +3,7 @@
   "generatedAt": "2026-08-22 10:31:26 GMT+7",
   "static": {
     "status": "PASS",
-    "validatedAt": "2026-08-22 10:31:27 GMT+7",
+    "validatedAt": "2026-08-23 09:43:47 GMT+7",
     "logicalTestIds": 82,
     "generatedRequests": 88,
     "forgotPasswordReferences": 0,
@@ -20,7 +20,7 @@
   },
   "schema": {
     "status": "PASS",
-    "validatedAt": "2026-08-22 10:31:48 GMT+7",
+    "validatedAt": "2026-08-23 09:43:48 GMT+7",
     "schemaPath": "postman/postman-v2.1.0-schema.json"
   },
   "newman": {

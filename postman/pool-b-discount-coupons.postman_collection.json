@@ -763,7 +763,12 @@
                 "type": "text/javascript",
                 "exec": [
                   "console.log('[Pool B evidence] API-068','status='+pm.response.code);",
-                  "pm.test('API-068 - reviewed safety oracle: no 5xx',function(){pm.expect(pm.response.code).to.be.below(500);});"
+                  "pm.test('API-068 - reviewed safety oracle: no 5xx and no successful calculation',function(){",
+                  "  pm.expect(pm.response.code).to.be.below(500);",
+                  "  var data={}; try { data=pm.response.json(); } catch(e) {}",
+                  "  var success=Object.prototype.hasOwnProperty.call(data,'discount_amount')&&Object.prototype.hasOwnProperty.call(data,'final_amount');",
+                  "  pm.expect(success).to.eql(false);",
+                  "});"
                 ]
               }
             }
@@ -813,7 +818,12 @@
                 "type": "text/javascript",
                 "exec": [
                   "console.log('[Pool B evidence] API-069','status='+pm.response.code);",
-                  "pm.test('API-069 - reviewed safety oracle: no 5xx',function(){pm.expect(pm.response.code).to.be.below(500);});"
+                  "pm.test('API-069 - reviewed safety oracle: no 5xx and no successful calculation',function(){",
+                  "  pm.expect(pm.response.code).to.be.below(500);",
+                  "  var data={}; try { data=pm.response.json(); } catch(e) {}",
+                  "  var success=Object.prototype.hasOwnProperty.call(data,'discount_amount')&&Object.prototype.hasOwnProperty.call(data,'final_amount');",
+                  "  pm.expect(success).to.eql(false);",
+                  "});"
                 ]
               }
             }

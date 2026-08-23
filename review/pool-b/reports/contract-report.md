@@ -116,7 +116,7 @@ Supported negative checks with a determinate semantic oracle are limited to form
 
 ## Human review
 
-- **Review Status: PENDING**
-- **Reviewer:**
-- **Review Notes:** Revised after review to make the cross-category disposition explicit: active/inactive, expiry, and usage-limit coverage belongs to DOMAIN; endpoint-driven STATE transition testing is not applicable; SEC-05 `user_id` coverage belongs to SECURITY. The approved contract inventory, rules, gaps, and assumptions are otherwise preserved.
+- **Review Status: APPROVED**
+- **Reviewer:** Human review (2026-08-23)
+- **Review Notes:** Approved after final cross-artifact review. Active/inactive, expiry, and usage-limit coverage belongs to DOMAIN; endpoint-driven STATE transition testing is not applicable; SEC-05 `user_id` coverage belongs to SECURITY. The contract inventory, rules, gaps, and assumptions remain consistent with the authoritative sources and the retained candidates.
 - **Reviewed Version:** `contract-report-v2 — 2026-08-22`

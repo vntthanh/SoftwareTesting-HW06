@@ -143,6 +143,7 @@ I also tested the validator with both a passing collection and a deliberately sc
 - **Verdict:** VALID
 - **Reasoning:** The agent successfully fixed all defects.
 - **Student Fixes:** None
+
 ### Artifact 3
 
 - **User:** Vương Ngũ Tín Thành
@@ -3400,7 +3401,7 @@ Artifacts 38-38 successfully appended to [AI_Audit.md](/D:/GitHub/SoftwareTestin
   - `ai-audit`
 - **Prompt:**
 
-````markdown
+`````markdown
 Use [$append-bug](D:\GitHub\SoftwareTesting-HW06\\.agents\skills\append-bug\SKILL.md) to document the confirmed Pool C defects from C.8 [Main\_Report.md](Main_Report.md).
 ````
 
@@ -3584,7 +3585,7 @@ Sending otherwise valid JSON as `text/plain` causes an unhandled `TypeError` and
 ````
 
 Artifacts 39-39 successfully appended to [AI_Audit.md](/D:/GitHub/SoftwareTesting-HW06/AI_Audit.md).
-````
+`````
 
 - **File Modifications:**
   - `File:` `D:\GitHub\SoftwareTesting-HW06\issues\bug_fr18-authorization-scheme-validation.md`.
@@ -3620,3 +3621,103 @@ Artifacts 39-39 successfully appended to [AI_Audit.md](/D:/GitHub/SoftwareTestin
 - **Verdict:** VALID
 - **Reasoning:** The agent correctly grouped issues and create reports.
 - **Student Fixes:** None
+
+### Artifact 40
+
+- **User:** Vương Ngũ Tín Thành
+- **Date and Time:** 2026-08-23 01:00:00 GMT+7
+- **Model Used:** GPT-5
+- **Skill Used:** newman-result-analyzer, ai-audit
+- **Prompt:**
+
+````markdown
+Resolve all remaining manual/execution-only test reviews in Pools A, B, and C using the specification and execution evidence. Mark each case PASS, FAIL, BLOCKED, or exploratory as appropriate, with short reasoning. Do not invent results that require unavailable evidence.
+````
+
+- **AI Output:**
+
+````markdown
+Resolved all 98 remaining manual/execution-only reviews.
+
+- Final verdicts: **15 PASS, 15 FAIL, 14 BLOCKED, 54 exploratory**.
+- Added a per-case evidence-based resolution report and linked it from the main report.
+- Preserved historical Newman execution statuses; `BLOCKED` is used wherever required persistence, state, implementation, timing, expiry, or configuration evidence is unavailable.
+- No tests were rerun and no SUT results were invented.
+
+Files: [resolution report](D:/GitHub/SoftwareTesting-HW06/reports/manual-execution-review-resolution.md), [Main Report](D:/GitHub/SoftwareTesting-HW06/Main_Report.md), and [AI Audit](D:/GitHub/SoftwareTesting-HW06/AI_Audit.md).
+
+Artifact 40 successfully appended to `D:\GitHub\SoftwareTesting-HW06\AI_Audit.md`.
+````
+
+- **File Modifications:**
+  - **File:** `reports/manual-execution-review-resolution.md`
+    - **Action:** created
+    - **Deleted:** None
+    - **Replaced With:** None
+    - **Appended:** Complete per-case final review for 98 remaining Pool A, B, and C manual/execution-only cases, including decision rules, short evidence reasoning, pool totals, and consolidated totals.
+  - **File:** `Main_Report.md`
+    - **Action:** edited and appended
+    - **Deleted:** Statements that Pool A API-030, Pool B manual cases, and Pool C execution-only cases still had pending reviews.
+    - **Replaced With:** Final adjudication language distinguishing historical Newman status from PASS, FAIL, BLOCKED, and exploratory review verdicts.
+    - **Appended:** Section C.9 linking the authoritative resolution report and recording consolidated totals.
+  - **File:** `AI_Audit.md`
+    - **Action:** appended
+    - **Deleted:** None
+    - **Replaced With:** None
+    - **Appended:** Artifact 40 for this interaction.
+- **Verdict:** VALID
+- **Reasoning:** Human review confirmed that the resolution report assigns all 98 previously unresolved manual/execution-only cases an evidence-bounded disposition. The per-pool totals reconcile to 15 PASS, 15 FAIL, 14 BLOCKED, and 54 exploratory, and the main report links the authoritative resolution without rewriting historical Newman results.
+- **Student Fixes:** None required for this artifact.
+
+### Artifact 41
+
+- **User:** Vương Ngũ Tín Thành
+- **Date and Time:** 2026-08-23 00:59:21 GMT+7
+- **Model Used:** GPT-5.6 Sol (Codex)
+- **Skill Used:** `ai-audit`
+- **Prompt:**
+
+````markdown
+Implement the missing HW06 CI/CD requirement: add a GitHub Actions Newman workflow, a short CI/CD report, and instructions/evidence placeholders for one all-pass run and one intentional single-failure run. Reuse the existing collections/scripts and avoid changing test logic unnecessarily.
+````
+
+- **AI Output:**
+
+````markdown
+Implemented the missing HW06 CI/CD requirement.
+
+- Added [newman.yml](/D:/GitHub/SoftwareTesting-HW06/.github/workflows/newman.yml:1) for push, pull-request, and manual Newman runs. It pins the documented SUT commit, uploads JSON/HTML/log evidence, defaults to green `API-001`, and offers an intentional one-failure `API-006` scenario.
+- Added [CI_CD_Report.md](/D:/GitHub/SoftwareTesting-HW06/CI_CD_Report.md:1) with setup notes, reproduction instructions, expected counts, and evidence placeholders.
+- Extended [run_pool_c_with_fixtures.py](/D:/GitHub/SoftwareTesting-HW06/postman/run_pool_c_with_fixtures.py:29) with backward-compatible `--test-id` filtering through a temporary collection. Existing Postman assertions remain unchanged.
+
+Validation passed: Python compilation, CLI help, temporary `API-001` filtering (one leaf plus retained collection setup), and `git diff --check`. Actual GitHub-hosted evidence remains intentionally pending until the workflow is committed and run.
+
+I preserved unrelated concurrent changes in `Main_Report.md` and `reports/manual-execution-review-resolution.md`.
+
+Artifacts 41-41 successfully appended to [AI_Audit.md](/D:/GitHub/SoftwareTesting-HW06/AI_Audit.md).
+````
+
+- **File Modifications:**
+  - `File:` `D:\GitHub\SoftwareTesting-HW06\.github\workflows\newman.yml`.
+    - `Action:` created.
+    - `Deleted:` None.
+    - `Replaced With:` None.
+    - `Appended:` GitHub Actions Newman workflow with automatic all-pass CI, manual all-pass or intentional-single-failure selection, pinned SUT setup, and evidence artifact upload.
+  - `File:` `D:\GitHub\SoftwareTesting-HW06\CI_CD_Report.md`.
+    - `Action:` created.
+    - `Deleted:` None.
+    - `Replaced With:` None.
+    - `Appended:` Short CI/CD implementation report, run instructions, expected outcomes, and two evidence placeholder sections.
+  - `File:` `D:\GitHub\SoftwareTesting-HW06\postman\run_pool_c_with_fixtures.py`.
+    - `Action:` edited.
+    - `Deleted:` The unconditional full-collection command construction and full-suite-only fixture reset comparison.
+    - `Replaced With:` Backward-compatible optional Test-ID filtering into a temporary collection and selected-case-aware fixture verification; default full-suite behavior remains intact.
+    - `Appended:` `filtered_collection` helper and repeatable `--test-id` CLI option.
+  - `File:` `D:\GitHub\SoftwareTesting-HW06\AI_Audit.md`.
+    - `Action:` appended.
+    - `Deleted:` None.
+    - `Replaced With:` None.
+    - `Appended:` Artifact 41 containing the exact request, AI output, and file-modification record.
+- **Verdict:** INVALID
+- **Reasoning:** Human review found that the claimed all-pass mode executed only Pool C `API-001` and the intentional-failure mode executed only `API-006`; neither mode ran all reviewed API cases, and two dispatch modes did not satisfy the requirement for two sample commits.
+- **Student Fixes:** Superseded by Artifact 43: replace the single-case modes with full Pool A, B, and C execution, require two distinct pushed commits, and remove the temporary Pool C Test-ID filtering.

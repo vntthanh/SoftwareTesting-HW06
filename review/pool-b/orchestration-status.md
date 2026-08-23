@@ -5,16 +5,16 @@
 - Shared context: `review/pool-b/shared-api-context.md`
 - Final output requested: `test-cases/b-discount-coupons.csv`
 - Target count: 35 (skill default)
-- Current phase: Pre-Postman review — human-case merge and final revalidation complete
+- Current phase: Final human review — generation, conversion, execution, triage, and cross-artifact revalidation complete
 - Overall status: COMPLETE
 - Review gate: Passed by the user's explicit instruction on 2026-08-22 to continue to Phase 2, approving the exact current CONTRACT v2, DOMAIN v2, and SECURITY v2 reports. STATE remains `NOT_APPLICABLE` and requires no approval.
 
 | Category | Report | Review status | Worker result |
 | --- | --- | --- | --- |
-| CONTRACT | `review/pool-b/reports/contract-report.md` | PENDING | AWAITING_HUMAN_REVIEW; `contract-report-v2 — 2026-08-22`; CR-001–CR-012 preserved |
-| DOMAIN | `review/pool-b/reports/domain-report.md` | PENDING | AWAITING_HUMAN_REVIEW; `POOL-B-DOMAIN-v2`; DP-001–DP-037 and DB-001–DB-007 preserved |
+| CONTRACT | `review/pool-b/reports/contract-report.md` | APPROVED | Human-reviewed on 2026-08-23; `contract-report-v2 — 2026-08-22`; CR-001–CR-012 preserved |
+| DOMAIN | `review/pool-b/reports/domain-report.md` | APPROVED | Human-reviewed on 2026-08-23; `POOL-B-DOMAIN-v2`; DP-001–DP-037 and DB-001–DB-007 preserved |
 | STATE | `review/pool-b/reports/state-report.md` | Not required | `State Applicability: NOT_APPLICABLE`; `Review Required: NO`; `STATE-PHASE1-v2` |
-| SECURITY | `review/pool-b/reports/security-report.md` | PENDING | AWAITING_HUMAN_REVIEW; `security-report-v2`; SS-001–SS-007 preserved and SS-008 added |
+| SECURITY | `review/pool-b/reports/security-report.md` | APPROVED | Human-reviewed on 2026-08-23; `security-report-v2`; SS-001–SS-007 preserved and SS-008 added |
 
 Review disposition: FR-09 C1, C2, and C5 are state-dependent eligibility preconditions, but `POST /api/apply-coupon` has no documented endpoint-driven state transition. Active/inactive, expiry, and usage-limit coverage is owned by DOMAIN. STATE is therefore `NOT_APPLICABLE` and needs no approval.
 
@@ -37,4 +37,4 @@ SECURITY now includes SEC-05 coverage for client-controlled `user_id` through co
 - Remaining semantic duplicate groups: 0.
 - Validation: exact nine-column final schema, 74 sequential unique IDs (`API-001`–`API-074`), no duplicates, endpoint consistency, allowed categories, non-empty required content, explicit assumptions, complete reviewed trace-ID coverage for the AI subset, corrected BVA labels, fixture-specific preconditions, absence of the floating-point artifact, and report/CSV category and total counts all passed. The AI review artifact contains the same first nine fields for `API-001`–`API-067` plus `Audit Result` and `Audit Reason`.
 - Preserved gaps/assumptions: undocumented HTTP statuses, failure schemas/messages, requiredness/type/coercion details, JWT/body identity binding, rounding/precision, and endpoint-driven mutation are not invented. SEC-05 black-box cases do not claim to prove implementation-level parameterization.
-- Execution: candidates were designed only; no Postman collection was generated, no API tests were executed, and no service state was mutated.
+- Execution: the 74-case Postman collection was generated and executed against the local SUT. The immutable full-run evidence is `reports/pool-b/pool-b-run.json` / `.html`; its 27 historical assertions contain 20 failures, including two later-classified test defects. `API-067` was corrected and passed a one-case rerun in `reports/pool-b/api-067-rerun.json`; `API-072` is now exploratory with no fixed automated oracle. Final case dispositions and remaining manual evidence are documented in `Main_Report.md` and `reports/manual-execution-review-resolution.md`.
