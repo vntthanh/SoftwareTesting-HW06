@@ -3721,3 +3721,280 @@ Artifacts 41-41 successfully appended to [AI_Audit.md](/D:/GitHub/SoftwareTestin
 - **Verdict:** INVALID
 - **Reasoning:** Human review found that the claimed all-pass mode executed only Pool C `API-001` and the intentional-failure mode executed only `API-006`; neither mode ran all reviewed API cases, and two dispatch modes did not satisfy the requirement for two sample commits.
 - **Student Fixes:** Superseded by Artifact 43: replace the single-case modes with full Pool A, B, and C execution, require two distinct pushed commits, and remove the temporary Pool C Test-ID filtering.
+
+### Artifact 42
+
+- **User:** Vương Ngũ Tín Thành
+- **Date and Time:** 2026-08-23 10:31:30 GMT+7
+- **Model Used:** GPT-5
+- **Skill Used:** TODO: Unknown
+- **Prompt:**
+
+````markdown
+Check for this repo against [2026.HW06.API Testing\_En.md](<reference/2026.HW06.API Testing_En.md>).
+
+State out what need to fix. What is missing.
+````
+
+- **AI Output:**
+
+````markdown
+The repository is not submission-ready yet. The API testing work is substantial, but several mandatory deliverables are missing or incomplete.
+
+## Must fix before submission
+
+1. **Complete CI/CD evidence.**  
+   [CI_CD_Report.md](D:/GitHub/SoftwareTesting-HW06/CI_CD_Report.md:39) still contains `TODO` placeholders. You need:
+
+   - One commit with the complete 241-case suite passing.
+   - One separate commit with exactly one intentional failing test.
+   - Commit links, Actions run links, screenshots, timestamps, totals, and artifact names.
+   - Because the pinned SUT contains real defects, create/fix a suitable SUT revision for the green baseline without hiding failures or excluding tests.
+
+2. **Push the latest commits.**  
+   Local `main` is two commits ahead of `origin/main`:
+
+   - `86aa381 Add GitHub Issues`
+   - `ad3c2af Implement CI workflow and review pool A-C`
+
+   The public repository currently referenced by [Main_Report.md](D:/GitHub/SoftwareTesting-HW06/Main_Report.md:13) therefore does not contain all local work, based on the current tracking state.
+
+3. **Add the mandatory AI Critique.**  
+   No 200–300-word critique was found. It must address AI errors/incompleteness, why they happened, and lessons learned. Provide it in Markdown and PDF as required by the [assignment](<D:/GitHub/SoftwareTesting-HW06/reference/2026.HW06.API Testing_En.md:121>).
+
+4. **Finish the AI Audit.**  
+   [AI_Audit.md](D:/GitHub/SoftwareTesting-HW06/AI_Audit.md:8) still has an empty accuracy table and a TODO. It currently contains:
+
+   - 23 `VALID`
+   - 1 `INVALID`
+   - 17 `INCOMPLETE`
+   - 41 total artifacts
+
+   Also, Artifact 41 says it was superseded by “Artifact 43,” but Artifacts 42–43 do not exist. Append the missing interactions that produced the current full-suite CI design, correct the reference, add the explicit AI-use declaration, and fill the accuracy summary.
+
+5. **Create the required `README.md`.**  
+   It must include:
+
+   - Self-assessment table and total grade.
+   - Number of APIs.
+   - AI-generated, human-added, executed, passed, failed, blocked, and exploratory cases.
+   - Number of distinct bugs.
+   - Public repository link.
+
+6. **Create Excel deliverables.**  
+   The repo has CSV test cases but no `.xlsx` file. The assignment explicitly requires Excel test cases and a test summary.
+
+7. **Generate required PDFs.**  
+   No PDF files exist. At minimum, provide:
+
+   - Main Report PDF.
+   - AI Audit Report PDF.
+   - AI Critique PDF.
+
+8. **Add the Git commit log file.**  
+   The Git history is well structured, but the required text-based exported commit log is missing—for example, `Git_Commit_Log.txt`.
+
+9. **List the Postman features actually used.**  
+   The report does not contain the mandatory feature list. Document evidence for features such as workspace, collections, collection variables, pre-request scripts, tests, Newman reporters, multi-request flows, and CI. Clearly state which optional features were not used; consider adding an environment and a genuine data-driven run where reasonable.
+
+10. **Create the final submission archive.**  
+    No correctly named ZIP exists. The required name is:
+
+    `23127261_HW06_AI_API_<grade>.zip`
+
+## Quality/compliance fixes
+
+- Pool B executed 74 cases but the Newman artifact has only 27 assertions. Many cases are observational. Ensure every behavior with a defined oracle has a meaningful automated assertion; reserve assertion-free execution for genuinely unspecified behavior.
+- Pool B checks `discount_amount` and `final_amount`, but does not appear to assert the exact response key set and types. Strengthen schema validation where the API specification defines the response structure.
+- Add a short statement confirming the chosen three-API combination is not duplicated by another group member.
+- The API-generator pseudocode and Mermaid diagram exist in [api-test-generator.md](D:/GitHub/SoftwareTesting-HW06/skills-design/api-test-generator/api-test-generator.md:34). Explicitly document that the submitted diagram was personally designed. If AI generated the diagram itself, it must be redrawn manually to satisfy the anti-cheat constraint.
+- Local bug files contain screenshots, and [Bug_Report.md](D:/GitHub/SoftwareTesting-HW06/Bug_Report.md:1) links ten live issues. Verify manually that each live GitHub issue—not merely the local Markdown copy—has its screenshot attached.
+- Consider linking `Bug_Report.md`, `CI_CD_Report.md`, AI Critique, and AI Audit clearly from the main report/README.
+
+## Already in good shape
+
+- Correct selection of one Pool A, B, and C API.
+- Test-count target exceeded: 76/67/79 AI cases and 6/7/6 human additions.
+- Every retained AI case has a case-level review verdict and reason.
+- Domain, contract, security, and applicable state-transition analyses are present.
+- Newman JSON and HTML reports exist for all three pools.
+- `X-Student-Id` injection is implemented, and the cited Postman console screenshot visibly includes the header log and localhost execution.
+- Ten consolidated bug reports and twelve evidence images exist.
+- API-generator design, pseudocode, diagrams, and demonstration links exist.
+- Phase-oriented Git commits exist for generation, review, extension, execution, and bug reporting.
+````
+
+- **File Modifications:** None
+- **Verdict:** TODO: VALID / INVALID / INCOMPLETE
+- **Reasoning:** TODO: Your reasoning here
+- **Student Fixes:** TODO: Your fixes here
+
+### Artifact 43
+
+- **User:** Vương Ngũ Tín Thành
+- **Date and Time:** 2026-08-23 10:31:30 GMT+7
+- **Model Used:** GPT-5
+- **Skill Used:** TODO: Unknown
+- **Prompt:**
+
+````markdown
+Tell me how to do step 1
+````
+
+- **AI Output:**
+
+````markdown
+Use a fixed fork of the SUT to create the legitimate green baseline, then introduce one deliberately wrong assertion in the test repository for the red run.
+
+## A. Produce the all-pass commit
+
+1. Fork `ttbhanh/eshop-sut` into your GitHub account, for example:
+
+   `https://github.com/vntthanh/eshop-sut`
+
+2. In that fork, fix all defects currently detected by the suite. Use the ten issues already listed in [Bug_Report.md](D:/GitHub/SoftwareTesting-HW06/Bug_Report.md:1), particularly:
+
+   - Reset-token type and password validation.
+   - Password hashing.
+   - Unsupported content types returning controlled `4xx`.
+   - Coupon percentage calculation and inclusive minimum.
+   - JWT validation for coupons.
+   - Authorization scheme and Admin-role enforcement.
+   - Invalid canceled-order transitions.
+
+3. Run all three collections locally against the fixed SUT. Do not continue until every automated assertion passes.
+
+4. Commit and push the SUT fixes. Record that SUT commit SHA.
+
+5. In [.github/workflows/newman.yml](D:/GitHub/SoftwareTesting-HW06/.github/workflows/newman.yml:20), change:
+
+```yaml
+repository: ttbhanh/eshop-sut
+ref: 85af3ba875c88283615e22cb108f13e2fccaf0e9
+```
+
+to:
+
+```yaml
+repository: vntthanh/eshop-sut
+ref: <fixed-sut-commit-sha>
+```
+
+Use an immutable commit SHA, not `main`.
+
+6. Commit the green baseline:
+
+```powershell
+git add .github/workflows/newman.yml CI_CD_Report.md
+git commit -m "ci: establish full Newman all-pass baseline"
+git push origin main
+```
+
+7. Open the GitHub Actions run and confirm:
+
+   - All 241 logical cases were included.
+   - Pools A, B, and C all ran.
+   - Zero failed assertions.
+   - The job is green.
+   - JSON/HTML artifacts were uploaded.
+
+8. Save a screenshot under:
+
+```text
+reports/ci/evidence/all-pass-run.png
+```
+
+Record the test-repository commit SHA, SUT commit SHA, commit URL, run URL, totals, timestamp, and artifact name in [CI_CD_Report.md](D:/GitHub/SoftwareTesting-HW06/CI_CD_Report.md:41).
+
+## B. Produce the exactly-one-failure commit
+
+1. Start immediately from the green test-repository commit.
+
+2. Change exactly one reliable passing assertion. Pool C `API-001` is a suitable choice: change its expected final state from `confirmed` to an impossible value such as `intentional-ci-failure`.
+
+Do not change the request, fixtures, or any other test.
+
+3. Commit and push:
+
+```powershell
+git add postman/pool-c-order-management.postman_collection.json
+git commit -m "test: demonstrate one intentional Newman failure"
+git push origin main
+```
+
+4. Confirm the new Actions run:
+
+   - All 241 cases still execute.
+   - Exactly one assertion fails.
+   - No request, fixture, or script error occurs.
+   - The failure is the deliberately changed `API-001` assertion.
+
+5. Save a screenshot as:
+
+```text
+reports/ci/evidence/single-failure-run.png
+```
+
+Fill the second evidence section in [CI_CD_Report.md](D:/GitHub/SoftwareTesting-HW06/CI_CD_Report.md:51). The red commit’s parent SHA must be the green commit SHA.
+
+## C. Restore the final branch
+
+Revert only the intentional assertion change and commit the restoration:
+
+```powershell
+git revert <intentional-failure-commit-sha>
+git push origin main
+```
+
+This preserves all three commits in history:
+
+```text
+green baseline → intentional one-failure → restore green
+```
+
+Finally, commit the screenshots and completed CI report. Do not use `--suppress-exit-code`, filter the suite, or weaken genuine assertions to manufacture the green run.
+````
+
+- **File Modifications:** None
+- **Verdict:** TODO: VALID / INVALID / INCOMPLETE
+- **Reasoning:** TODO: Your reasoning here
+- **Student Fixes:** TODO: Your fixes here
+
+### Artifact 44
+
+- **User:** Vương Ngũ Tín Thành
+- **Date and Time:** 2026-08-23 10:31:30 GMT+7
+- **Model Used:** GPT-5
+- **Skill Used:** TODO: Unknown
+- **Prompt:**
+
+````markdown
+The [2026.HW06.API Testing\_En.md](<reference/2026.HW06.API Testing_En.md>) does not require fixing bug. Remove the all test cases passing requirement
+````
+
+- **AI Output:**
+
+````markdown
+You are correct that the assignment does not require repairing the SUT’s bugs. However, it explicitly requires CI evidence of:
+
+> “two sample commits: one whose pipeline run shows all API test cases passing, and another whose pipeline run shows one test case failing.”
+
+See [the CI/CD requirement](<D:/GitHub/SoftwareTesting-HW06/reference/2026.HW06.API Testing_En.md:91>).
+
+Therefore, I should remove the suggestion that you must fix the bugs, but I cannot accurately remove the all-tests-passing requirement from the checklist. The specification creates a practical conflict: genuine defect-detection tests cannot all pass against the defective SUT.
+
+The safest submission approach is:
+
+- Keep the genuine failing tests and bug evidence unchanged.
+- Keep the full CI workflow.
+- State clearly in the CI report that the green-run requirement cannot be produced against the assigned SUT without modifying the SUT, weakening assertions, or concealing genuine defects.
+- Do not fabricate a green run.
+- Ask the lecturer/TA whether an alternate fixed SUT revision or a demonstration-only test is expected for the green commit.
+
+So: **fixing SUT bugs is not required; an all-passing sample pipeline is still explicitly required by the provided assignment.**
+````
+
+- **File Modifications:** None
+- **Verdict:** TODO: VALID / INVALID / INCOMPLETE
+- **Reasoning:** TODO: Your reasoning here
+- **Student Fixes:** TODO: Your fixes here

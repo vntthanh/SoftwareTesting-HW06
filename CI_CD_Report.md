@@ -1,61 +1,76 @@
 # HW06 CI/CD Report
 
-## Pipeline scope
+## Pipeline location and design
 
-[`Newman full API suite`](.github/workflows/newman.yml) runs on every push to `main`, every pull request, and manual dispatch. One job executes all three reviewed collections against the pinned EShop SUT:
+The submitted CI demonstration runs in the forked SUT repository:
 
-| Pool | Endpoint | Reviewed cases | Collection requests |
-| --- | --- | ---: | ---: |
-| A | `POST /api/reset-password` | 82 | 88 |
-| B | `POST /api/apply-coupon` | 74 | 74 |
-| C | `PUT /api/admin/orders/:id/status` | 85 | 93 |
-| **Total** | **All assigned endpoints** | **241** | **255** |
+- **SUT repository:** <https://github.com/vntthanh/eshop-sut>
+- **Workflow:** [`.github/workflows/api-tests.yml`](https://github.com/vntthanh/eshop-sut/blob/b95838e79e6f8c300c3366c2daaa755b70b2ab66/.github/workflows/api-tests.yml)
+- **Trigger:** every push to `main`, plus manual dispatch
+- **Runtime:** Ubuntu, Node.js 20, the EShop backend on `127.0.0.1:3000`, and Newman 6.2.2
+- **Required identity header:** `X-Student-Id: 23127261`
 
-Pool A uses the existing deterministic seeder. Pools B and C use their existing fixture-aware runners, which restore controlled database state after execution. CI submits every collection item to Newman; any skip remains the reviewed collection's own explicit blocked/manual behavior. CI does not filter Test IDs or change collection assertions. It records each pool's exit code, continues through all three pools even if an earlier pool fails, and fails the job if any pool fails.
+The workflow checks out an immutable HW06 test-repository revision, installs the SUT and Newman dependencies, starts the backend, prepares deterministic SQLite fixtures, runs Newman, preserves the exit code, and uploads the generated JSON/HTML reports and SUT log for 30 days.
 
-Every run uploads the three Newman JSON reports, three HTML reports, and the SUT log as `newman-full-suite-<run-id>-<attempt>` for 30 days.
+No SUT defect was fixed or hidden to manufacture the passing result. The first commit intentionally selects one existing reviewed case that passes on the teaching SUT. Its child commit changes only the CI scope to execute the complete reviewed suite; the resulting failure preserves the genuine defect evidence.
 
-## Required two-commit evidence procedure
+## Evidence commit 1 — passing test
 
-The evidence must come from two distinct pushed commits, not two modes of one workflow run.
+| Field | Evidence |
+| --- | --- |
+| Commit | [`da76e9a42ed523b2506214636f9d456ce1c34225`](https://github.com/vntthanh/eshop-sut/commit/da76e9a42ed523b2506214636f9d456ce1c34225) — `ci: add passing API test sample` |
+| Parent SUT commit | `85af3ba875c88283615e22cb108f13e2fccaf0e9` |
+| GitHub Actions run | [Run 32615052703](https://github.com/vntthanh/eshop-sut/actions/runs/32615052703) |
+| Job | `Passing sample - Pool A API-001` |
+| Run time (GMT+7) | 2026-08-23 10:19:14–10:19:43 |
+| Result | **Success** |
+| Scope | Pool A `API-001`, using the original reviewed request, fixture, and assertion |
+| Observed totals | 1 logical test case; 1 SUT request; 1 assertion passed; 0 failed assertions |
+| Artifact | `newman-passing-sample-32615052703-1` (15.2 KB; expires after the configured 30-day retention period) |
+| Screenshot | [`reports/ci/evidence/passing-sample-run.png`](reports/ci/evidence/passing-sample-run.png) |
 
-### Sample commit 1 — all pass
+The run page identifies commit `da76e9a`, reports `Status: Success`, shows the passing Pool A `API-001` job, and provides the Newman JSON/HTML artifact. This is a real test from the final Pool A collection; it is not a stub or an assertion whose expected result was changed for CI.
 
-1. Ensure the pinned SUT revision satisfies every automated assertion in all three collections. Update the workflow's SUT `ref` if the fixes are in a newer SUT commit.
-2. Run the complete workflow locally or on a branch and confirm Pools A, B, and C contain zero failed assertions.
-3. Commit and push the passing baseline, for example: `ci: add full Newman all-pass baseline`.
-4. Preserve the resulting green Actions run and all uploaded reports.
+![Passing CI sample](reports/ci/evidence/passing-sample-run.png)
 
-The currently pinned teaching SUT commit has confirmed defects recorded in `Main_Report.md`; therefore it cannot honestly supply this green sample until those defects are fixed. Do not use `--suppress-exit-code`, exclude failing Test IDs, or label a run with failed assertions as all-pass.
+## Evidence commit 2 — complete suite with genuine failures
 
-### Sample commit 2 — intentional single failure
+| Field | Evidence |
+| --- | --- |
+| Commit | [`b95838e79e6f8c300c3366c2daaa755b70b2ab66`](https://github.com/vntthanh/eshop-sut/commit/b95838e79e6f8c300c3366c2daaa755b70b2ab66) — `ci: run full reviewed API suite` |
+| Parent commit | `da76e9a42ed523b2506214636f9d456ce1c34225` — exactly the passing-test commit above |
+| GitHub Actions run | [Run 32615258699](https://github.com/vntthanh/eshop-sut/actions/runs/32615258699) |
+| Job | `Full suite - Pools A, B, and C (241 reviewed cases)` |
+| Run time (GMT+7) | 2026-08-23 10:24:16–10:24:47 |
+| Result | **Failure** |
+| Scope | All final Pool A, Pool B, and Pool C collections |
+| Logical cases / collection requests | 241 logical cases / 255 collection leaf requests |
+| Actual requests | 478 total, including fixture and post-response state helpers |
+| Assertions | 407 total: 356 passed and 51 failed |
+| Per-pool exit status | Pool A `1`; Pool B `1`; Pool C `1` |
+| Artifact | `newman-full-suite-32615258699-1` (932 KB; JSON/HTML reports for all pools plus SUT log) |
+| Screenshot | [`reports/ci/evidence/full-suite-failing-run.png`](reports/ci/evidence/full-suite-failing-run.png) |
 
-1. Start from the exact all-pass commit.
-2. Change exactly one assertion in one collection and label it clearly as intentional. A minimal option is to change only Pool C `API-001`'s expected state from `confirmed` to an impossible sample value, without changing its request or fixtures.
-3. Commit that one-line change separately, for example: `test: demonstrate one intentional Newman failure`.
-4. Push it and confirm all 241 cases execute, the job is red, and exactly one assertion fails.
-5. Preserve the red run and reports. Revert the intentional assertion afterward in a separate cleanup commit so the final branch returns to green.
+The full-suite commit changes the workflow from the one-case selector to all three final collections. It pins HW06 test commit `ad3c2af973c000026cd4ad985b57390d32fdd917`, executes every reviewed Test ID, continues through all pools even after an earlier pool fails, and fails the job only after recording all three exit statuses. The failed assertions correspond to the genuine SUT defects already analyzed in `Main_Report.md` and `Bug_Report.md`; they are not intentionally falsified assertions.
 
-## Evidence placeholders
+![Full-suite failing CI run](reports/ci/evidence/full-suite-failing-run.png)
 
-### Commit 1 — all-pass sample
+## Result reconciliation
 
-- Commit SHA: `TODO`
-- Commit URL: `TODO`
-- GitHub Actions run URL: `TODO`
-- Run date/time (GMT+7): `TODO`
-- Observed totals: `TODO — 241 cases executed; 0 failed assertions`
-- Screenshot: `TODO — add under reports/ci/evidence/ and link here`
-- Artifact name: `TODO — newman-full-suite-<run-id>-<attempt>`
+| Pool | Logical cases | Collection requests | Actual requests | Assertions | Passed | Failed |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Pool A — Reset Password | 82 | 88 | 85 | 82 | 59 | 23 |
+| Pool B — Discount Coupons | 74 | 74 | 148 | 27 | 7 | 20 |
+| Pool C — Admin Order Management | 85 | 93 | 245 | 298 | 290 | 8 |
+| **Total** | **241** | **255** | **478** | **407** | **356** | **51** |
 
-### Commit 2 — intentional single-failure sample
+The distinction between collection requests and actual requests is expected. Pool A uses three pre-request helper calls, Pool B performs one fixture reset for each of its 74 cases, and Pool C performs 85 fixture resets plus 67 post-response state inspections. These helper calls are part of deterministic test setup and state verification, not additional logical test cases.
 
-- Parent commit SHA: `TODO — must equal the all-pass sample SHA above`
-- Commit SHA: `TODO`
-- Commit URL: `TODO`
-- GitHub Actions run URL: `TODO`
-- Run date/time (GMT+7): `TODO`
-- Intentional one-line assertion change: `TODO — file, Test ID, and assertion`
-- Observed totals: `TODO — 241 cases executed; exactly 1 failed assertion`
-- Screenshot: `TODO — add under reports/ci/evidence/ and link here`
-- Artifact name: `TODO — newman-full-suite-<run-id>-<attempt>`
+## Reproduction
+
+1. Check out SUT commit `da76e9a42ed523b2506214636f9d456ce1c34225` to reproduce the one-case passing run.
+2. Check out its child `b95838e79e6f8c300c3366c2daaa755b70b2ab66` to reproduce the full-suite failing run.
+3. Run the `HW06 API tests` workflow manually, or push the selected commit to `main` in the SUT fork.
+4. Download the uploaded Newman artifact before its 30-day retention period expires.
+
+The final SUT branch intentionally remains at the complete-suite commit, so subsequent CI runs continue to expose the known defects rather than hiding them behind the passing-case selector.

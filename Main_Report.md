@@ -24,7 +24,7 @@
 
 Execution identity evidence: the Postman console in [`bug_fr03-unsupported-content-type-server-error.png`](issues/evidence/bug_fr03-unsupported-content-type-server-error.png) shows the collection pre-request log `X-Student-Id: 23127261` for a real request to the local SUT. The same collection-level injection pattern is used by all three reviewed collections, and the Newman artifacts retain the corresponding runtime assertions or request headers.
 
-The full-suite GitHub Actions design and the still-pending two-commit evidence checklist are documented in [`CI_CD_Report.md`](CI_CD_Report.md). The CI requirement remains incomplete until the genuine green and intentional-single-failure runs are pushed and their links and screenshots replace the report placeholders.
+The completed two-commit GitHub Actions evidence is documented in [`CI_CD_Report.md`](CI_CD_Report.md). SUT commit `da76e9a` runs one existing reviewed case that passes without changing its assertion; its child commit `b95838e` expands CI to all 241 reviewed cases and preserves the genuine failing assertions. Both run links, uploaded-artifact names, timestamps, totals, and screenshots are included in the CI/CD report.
 
 ## 3. Agent Skills
 
