@@ -59,6 +59,22 @@ The **AI Audit** skill is not included in this folder because it is a reusable s
 | **Append Bug** (HW02) | <https://youtu.be/G0DPfJ1dkqE> |
 | **AI Audit** (HW02) | <https://youtu.be/1gSqi7MfGV> |
 
+## 4. Postman Features Used
+
+The project used the following Postman and Newman features:
+
+| Feature | How it was used | Evidence |
+| --- | --- | --- |
+| Postman Collection v2.1 | Saved the three API test suites as JSON collection files. | [Pool A](postman/pool-a-forgot-password.postman_collection.json), [Pool B](postman/pool-b-discount-coupons.postman_collection.json), and [Pool C](postman/pool-c-order-management.postman_collection.json) |
+| Collection variables | Stored values such as base URLs, student ID, tokens, order IDs, and OTP values. Requests used these values with `{{variable}}`. | Variable sections in the three collections |
+| Pre-request scripts | Added the `X-Student-Id: 23127261` header before requests. Pool B and Pool C also reset test data before testing. | Collection-level `prerequest` scripts |
+| Test scripts and assertions | Checked status codes, headers, response bodies, authentication, and saved state with `pm.test` and `pm.expect`. | Request-level `test` scripts |
+| Request chaining | Used `pm.sendRequest` to prepare OTP data and check saved order data after a request. | Pool A setup scripts and Pool C state-checking scripts |
+| Multi-request test flows | Grouped several requests under one test ID for retry, replay, authorization, and order state tests. | Test folders in Pool A and Pool C |
+| Bearer token testing | Tested Admin and non-Admin tokens, as well as missing, malformed, forged, expired, and invalid tokens. | Authorization headers and variables in Pool B and Pool C |
+| Newman command-line execution | Ran the Postman collections outside the Postman application. | [Pool A report](reports/pool-a/pool-a.html), [Pool B report](reports/pool-b/pool-b-run.html), and [Pool C report](reports/pool-c/pool-c.html) |
+| JSON and HTML reports | Created JSON files for detailed results and HTML files for easier review. | [Newman reports](reports/) and [CI/CD report](CI_CD_Report.md) |
+
 ## Pool A: Forgot Password
 
 ### A.1. Introduction
