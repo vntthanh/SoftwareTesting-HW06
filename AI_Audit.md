@@ -7,13 +7,13 @@
 
 ## Summary of AI Accuracy
 
-**TODO: Fill in AI Accuracy when complete the exercise.**
+The audit contains 44 reviewed artifacts. Most AI responses were valid, but 18 artifacts required correction or further work. This shows that AI was useful for creating and revising test artifacts, but human review was still necessary to find unsupported assumptions, weak assertions, duplicate cases, and incomplete evidence.
 
 | Metric | Count | Percentage |
 | --- | ---: | ---: |
-| VALID | | % |
-| INVALID | | % |
-| INCOMPLETE | | % |
+| VALID | 26 | 59.09% |
+| INVALID | 1 | 2.27% |
+| INCOMPLETE | 17 | 38.64% |
 
 The verdict of each artifact is identified as:
 
@@ -3727,7 +3727,7 @@ Artifacts 41-41 successfully appended to [AI_Audit.md](/D:/GitHub/SoftwareTestin
 - **User:** Vương Ngũ Tín Thành
 - **Date and Time:** 2026-08-23 10:31:30 GMT+7
 - **Model Used:** GPT-5
-- **Skill Used:** TODO: Unknown
+- **Skill Used:** None
 - **Prompt:**
 
 ````markdown
@@ -3825,16 +3825,16 @@ The repository is not submission-ready yet. The API testing work is substantial,
 ````
 
 - **File Modifications:** None
-- **Verdict:** TODO: VALID / INVALID / INCOMPLETE
-- **Reasoning:** TODO: Your reasoning here
-- **Student Fixes:** TODO: Your fixes here
+- **Verdict:** VALID
+- **Reasoning:** The repository review correctly identified the mandatory deliverables that were missing or incomplete at that time. It also separated completed API-testing work from remaining submission requirements and supported the findings with repository evidence.
+- **Student Fixes:** None
 
 ### Artifact 43
 
 - **User:** Vương Ngũ Tín Thành
 - **Date and Time:** 2026-08-23 10:31:30 GMT+7
 - **Model Used:** GPT-5
-- **Skill Used:** TODO: Unknown
+- **Skill Used:** None
 - **Prompt:**
 
 ````markdown
@@ -3956,16 +3956,16 @@ Finally, commit the screenshots and completed CI report. Do not use `--suppress-
 ````
 
 - **File Modifications:** None
-- **Verdict:** TODO: VALID / INVALID / INCOMPLETE
-- **Reasoning:** TODO: Your reasoning here
-- **Student Fixes:** TODO: Your fixes here
+- **Verdict:** VALID
+- **Reasoning:** The response gave clear steps for creating the two CI examples requested by the assignment. It preserved full-suite execution, required real exit codes, and warned against hiding failures or filtering tests to create misleading evidence.
+- **Student Fixes:** None
 
 ### Artifact 44
 
 - **User:** Vương Ngũ Tín Thành
 - **Date and Time:** 2026-08-23 10:31:30 GMT+7
 - **Model Used:** GPT-5
-- **Skill Used:** TODO: Unknown
+- **Skill Used:** None
 - **Prompt:**
 
 ````markdown
@@ -3995,6 +3995,6 @@ So: **fixing SUT bugs is not required; an all-passing sample pipeline is still e
 ````
 
 - **File Modifications:** None
-- **Verdict:** TODO: VALID / INVALID / INCOMPLETE
-- **Reasoning:** TODO: Your reasoning here
-- **Student Fixes:** TODO: Your fixes here
+- **Verdict:** VALID
+- **Reasoning:** The response correctly distinguished between fixing SUT bugs and providing the required CI evidence. It quoted the assignment requirement that one sample commit show all API tests passing and another show one failing test case.
+- **Student Fixes:** None
